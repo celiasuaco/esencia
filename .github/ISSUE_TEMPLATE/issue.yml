@@ -1,0 +1,80 @@
+name: "📋 Nueva Tarea / Feature"
+description: "Planificar una nueva funcionalidad o tarea del proyecto"
+title: "[TASK]: "
+labels: ["🚀 mejora"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # 📝 Detalle de la Tarea
+        Completa los campos para que el equipo entienda el alcance técnico.
+        ---
+
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: "🔍 Descripción Técnica"
+      description: "Explica qué se debe hacer y por qué es necesario."
+      placeholder: |
+        Ejemplo: Necesitamos implementar la lógica de carrito en el frontend y el endpoint de validación en el backend.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modulo
+    attributes:
+      label: "📍 Módulo / Área"
+      description: "Selecciona el dominio afectado"
+      options:
+        - "🔒 Autenticación"
+        - "🛒 Compra / Pedidos"
+        - "📊 Estadísticas / Dashboard"
+        - "📦 Infraestructura (Docker/DB)"
+        - "⚙️ Configuración / Backend"
+        - "🏠 Home / Core"
+        - "📜 Documentación"
+        - "➕ Otro (especificar abajo)"
+    validations:
+      required: true
+
+  - type: input
+    id: otro-modulo
+    attributes:
+      label: "➕ Especificar 'Otro':"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: prioridad
+    attributes:
+      label: "⚠️ Prioridad"
+      options:
+        - "🔥 Urgente - Bloqueante"
+        - "🔴 Alta - Prioridad máxima"
+        - "🟡 Media - Estándar"
+        - "🟢 Baja - Nice to have"
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios-aceptacion
+    attributes:
+      label: "✅ Criterios de Aceptación"
+      description: "Lista de puntos para marcar la tarea como 'Hecha'"
+      placeholder: "- El usuario recibe un email.\n- El botón cambia a color verde."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: sprint
+    attributes:
+      label: "🔔 Milestone / Entrega"
+      options:
+        - "Sprint 1"
+        - "Sprint 2"
+        - "Sprint 3"
+        - "Sprint 4"
+        - "Sprint 5"
+        - "Sprint 6"
+    validations:
+      required: true
