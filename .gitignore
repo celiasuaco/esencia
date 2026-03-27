@@ -21,3 +21,6 @@ htmlcov/
 # IDEs
 .vscode/
 .idea/
+
+# Docker volumes
+volumes/
