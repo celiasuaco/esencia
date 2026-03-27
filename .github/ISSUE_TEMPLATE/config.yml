@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "📚 Documentación"
+    url: https://github.com/celiasuaco/esencia#readme
+    about: "Nuestra guía oficial del proyecto"
