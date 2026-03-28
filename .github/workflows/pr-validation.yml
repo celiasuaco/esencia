@@ -1,0 +1,21 @@
+name: PR & Docker Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Valida que el título sea: feat: ..., fix: ..., chore: ...
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Valida que el docker-compose.yml no tenga errores de indentación o rutas
+      - name: Validate Docker Compose
+        run: docker compose config
