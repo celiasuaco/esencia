@@ -15,6 +15,8 @@ from product.models import Product
 
 fake = Faker(["es_ES"])  # Datos en español
 
+PASSWORD = "admin123"  # NOSONAR
+
 
 # --- FUNCIONES AUXILIARES ---
 def secure_choice(sequence):
@@ -55,7 +57,7 @@ def run_seeder():
         User.objects.create_superuser(
             username="admin",
             email="admin@esencia.com",
-            password="adminpassword123",  # NOSONAR: Contraseña de ejemplo para desarrollo
+            password=PASSWORD,
             full_name="Admin Principal",
             role="ADMIN",
         )
