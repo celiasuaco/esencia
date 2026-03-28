@@ -16,6 +16,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Crea el archivo .env desde el ejemplo
+      - name: Create .env from example
+        run: cp .env.example .env
+        
       # Valida que el docker-compose.yml no tenga errores de indentación o rutas
       - name: Validate Docker Compose
         run: docker compose config
