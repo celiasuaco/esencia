@@ -1,4 +1,4 @@
-import random
+import secrets
 import string
 from decimal import Decimal
 
@@ -57,7 +57,7 @@ class Order(models.Model):
     def _generate_unique_code(self):
         chars = string.ascii_uppercase + string.digits
         while True:
-            code = "".join(random.choices(chars, k=8))
+            code = "".join(secrets.choice(chars) for _ in range(8))
             if not Order.objects.filter(tracking_code=code).exists():
                 return code
 

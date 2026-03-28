@@ -1,5 +1,6 @@
 import os
 import random
+import secrets
 from decimal import Decimal
 
 import django
@@ -14,6 +15,14 @@ from order.models import Order, OrderItem
 from product.models import Product
 
 fake = Faker(["es_ES"])  # Datos en español
+
+
+def secure_choice(sequence):
+    return secrets.choice(sequence)
+
+
+def secure_randint(min_val, max_val):
+    return min_val + secrets.randbelow(max_val - min_val + 1)
 
 
 def run_seeder():
@@ -60,15 +69,15 @@ def run_seeder():
     productos = []
 
     for _ in range(30):
-        nombre = f"{random.choice(['Anillo', 'Collar', 'Pendientes', 'Pulsera'])} {fake.word().capitalize()} {random.choice(['Eterno', 'Gala', 'Minimal', 'Luxury', 'Esencia'])}"
+        nombre = f"{secure_choice(['Anillo', 'Collar', 'Pendientes', 'Pulsera'])} {fake.word().capitalize()} {secure_choice(['Eterno', 'Gala', 'Minimal', 'Luxury', 'Esencia'])}"
         prod, created = Product.objects.get_or_create(
             name=nombre,
             defaults={
                 "description": fake.sentence(nb_words=12),
                 "price": Decimal(random.uniform(25.0, 450.0)).quantize(Decimal("0.00")),
                 "stock": random.randint(5, 50),
-                "category": random.choice(categorias),
-                "material": random.choice(materiales),
+                "category": secure_choice(categorias),
+                "material": secure_choice(materiales),
                 "is_active": True,
             },
         )
@@ -79,12 +88,12 @@ def run_seeder():
     estados = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"]
 
     for _ in range(10):
-        cliente = random.choice(clientes)
+        cliente = secure_choice(clientes)
         # El modelo Order genera el tracking_code y gestiona is_paid en su save()
         pedido = Order.objects.create(
             user=cliente,
             address=fake.address(),
-            status=random.choice(estados),
+            status=secure_choice(estados),
             placed_at=fake.date_time_between(
                 start_date="-30d", end_date="now", tzinfo=None
             ),
