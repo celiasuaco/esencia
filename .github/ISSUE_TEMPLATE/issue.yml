@@ -1,6 +1,6 @@
 name: "📋 Nueva Tarea / Feature"
 description: "Planificar una nueva funcionalidad o tarea del proyecto"
-title: "[TASK]: "
+title: "[ES-XX]: "
 labels: ["🚀 mejora"]
 body:
   - type: markdown
