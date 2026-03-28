@@ -1,5 +1,4 @@
 import os
-import random
 import secrets
 from decimal import Decimal
 
@@ -17,14 +16,37 @@ from product.models import Product
 fake = Faker(["es_ES"])  # Datos en español
 
 
+# --- FUNCIONES AUXILIARES ---
 def secure_choice(sequence):
+    """Selecciona un elemento aleatorio de forma segura."""
     return secrets.choice(sequence)
 
 
 def secure_randint(min_val, max_val):
+    """Genera un entero aleatorio seguro entre min y max (incluidos)."""
     return min_val + secrets.randbelow(max_val - min_val + 1)
 
 
+def secure_uniform(min_val, max_val):
+    """Genera un float aleatorio seguro entre min y max."""
+    # Generamos un factor entre 0 y 1 con alta precisión
+    factor = secrets.randbelow(1000000) / 1000000.0
+    return min_val + (factor * (max_val - min_val))
+
+
+def secure_sample(population, k):
+    """Selecciona k elementos únicos de una población de forma segura."""
+    list_pop = list(population)
+    if k > len(list_pop):
+        k = len(list_pop)
+    result = []
+    for _ in range(k):
+        idx = secrets.randbelow(len(list_pop))
+        result.append(list_pop.pop(idx))
+    return result
+
+
+# --- SEEDER PRINCIPAL ---
 def run_seeder():
     print("🚀 Iniciando Seeder Masivo para Esencia...")
 
@@ -70,12 +92,17 @@ def run_seeder():
 
     for _ in range(30):
         nombre = f"{secure_choice(['Anillo', 'Collar', 'Pendientes', 'Pulsera'])} {fake.word().capitalize()} {secure_choice(['Eterno', 'Gala', 'Minimal', 'Luxury', 'Esencia'])}"
+
+        # Precio y Stock generados con funciones seguras
+        precio_val = secure_uniform(25.0, 450.0)
+        stock_val = secure_randint(5, 50)
+
         prod, created = Product.objects.get_or_create(
             name=nombre,
             defaults={
                 "description": fake.sentence(nb_words=12),
-                "price": Decimal(random.uniform(25.0, 450.0)).quantize(Decimal("0.00")),
-                "stock": random.randint(5, 50),
+                "price": Decimal(precio_val).quantize(Decimal("0.00")),
+                "stock": stock_val,
                 "category": secure_choice(categorias),
                 "material": secure_choice(materiales),
                 "is_active": True,
@@ -89,7 +116,7 @@ def run_seeder():
 
     for _ in range(10):
         cliente = secure_choice(clientes)
-        # El modelo Order genera el tracking_code y gestiona is_paid en su save()
+
         pedido = Order.objects.create(
             user=cliente,
             address=fake.address(),
@@ -99,14 +126,16 @@ def run_seeder():
             ),
         )
 
-        # Añadir entre 1 y 4 productos a cada pedido
-        productos_pedido = random.sample(productos, random.randint(1, 4))
+        # Añadir entre 1 y 4 productos a cada pedido usando la función de sample segura
+        num_items = secure_randint(1, 4)
+        productos_pedido = secure_sample(productos, num_items)
+
         for p in productos_pedido:
             OrderItem.objects.create(
                 order=pedido,
                 product=p,
-                quantity=random.randint(1, 2),
-                price_at_purchase=p.price,  # Foto fija del precio
+                quantity=secure_randint(1, 2),
+                price_at_purchase=p.price,
             )
 
     print("✅ 10 Pedidos con sus desgloses creados")
