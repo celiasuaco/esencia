@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalamos (esto fallaba antes, pero aquí dentro de Docker usará la versión correcta)
-RUN npm install
+RUN npm install --ignore-scripts
 
 COPY . .
 
