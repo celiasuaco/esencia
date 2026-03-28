@@ -5,7 +5,7 @@ from rest_framework import status
 from .models import User
 from .services import create_user
 
-GOOD_PASSWORD = "Password123"  # NOSONAR
+GOOD_PASSWORD = "Esencia_Test_99_"  # NOSONAR
 BAD_PASSWORD = "123"  # NOSONAR
 OTHER_PASSWORD = "OtherPassword123"  # NOSONAR
 

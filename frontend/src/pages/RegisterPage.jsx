@@ -27,18 +27,20 @@ const RegisterPage = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
-                        <label>Nombre Completo</label>
+                        <label htmlFor="full_name">Nombre Completo</label>
                         <input
+                            id="full_name"
                             className="input-field"
                             type="text"
-                            placeholder="Ej. Pepe Pérez"
+                            placeholder="Ej. Celia Suárez"
                             onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                         />
                     </div>
 
                     <div className="input-group">
-                        <label>Email</label>
+                        <label htmlFor="email">Email</label>
                         <input
+                            id="email"
                             className="input-field"
                             type="email"
                             placeholder="pepe@email.com"
@@ -47,8 +49,9 @@ const RegisterPage = () => {
                     </div>
 
                     <div className="input-group">
-                        <label>Contraseña</label>
+                        <label htmlFor="password">Contraseña</label>
                         <input
+                            id="password"
                             className="input-field"
                             type="password"
                             placeholder="••••••••"
