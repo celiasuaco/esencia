@@ -81,7 +81,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("POSTGRES_DB", "esencia_db"),
         "USER": os.environ.get("POSTGRES_USER", "postgres"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        "PASSWORD": os.environ.get(
+            "POSTGRES_PASSWORD", "postgres"
+        ),  # NOSONAR: Contraseña de ejemplo para desarrollo
         "HOST": os.environ.get(
             "POSTGRES_HOST", "db"
         ),  # "db" es el nombre del servicio en docker-compose

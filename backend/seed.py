@@ -55,7 +55,7 @@ def run_seeder():
         User.objects.create_superuser(
             username="admin",
             email="admin@esencia.com",
-            password="adminpassword123",
+            password="adminpassword123",  # NOSONAR: Contraseña de ejemplo para desarrollo
             full_name="Admin Principal",
             role="ADMIN",
         )
