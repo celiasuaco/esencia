@@ -31,3 +31,8 @@ class RegisterSerializer(serializers.ModelSerializer):
                 "La contraseña debe contener al menos una letra mayúscula."
             )
         return value
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
