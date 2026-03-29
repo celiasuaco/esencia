@@ -5,9 +5,9 @@ from rest_framework import status
 from .models import User
 from .services import create_user
 
-GOOD_PASSWORD = "Esencia_Test_99_"  # NOSONAR
+GOOD_PASSWORD = "StroNG-Pa$$w0rd-2026!#"  # NOSONAR
 BAD_PASSWORD = "123"  # NOSONAR
-OTHER_PASSWORD = "OtherPassword123"  # NOSONAR
+OTHER_PASSWORD = "AlthougH-It-Is-A-TeSt-99"  # NOSONAR
 
 
 @pytest.mark.django_db
