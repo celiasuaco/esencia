@@ -1,11 +1,19 @@
-
-import RegisterPage from './pages/RegisterPage';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import DashboardPage from './pages/DashboardPage';
+import AuthPage from './pages/AuthPage'; // <--- Nueva página única
+import './App.css';
 
 function App() {
   return (
-    <main className="App">
-      <RegisterPage />
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<DashboardPage />} />
+
+        {/* Ambas URLs cargan AuthPage, que internamente decide qué mostrar */}
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

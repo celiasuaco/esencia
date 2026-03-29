@@ -1,6 +1,7 @@
 import pytest
 from django.urls import reverse
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
 from .services import create_user
@@ -62,3 +63,32 @@ class TestRegistration:
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "password" in response.data
+
+
+@pytest.mark.django_db
+class TestLoginLogout:
+    def test_login_success(self, client):
+        # Primero creamos el usuario
+        email = "login@test.com"
+        User.objects.create_user(username=email, email=email, password=GOOD_PASSWORD)
+
+        url = reverse("login")
+        data = {"email": email, "password": GOOD_PASSWORD}
+        response = client.post(url, data, content_type="application/json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert "access" in response.data
+        assert "refresh" in response.data
+
+    def test_logout_success(self, client):
+        email = "logout@test.com"
+        user = User.objects.create_user(
+            username=email, email=email, password=GOOD_PASSWORD
+        )
+        refresh = RefreshToken.for_user(user)
+
+        url = reverse("logout")
+        data = {"refresh": str(refresh)}
+        response = client.post(url, data, content_type="application/json")
+
+        assert response.status_code == status.HTTP_200_OK
