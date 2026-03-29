@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DashboardPage from './pages/DashboardPage';
-import AuthPage from './pages/AuthPage'; // <--- Nueva página única
+import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
 import './App.css';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
         {/* Ambas URLs cargan AuthPage, que internamente decide qué mostrar */}
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,5 +1,6 @@
 import re
 
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 
 from .models import User
@@ -35,4 +36,42 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, style={"input_type": "password"})
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        if email and password:
+            user = authenticate(
+                request=self.context.get("request"), email=email, password=password
+            )
+            if not user:
+                raise serializers.ValidationError(
+                    "No se pudo iniciar sesión con las credenciales proporcionadas.",
+                    code="authorization",
+                )
+        else:
+            raise serializers.ValidationError(
+                "Debe incluir 'email' y 'password'.", code="authorization"
+            )
+
+        attrs["user"] = user
+        return attrs
+
+
+class UserSerializer(serializers.ModelSerializer):
+    photo = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "email", "full_name", "role", "photo"]
+        read_only_fields = ["id", "role"]
+
+    def validate_email(self, value):
+        user = self.instance
+        if User.objects.exclude(pk=user.pk).filter(email=value).exists():
+            raise serializers.ValidationError(
+                "Este correo electrónico ya está en uso por otro usuario."
+            )
+        return value

@@ -5,6 +5,7 @@ db.sqlite3
 db.sqlite3-journal
 media/
 staticfiles/
+backend/profile_pics/
 
 # Python
 __pycache__/

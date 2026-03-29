@@ -2,9 +2,10 @@ import logging
 
 from django.contrib.auth import authenticate
 from rest_framework import response, status, views
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import LoginSerializer, RegisterSerializer
+from .serializers import LoginSerializer, RegisterSerializer, UserSerializer
 from .services import create_user
 
 logger = logging.getLogger("authentication")
@@ -59,6 +60,7 @@ class LoginView(views.APIView):
                         "email": user.email,
                         "full_name": user.full_name,
                         "role": user.role,
+                        "photo": user.photo.url if user.photo else None,
                     },
                 },
                 status=status.HTTP_200_OK,
@@ -86,3 +88,18 @@ class LogoutView(views.APIView):
                 {"error": "Token inválido o expirado"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class UserProfileView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return response.Response(serializer.data)
+
+    def patch(self, request):
+        serializer = UserSerializer(request.user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return response.Response(serializer.data)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
