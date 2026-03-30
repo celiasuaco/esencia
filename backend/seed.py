@@ -18,26 +18,21 @@ fake = Faker(["es_ES"])  # Datos en español
 PASSWORD = "admin123"  # NOSONAR
 
 
-# --- FUNCIONES AUXILIARES ---
+# --- FUNCIONES AUXILIARES SEGURAS ---
 def secure_choice(sequence):
-    """Selecciona un elemento aleatorio de forma segura."""
     return secrets.choice(sequence)
 
 
 def secure_randint(min_val, max_val):
-    """Genera un entero aleatorio seguro entre min y max (incluidos)."""
     return min_val + secrets.randbelow(max_val - min_val + 1)
 
 
 def secure_uniform(min_val, max_val):
-    """Genera un float aleatorio seguro entre min y max."""
-    # Generamos un factor entre 0 y 1 con alta precisión
     factor = secrets.randbelow(1000000) / 1000000.0
     return min_val + (factor * (max_val - min_val))
 
 
 def secure_sample(population, k):
-    """Selecciona k elementos únicos de una población de forma segura."""
     list_pop = list(population)
     if k > len(list_pop):
         k = len(list_pop)
@@ -63,7 +58,7 @@ def run_seeder():
         )
         print("✅ Administrador creado (admin@esencia.com)")
 
-    # --- 2. CREAR 5 CLIENTES ---
+    # --- 2. CREAR CLIENTES ---
     clientes = []
     for i in range(5):
         email = f"cliente{i + 1}@test.com"
@@ -81,7 +76,7 @@ def run_seeder():
         clientes.append(user)
     print(f"✅ {len(clientes)} Clientes creados/verificados")
 
-    # --- 3. CREAR 30 PRODUCTOS ---
+    # --- 3. CREAR PRODUCTOS ---
     categorias = ["ANILLO", "COLLAR", "PENDIENTE", "PULSERA"]
     materiales = [
         "Oro 18k",
@@ -94,10 +89,10 @@ def run_seeder():
 
     for _ in range(30):
         nombre = f"{secure_choice(['Anillo', 'Collar', 'Pendientes', 'Pulsera'])} {fake.word().capitalize()} {secure_choice(['Eterno', 'Gala', 'Minimal', 'Luxury', 'Esencia'])}"
-
-        # Precio y Stock generados con funciones seguras
         precio_val = secure_uniform(25.0, 450.0)
-        stock_val = secure_randint(5, 50)
+        stock_val = secure_randint(
+            0, 50
+        )  # Permitimos stock 0 para probar alertas del dashboard
 
         prod, created = Product.objects.get_or_create(
             name=nombre,
@@ -113,12 +108,13 @@ def run_seeder():
         productos.append(prod)
     print(f"✅ {len(productos)} Productos creados")
 
-    # --- 4. CREAR 10 PEDIDOS ---
+    # --- 4. CREAR PEDIDOS ---
     estados = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"]
 
     for _ in range(10):
         cliente = secure_choice(clientes)
 
+        # Creamos el pedido (los campos amount se inicializan en 0 por defecto)
         pedido = Order.objects.create(
             user=cliente,
             address=fake.address(),
@@ -128,7 +124,7 @@ def run_seeder():
             ),
         )
 
-        # Añadir entre 1 y 4 productos a cada pedido usando la función de sample segura
+        # Añadir entre 1 y 4 productos al pedido
         num_items = secure_randint(1, 4)
         productos_pedido = secure_sample(productos, num_items)
 
@@ -140,8 +136,11 @@ def run_seeder():
                 price_at_purchase=p.price,
             )
 
-    print("✅ 10 Pedidos con sus desgloses creados")
-    print("✨ Seeder finalizado. ¡La base de datos está lista!")
+        # --- CAMBIO CLAVE ---
+        pedido.update_totals()
+
+    print("✅ 10 Pedidos creados y totales calculados en DB")
+    print("✨ Seeder finalizado. El Dashboard debería mostrar datos reales ahora.")
 
 
 if __name__ == "__main__":

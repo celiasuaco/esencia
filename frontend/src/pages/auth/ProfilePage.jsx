@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User, LogOut, Edit, Mail } from 'lucide-react';
-import { authService } from '../services/authService';
-import Navbar from '../components/layout/Navbar';
-import EditProfileForm from '../components/auth/EditProfileForm';
+import { authService } from '../../services/authService';
+import EditProfileForm from '../../components/auth/EditProfileForm';
 
 export default function ProfilePage() {
     const [user, setUser] = useState(null);
@@ -33,16 +32,13 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-[#FDFBF9]">
-            <Navbar />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <h1 className="text-5xl font-serif text-[#2C3632] mb-12">Mi Cuenta</h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    {/* Sidebar Izquierda */}
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-3xl shadow-xl p-8 border border-[#5B7B63]/10">
                             <div className="text-center mb-8">
-                                {/* CONTENEDOR DE FOTO CORREGIDO */}
                                 <div className="w-28 h-28 bg-gradient-to-br from-[#C77C5D] to-[#A86447] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-4xl text-white font-serif overflow-hidden relative">
                                     <span className="absolute z-0">{user.full_name.charAt(0).toUpperCase()}</span>
                                     {user.photo && (
@@ -74,7 +70,6 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    {/* Contenedor Principal */}
                     <div className="lg:col-span-3">
                         <div className="bg-white rounded-3xl shadow-xl p-10 border border-[#5B7B63]/10 h-full">
                             {isEditing ? (
