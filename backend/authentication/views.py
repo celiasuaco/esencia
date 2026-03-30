@@ -2,6 +2,7 @@ import logging
 
 from django.contrib.auth import authenticate
 from rest_framework import response, status, views
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -92,13 +93,14 @@ class LogoutView(views.APIView):
 
 class UserProfileView(views.APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get(self, request):
         serializer = UserSerializer(request.user)
         return response.Response(serializer.data)
 
     def patch(self, request):
-        serializer = UserSerializer(request.user, data=request.data)
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return response.Response(serializer.data)

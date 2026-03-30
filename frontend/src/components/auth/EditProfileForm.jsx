@@ -53,20 +53,39 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-8">
-            {/* Selector de Foto Circular */}
-            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current.click()}>
+
+            {/* Selector de Foto Circular - CAMBIADO DE <div> A <button> PARA SONARQUBE */}
+            <button
+                type="button"
+                className="relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5B7B63] focus:ring-offset-4 rounded-full border-none bg-transparent p-0"
+                onClick={() => fileInputRef.current.click()}
+                aria-label="Cambiar foto de perfil"
+            >
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#F5F1ED] shadow-inner bg-gray-100 flex items-center justify-center">
                     {preview || user.photo ? (
-                        <img src={preview || getPhotoUrl(user.photo)} className="w-full h-full object-cover" alt="Preview" />
+                        <img
+                            src={preview || getPhotoUrl(user.photo)}
+                            className="w-full h-full object-cover"
+                            alt="Vista previa de perfil"
+                        />
                     ) : (
                         <span className="text-4xl font-serif text-[#A3937B]">{fullName.charAt(0)}</span>
                     )}
                 </div>
-                <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+
+                {/* Overlay de cámara */}
+                <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity">
                     <Camera className="text-white w-8 h-8" />
                 </div>
-                <input type="file" ref={fileInputRef} hidden onChange={handleImageChange} accept="image/*" />
-            </div>
+            </button>
+
+            <input
+                type="file"
+                ref={fileInputRef}
+                hidden
+                onChange={handleImageChange}
+                accept="image/*"
+            />
 
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                 <div className="space-y-2">
@@ -94,7 +113,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#5B7B63] to-[#3D5742] text-white px-8 py-3 rounded-full shadow-lg hover:scale-105 transition-all font-medium min-w-[180px]"
+                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#5B7B63] to-[#3D5742] text-white px-8 py-3 rounded-full shadow-lg hover:scale-105 transition-all font-medium min-w-[180px] disabled:opacity-50 disabled:hover:scale-100"
                 >
                     <Save className="w-4 h-4" />
                     {loading ? 'Guardando...' : 'Guardar Cambios'}

@@ -1,6 +1,11 @@
+from io import BytesIO
+
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from PIL import Image
 from rest_framework import status
+from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
@@ -92,3 +97,81 @@ class TestLoginLogout:
         response = client.post(url, data, content_type="application/json")
 
         assert response.status_code == status.HTTP_200_OK
+
+
+@pytest.fixture
+def auth_client(db):  # Usamos db para asegurar acceso a base de datos
+    """Fixture mejorada con APIClient de DRF"""
+    client = APIClient()
+    email = "profile@test.com"
+    user = User.objects.create_user(
+        username=email, email=email, password=GOOD_PASSWORD, full_name="Profile User"
+    )
+    refresh = RefreshToken.for_user(user)
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
+    return client, user
+
+
+@pytest.mark.django_db
+class TestUserProfile:
+    def test_get_profile_success(self, auth_client):
+        client, user = auth_client
+        url = reverse("profile")
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["email"] == user.email
+
+    def test_update_profile_name_success(self, auth_client):
+        client, user = auth_client
+        url = reverse("profile")
+        # Enviamos el full_name y mantenemos el email actual para evitar conflictos de validación
+        data = {"full_name": "Updated Name", "email": user.email}
+
+        response = client.patch(url, data, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["full_name"] == "Updated Name"
+
+    def test_update_profile_duplicate_email_error(self, auth_client):
+        client, user = auth_client
+        User.objects.create_user(
+            username="other@test.com", email="other@test.com", password=GOOD_PASSWORD
+        )
+
+        url = reverse("profile")
+        data = {"email": "other@test.com"}
+
+        response = client.patch(url, data, format="json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        # Verificamos que el error sea sobre el email
+        assert "email" in response.data
+
+    def test_update_profile_photo_upload(self, auth_client):
+        client, user = auth_client
+        url = reverse("profile")
+
+        # 1. Preparar la imagen
+        file_res = BytesIO()
+        image = Image.new("RGBA", size=(100, 100), color=(155, 0, 0))
+        image.save(file_res, "PNG")
+        file_res.seek(0)
+
+        photo = SimpleUploadedFile(
+            "test_roses.png", file_res.read(), content_type="image/png"
+        )
+
+        # 2. Datos completos para el PATCH
+        # Incluimos el email para evitar el error de validación 400
+        data = {"full_name": "User with Photo", "email": user.email, "photo": photo}
+
+        # 3. Ejecutar petición
+        response = client.patch(url, data, format="multipart")
+
+        # 4. Aserciones
+        assert response.status_code == status.HTTP_200_OK
+        assert "photo" in response.data
+        assert response.data["photo"] is not None
+
+        # Opcional: Verificar que el nombre también cambió
+        assert response.data["full_name"] == "User with Photo"
