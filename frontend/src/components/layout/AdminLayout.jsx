@@ -39,10 +39,10 @@ export default function AdminLayout() {
                     })}
                 </nav>
 
-                {/* Botón de Perfil - Posicionado arriba del footer */}
+                {/* Botón de Perfil en el Sidebar */}
                 <div className="px-4 mb-4">
                     <Link
-                        to="/profile"
+                        to="admin/profile"
                         className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 ${location.pathname === '/profile'
                             ? 'bg-[#C77C5D] text-white shadow-lg'
                             : 'text-[#8FA895] hover:bg-white/5 hover:text-white'

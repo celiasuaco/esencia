@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoginForm from '../../components/auth/LoginForm';
 import RegisterForm from '../../components/auth/RegisterForm';
-import Navbar from '../../components/layout/Navbar'; // Reutilizamos tu Navbar
 
 const AuthPage = () => {
     const location = useLocation();
@@ -26,7 +25,6 @@ const AuthPage = () => {
 
     return (
         <div className="min-h-screen bg-[#FDFBF7]">
-            <Navbar /> {/* Añadimos la Navbar para consistencia visual */}
 
             <main className="flex items-center justify-center p-4 mt-20">
                 <div className="w-full max-w-md transition-all duration-300 ease-in-out">

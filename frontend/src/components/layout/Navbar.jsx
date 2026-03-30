@@ -1,29 +1,43 @@
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { authService } from '../../services/authService';
 
 const Navbar = () => {
     const isAuthenticated = authService.isAuthenticated();
     const user = authService.getCurrentUser();
 
-    return (
-        <nav className="flex justify-between items-center p-6 bg-white border-b border-[#E8E2D6]">
-            <Link to="/" className="text-2xl font-serif text-primary">Esencia</Link>
+    // Lógica de redirección dinámica
+    const getProfilePath = () => {
+        if (!isAuthenticated) return "/register";
+        if (user?.role === 'ADMIN') return "/admin/profile";
+        return "/profile"; // Cliente estándar
+    };
 
-            <div className="flex items-center gap-4">
-                {/* Si está autenticado va a perfil, si no a login (que redirige a AuthPage) */}
-                <Link to={isAuthenticated ? "/profile" : "/login"} className="p-2 rounded-full hover:bg-[#FDFBF7]">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isAuthenticated ? "#5B7B63" : "#A3937B"} strokeWidth="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                </Link>
-            </div>
-            {user && user.role === 'ADMIN' && (
-                <Link to="/dashboard" className="text-[#C77C5D] font-bold">
-                    Panel de Control
-                </Link>
-            )}
-        </nav>
+    return (
+        <>
+            <nav className="flex justify-between items-center p-6 bg-white border-b border-[#E8E2D6]">
+                <Link to="/" className="text-2xl font-serif text-primary">Esencia</Link>
+
+                <div className="flex items-center gap-4">
+                    {/* El link cambia según el estado y rol */}
+                    <Link to={getProfilePath()} className="p-2 rounded-full hover:bg-[#FDFBF7]">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke={isAuthenticated ? "#5B7B63" : "#A3937B"}
+                            strokeWidth="2"
+                        >
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </Link>
+                </div>
+            </nav>
+
+            <Outlet />
+        </>
     );
 };
 
