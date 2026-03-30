@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Añadimos la barra al final para evitar problemas de rutas en Django
-const API_URL = 'http://localhost:8000/api/auth/';
+const API_URL = 'http://127.0.0.1:8000/api/auth/';
 
 export const authService = {
   // Registro de usuario
@@ -10,7 +9,6 @@ export const authService = {
       const response = await axios.post(`${API_URL}register/`, userData);
       return response.data;
     } catch (error) {
-      // Extraemos el mensaje de error del backend
       throw error.response?.data || "Error en el servidor";
     }
   },
@@ -30,23 +28,64 @@ export const authService = {
     }
   },
 
-  // Cierre de sesión
+  // Cierre de sesión mejorado para evitar el estado "pending"
   logout: async () => {
     const refreshToken = localStorage.getItem('refresh');
+    const accessToken = localStorage.getItem('access');
+    
     try {
-      if (refreshToken) {
-        await axios.post(`${API_URL}logout/`, { refresh: refreshToken });
+      if (refreshToken && accessToken) {
+        // Añadimos un timeout para que si el backend no responde en 2 seg, 
+        // el frontend limpie la sesión de todos modos.
+        await axios.post(`${API_URL}logout/`, 
+          { refresh: refreshToken },
+          { 
+            headers: { 'Authorization': `Bearer ${accessToken}` },
+            timeout: 2000 
+          }
+        );
       }
     } catch (error) {
-      console.error("Error invalidando token en el servidor", error);
+      console.warn("El servidor no pudo invalidar el token o ya estaba expirado:", error);
     } finally {
-      localStorage.clear();
-      window.location.href = '/login';
+      localStorage.removeItem('user');
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
+      window.location.replace('/login');
     }
   },
 
+  // Actualizar perfil (maneja texto y archivos)
+  updateProfile: async (formData) => {
+    try {
+      const token = localStorage.getItem('access');
+      const response = await axios.patch(`${API_URL}profile/`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      // Sincronizamos el localStorage inmediatamente tras el éxito
+      if (response.data) {
+        authService.updateLocalUser(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || "Error al actualizar perfil";
+    }
+  },
+
+  // Helper para sincronizar los datos locales
+  updateLocalUser: (userData) => {
+    // Mantenemos la estructura del objeto usuario
+    localStorage.setItem('user', JSON.stringify(userData));
+  },
+
   // Helpers de utilidad
-  getCurrentUser: () => JSON.parse(localStorage.getItem('user')),
+  getCurrentUser: () => {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  },
   getAccessToken: () => localStorage.getItem('access'),
   isAuthenticated: () => !!localStorage.getItem('access'),
 };
