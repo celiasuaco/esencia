@@ -1,21 +1,28 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 
 const LoginForm = ({ onSwitchForm }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate();
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
         try {
-            await authService.login(email, password);
-            navigate('/');
+            // 1. Llamamos al login y capturamos la respuesta directa
+            const data = await authService.login(email, password);
+
+            // 2. Usamos los datos que vienen directos de la API (no del storage)
+            const user = data.user;
+
+            if (user && user.role === 'ADMIN') {
+                window.location.href = '/dashboard';
+            } else {
+                window.location.href = '/profile';
+            }
         } catch (err) {
-            setError(typeof err === 'string' ? err : 'Credenciales incorrectas. Inténtalo de nuevo.');
+            setError("Email o contraseña incorrectos");
         }
     };
 

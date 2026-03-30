@@ -17,12 +17,15 @@ export const authService = {
   login: async (email, password) => {
     try {
       const response = await axios.post(`${API_URL}login/`, { email, password });
+      
       if (response.data.access) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        // Guardamos los tokens y el user
         localStorage.setItem('access', response.data.access);
         localStorage.setItem('refresh', response.data.refresh);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        return response.data; 
       }
-      return response.data;
     } catch (error) {
       throw error.response?.data || "Credenciales incorrectas";
     }
@@ -83,8 +86,13 @@ export const authService = {
 
   // Helpers de utilidad
   getCurrentUser: () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+    try {
+        const user = localStorage.getItem('user');
+        // Añadimos un chequeo de seguridad por si el JSON está mal formado
+        return user ? JSON.parse(user) : null;
+    } catch (e) {
+        return null;
+    }
   },
   getAccessToken: () => localStorage.getItem('access'),
   isAuthenticated: () => !!localStorage.getItem('access'),

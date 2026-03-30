@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { User, LogOut, Edit, Mail } from 'lucide-react';
-import { authService } from '../services/authService';
-import Navbar from '../components/layout/Navbar';
-import EditProfileForm from '../components/auth/EditProfileForm';
+import { authService } from '../../services/authService';
+import Navbar from '../../components/layout/Navbar';
+import EditProfileForm from '../../components/auth/EditProfileForm';
 
 export default function ProfilePage() {
     const [user, setUser] = useState(null);

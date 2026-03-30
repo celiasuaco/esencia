@@ -3,6 +3,7 @@ import { authService } from '../../services/authService';
 
 const Navbar = () => {
     const isAuthenticated = authService.isAuthenticated();
+    const user = authService.getCurrentUser();
 
     return (
         <nav className="flex justify-between items-center p-6 bg-white border-b border-[#E8E2D6]">
@@ -17,6 +18,11 @@ const Navbar = () => {
                     </svg>
                 </Link>
             </div>
+            {user && user.role === 'ADMIN' && (
+                <Link to="/dashboard" className="text-[#C77C5D] font-bold">
+                    Panel de Control
+                </Link>
+            )}
         </nav>
     );
 };

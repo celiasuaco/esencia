@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import LoginForm from '../components/auth/LoginForm';
-import RegisterForm from '../components/auth/RegisterForm';
-import Navbar from '../components/layout/Navbar'; // Reutilizamos tu Navbar
+import LoginForm from '../../components/auth/LoginForm';
+import RegisterForm from '../../components/auth/RegisterForm';
+import Navbar from '../../components/layout/Navbar'; // Reutilizamos tu Navbar
 
 const AuthPage = () => {
     const location = useLocation();
