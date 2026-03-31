@@ -17,6 +17,7 @@ Including another URLconf
 
 from authentication import urls as authentication_urls
 from dashboard import urls as dashboard_urls
+from dashboard.views import ShowcaseView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -26,6 +27,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", include(authentication_urls)),
     path("api/dashboard/", include(dashboard_urls)),
+    path("api/", ShowcaseView.as_view(), name="showcase-products"),
 ]
 
 if settings.DEBUG:

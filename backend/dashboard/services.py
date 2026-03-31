@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from authentication.models import User
-from django.db.models import Sum
+from django.db.models import Count, Sum
 from django.utils import timezone
 from order.models import Order
 from product.models import Product
@@ -48,3 +48,19 @@ def get_admin_dashboard_stats():
         },
         "generated_at": timezone.now(),
     }
+
+
+class ShowcaseService:
+    @staticmethod
+    def get_showcase_data():
+        last_units = Product.objects.filter(
+            is_active=True, stock__gt=0, stock__lte=10
+        ).order_by("stock")[:4]
+
+        best_sellers = (
+            Product.objects.filter(is_active=True)
+            .annotate(total_sales=Count("order_items"))
+            .order_by("-total_sales", "-id")[:4]
+        )
+
+        return {"last_units": last_units, "best_sellers": best_sellers}
