@@ -8,6 +8,9 @@ import AuthPage from "./pages/auth/AuthPage";
 import { authService } from "./services/authService";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import ProductFormPage from "./pages/admin/ProductFormPage";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPasswordConfirm from "./components/auth/ResetPasswordConfirm";
+import { Toaster } from 'sonner';
 
 function App() {
   const user = authService.getCurrentUser();
@@ -15,6 +18,13 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        richColors
+        expand={true}
+        closeButton
+        theme="light"
+      />
       <Routes>
 
         {/* GRUPO 1: CLIENTES / PÚBLICO (Con Navbar superior) */}
@@ -22,6 +32,8 @@ function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/register" element={<AuthPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:uid/:token" element={<ResetPasswordConfirm />} />
 
           {/* Perfil de Cliente: Solo si NO es admin (o si quieres que el admin vea la tienda) */}
           <Route

@@ -1,15 +1,19 @@
 from io import BytesIO
 
 import pytest
+from django.contrib.auth.tokens import default_token_generator
+from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from PIL import Image
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
-from .services import create_user
+from .services import create_user, send_password_reset_email
 
 GOOD_PASSWORD = "StroNG-Pa$$w0rd-2026!#"  # NOSONAR
 BAD_PASSWORD = "123"  # NOSONAR
@@ -175,3 +179,108 @@ class TestUserProfile:
 
         # Opcional: Verificar que el nombre también cambió
         assert response.data["full_name"] == "User with Photo"
+
+
+@pytest.mark.django_db
+class TestPasswordReset:
+    # --- TESTS DEL SERVICIO (EMAIL) ---
+    def test_send_password_reset_email_logic(self, db):
+        user = User.objects.create_user(
+            username="reset@test.com",
+            email="reset@test.com",
+            password=GOOD_PASSWORD,
+            full_name="Reset User",
+        )
+
+        send_password_reset_email(user)
+
+        assert len(mail.outbox) == 1
+        assert mail.outbox[0].subject == "Restablece tu contraseña - Esencia"
+        assert user.email in mail.outbox[0].to
+
+        html_body = mail.outbox[0].alternatives[0][0]
+        assert "Esencia Joyería" in html_body
+        assert "Restablecer" in html_body
+
+    # --- TESTS DE LA VISTA: SOLICITUD ---
+    def test_password_reset_request_api(self, client):
+        email = "exist@test.com"
+        User.objects.create_user(username=email, email=email, password=GOOD_PASSWORD)
+
+        url = reverse("password_reset")
+        data = {"email": email}
+        response = client.post(url, data, content_type="application/json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert "message" in response.data
+        assert len(mail.outbox) == 1
+
+    def test_password_reset_request_non_existent_email(self, client):
+        url = reverse("password_reset")
+        data = {"email": "no-existe@test.com"}
+        response = client.post(url, data, content_type="application/json")
+
+        # Por seguridad, el sistema debe responder 200 aunque el email no exista
+        assert response.status_code == status.HTTP_200_OK
+        # Pero no debe enviarse ningún correo
+        assert len(mail.outbox) == 0
+
+    # --- TESTS DE LA VISTA: CONFIRMACIÓN ---
+    def test_password_reset_confirm_success(self, client):
+        # 1. Preparar usuario y token real
+        user = User.objects.create_user(
+            username="confirm@test.com",
+            email="confirm@test.com",
+            password=GOOD_PASSWORD,
+        )
+        token = default_token_generator.make_token(user)
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+
+        url = reverse("password_reset_confirm")
+        data = {"uidb64": uidb64, "token": token, "new_password": OTHER_PASSWORD}
+
+        response = client.post(url, data, content_type="application/json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["message"] == "Contraseña actualizada con éxito."
+
+        # Verificar que la contraseña cambió realmente
+        user.refresh_from_db()
+        assert user.check_password(OTHER_PASSWORD)
+
+    def test_password_reset_confirm_invalid_token(self, client):
+        user = User.objects.create_user(
+            username="invalid@test.com",
+            email="invalid@test.com",
+            password=GOOD_PASSWORD,
+        )
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+
+        url = reverse("password_reset_confirm")
+        data = {
+            "uidb64": uidb64,
+            "token": "token-falso-123",
+            "new_password": OTHER_PASSWORD,
+        }
+
+        response = client.post(url, data, content_type="application/json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert "error" in response.data
+
+    def test_password_reset_confirm_weak_password(self, client):
+        user = User.objects.create_user(
+            username="weak@test.com", email="weak@test.com", password=GOOD_PASSWORD
+        )
+        token = default_token_generator.make_token(user)
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+
+        url = reverse("password_reset_confirm")
+        # Password sin mayúsculas ni números
+        data = {"uidb64": uidb64, "token": token, "new_password": "solo-letras"}
+
+        response = client.post(url, data, content_type="application/json")
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        # El error viene de la validación del serializer que definiste
+        assert "new_password" in response.data
