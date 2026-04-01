@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productService } from '../../services/productService';
 import { ArrowLeft, Save, Camera, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ProductFormPage() {
     const { id } = useParams();
@@ -35,10 +36,10 @@ export default function ProductFormPage() {
                 material: data.material || '',
                 is_active: data.is_active
             });
-            // Importante: No guardamos la URL de la foto en el estado 'photo'
             if (data.photo) setImagePreview(data.photo);
         } catch (err) {
-            alert("Error al cargar el producto");
+            toast.error("Error al cargar el producto", { description: err });
+            navigate('/admin/products');
         }
     };
 
@@ -57,24 +58,10 @@ export default function ProductFormPage() {
         setLoading(true);
 
         const data = new FormData();
-
-        // 1. Limpiamos y preparamos los datos
-        const payload = {
-            name: formData.name,
-            description: formData.description,
-            category: formData.category,
-            price: formData.price,
-            stock: formData.stock,
-            material: formData.material,
-            is_active: formData.is_active
-        };
-
-        // 2. Añadimos los campos al FormData
-        Object.keys(payload).forEach(key => {
-            data.append(key, payload[key]);
+        Object.keys(formData).forEach(key => {
+            data.append(key, formData[key]);
         });
 
-        // 3. Manejo de la foto:
         if (photo instanceof File) {
             data.append('photo', photo);
         }
@@ -82,13 +69,17 @@ export default function ProductFormPage() {
         try {
             if (id) {
                 await productService.update(id, data);
+                toast.success("Producto actualizado correctamente");
             } else {
                 await productService.create(data);
+                toast.success("Producto creado exitosamente");
             }
             navigate('/admin/products');
         } catch (err) {
-            console.error("Error detallado:", err.response?.data); // Para ver qué campo falla exactamente
-            alert("Error al guardar. Revisa los datos.");
+            // Reemplazamos el alert feo por un toast informativo
+            toast.error("Error al guardar los cambios", {
+                description: err // Aquí aparecerá exactamente qué campo falló (ej: "price: Ingrese un número válido")
+            });
         } finally {
             setLoading(false);
         }

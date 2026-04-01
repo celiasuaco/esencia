@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function ProductForm({ product, onSubmit, onCancel }) {
     const [formData, setFormData] = useState(product || {
@@ -13,8 +14,13 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const data = new FormData();
 
+        // Validación rápida frontend
+        if (parseFloat(formData.price) <= 0) {
+            return toast.error("El precio debe ser mayor a 0");
+        }
+
+        const data = new FormData();
         // Creamos una copia para no ensuciar el estado del componente
         const cleanData = { ...formData };
 
