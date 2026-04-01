@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { productService } from '../services/productService';
+import { showcaseService } from '../services/showcaseService';
 import ProductCard from '../components/product/ProductCard';
 
 const DashboardPage = () => {
@@ -9,7 +9,7 @@ const DashboardPage = () => {
     useEffect(() => {
         const fetchShowcase = async () => {
             try {
-                const res = await productService.getShowcase();
+                const res = await showcaseService.getShowcase();
                 setData(res);
             } catch (err) {
                 console.error(err);

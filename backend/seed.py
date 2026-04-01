@@ -15,6 +15,9 @@ from product.models import Product
 
 fake = Faker(["es_ES"])  # Datos en español
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
 PASSWORD = "admin123"  # NOSONAR
 
 
@@ -77,7 +80,11 @@ def run_seeder():
     print(f"✅ {len(clientes)} Clientes creados/verificados")
 
     # --- 3. CREAR PRODUCTOS ---
-    categorias = ["ANILLO", "COLLAR", "PENDIENTE", "PULSERA"]
+    print("🗑️ Eliminando productos antiguos...")
+    OrderItem.objects.all().delete()  # Evitar errores de integridad si hay pedidos
+    Product.objects.all().delete()
+
+    categorias = ["Anillo", "Collar", "Pendientes", "Pulsera"]
     materiales = [
         "Oro 18k",
         "Plata de Ley 925",
@@ -85,28 +92,42 @@ def run_seeder():
         "Platino",
         "Acero Quirúrgico",
     ]
+
+    fotos_por_tipo = {
+        "Anillo": "products/seed_anillo.jpg",
+        "Collar": "products/seed_collar.jpg",
+        "Pendientes": "products/seed_pendiente.jpg",
+        "Pulsera": "products/seed_pulsera.jpg",
+    }
+
     productos = []
 
-    for _ in range(30):
-        nombre = f"{secure_choice(['Anillo', 'Collar', 'Pendientes', 'Pulsera'])} {fake.word().capitalize()} {secure_choice(['Eterno', 'Gala', 'Minimal', 'Luxury', 'Esencia'])}"
-        precio_val = secure_uniform(25.0, 450.0)
-        stock_val = secure_randint(
-            0, 50
-        )  # Permitimos stock 0 para probar alertas del dashboard
+    print("Generando nuevos productos...")
+    for i in range(30):
+        tipo_joya = secure_choice(categorias)
+        nombre = f"{tipo_joya} {fake.word().capitalize()} {secure_choice(['Eterno', 'Gala', 'Minimal', 'Luxury', 'Esencia'])}"
 
-        prod, created = Product.objects.get_or_create(
+        precio_val = secure_uniform(25.0, 100.0)
+        stock_val = secure_randint(0, 50)
+
+        # Lógica de foto:
+        foto_path = None
+        if i % 5 != 0:
+            foto_path = fotos_por_tipo.get(tipo_joya)
+
+        prod = Product.objects.create(
             name=nombre,
-            defaults={
-                "description": fake.sentence(nb_words=12),
-                "price": Decimal(precio_val).quantize(Decimal("0.00")),
-                "stock": stock_val,
-                "category": secure_choice(categorias),
-                "material": secure_choice(materiales),
-                "is_active": True,
-            },
+            description=fake.sentence(nb_words=12),
+            price=Decimal(precio_val).quantize(Decimal("0.00")),
+            stock=stock_val,
+            category=tipo_joya.upper() if tipo_joya != "Pendientes" else "PENDIENTE",
+            material=secure_choice(materiales),
+            is_active=True,
+            photo=foto_path,
         )
         productos.append(prod)
-    print(f"✅ {len(productos)} Productos creados")
+
+    print(f"✅ {len(productos)} Productos creados con fotos y materiales variados")
 
     # --- 4. CREAR PEDIDOS ---
     estados = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"]
