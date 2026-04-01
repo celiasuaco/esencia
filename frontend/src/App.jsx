@@ -8,6 +8,7 @@ import AuthPage from "./pages/auth/AuthPage";
 import { authService } from "./services/authService";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPasswordConfirm from "./components/auth/ResetPasswordConfirm";
+import { Toaster } from 'sonner';
 
 function App() {
   const user = authService.getCurrentUser();
@@ -15,6 +16,13 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        richColors
+        expand={true}
+        closeButton
+        theme="light"
+      />
       <Routes>
 
         {/* GRUPO 1: CLIENTES / PÚBLICO (Con Navbar superior) */}

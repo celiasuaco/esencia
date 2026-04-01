@@ -2,26 +2,26 @@ import { useState } from 'react';
 import { authService } from '../../services/authService';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { toast } from 'sonner';
 
 const LoginForm = ({ onSwitchForm }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const data = await authService.login(email, password);
-            const user = data.user;
+            toast.success(`Bienvenido de nuevo, ${data.user.full_name}`); // Notificación de éxito
 
-            if (user && user.role === 'ADMIN') {
+            if (data.user.role === 'ADMIN') {
                 window.location.href = '/dashboard';
             } else {
                 window.location.href = '/profile';
             }
         } catch (err) {
-            setError("Email o contraseña incorrectos");
+            toast.error(err); // Usa el error limpio del authService
         }
     };
 
@@ -29,12 +29,6 @@ const LoginForm = ({ onSwitchForm }) => {
         <div className="register-card max-w-md w-full">
             <h2 className="text-3xl font-serif text-primary text-center mb-2">Bienvenido</h2>
             <p className="text-secondary text-center mb-8">Ingresa a tu cuenta exclusiva</p>
-
-            {error && (
-                <div className="bg-red-50 border border-red-100 text-red-500 text-sm py-2 px-4 rounded-xl mb-6 text-center animate-pulse">
-                    {error}
-                </div>
-            )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* CAMPO EMAIL */}

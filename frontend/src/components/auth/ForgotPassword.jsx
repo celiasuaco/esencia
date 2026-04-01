@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { authService } from '../../services/authService';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -14,8 +15,8 @@ export default function ForgotPassword() {
         try {
             await authService.sendPasswordResetEmail(email);
             setSent(true);
-        } catch {
-            alert("Error al enviar el correo. Inténtalo de nuevo.");
+        } catch (err) {
+            toast.error(err);
         } finally {
             setLoading(false);
         }

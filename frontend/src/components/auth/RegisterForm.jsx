@@ -1,28 +1,29 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService';
+import { toast } from 'sonner'; // 1. Importamos toast
 
 const RegisterForm = ({ onSwitchForm }) => {
     const [formData, setFormData] = useState({ email: '', password: '', full_name: '' });
-    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
         try {
             await authService.register(formData);
-            alert("¡Cuenta creada con éxito!");
+            // 2. Éxito con Toast
+            toast.success("¡Cuenta creada con éxito!", {
+                description: "Ya puedes acceder a tu cuenta exclusiva."
+            });
             onSwitchForm();
         } catch (err) {
-            setError(typeof err === 'string' ? err : 'Error al crear cuenta');
+            toast.error(err);
         }
     };
 
     return (
-        <div className="register-card"> {/* Usamos tu clase original */}
+        <div className="register-card">
             <h2 className="text-3xl font-serif text-primary text-center mb-2">Crear Cuenta</h2>
             <p className="text-secondary text-center mb-8">Únete a nuestra comunidad exclusiva</p>
 
-            {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="input-group">

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ResetPasswordConfirm() {
     const { uid, token } = useParams();
@@ -15,10 +16,10 @@ export default function ResetPasswordConfirm() {
         setLoading(true);
         try {
             await authService.confirmPasswordReset(uid, token, password);
-            alert("Contraseña actualizada con éxito. Ya puedes iniciar sesión.");
+            toast.success("Contraseña actualizada con éxito"); // Reemplaza alert
             navigate('/login');
-        } catch {
-            alert("El enlace ha expirado o es inválido. Solicita uno nuevo.");
+        } catch (err) {
+            toast.error(err); // Reemplaza alert
         } finally {
             setLoading(false);
         }
