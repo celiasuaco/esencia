@@ -1,13 +1,22 @@
 import logging
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
 from rest_framework import response, status, views
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import LoginSerializer, RegisterSerializer, UserSerializer
-from .services import create_user
+from .models import User
+from .serializers import (
+    LoginSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+    RegisterSerializer,
+    UserSerializer,
+)
+from .services import create_user, send_password_reset_email
 
 logger = logging.getLogger("authentication")
 
@@ -104,4 +113,50 @@ class UserProfileView(views.APIView):
         if serializer.is_valid():
             serializer.save()
             return response.Response(serializer.data)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetRequestView(views.APIView):
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data["email"]
+            user = User.objects.filter(email=email).first()
+            if user:
+                send_password_reset_email(user)
+            return response.Response(
+                {
+                    "message": "Si el correo está registrado, se ha enviado un enlace de recuperación."
+                },
+                status=status.HTTP_200_OK,
+            )
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetConfirmView(views.APIView):
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                uid = urlsafe_base64_decode(
+                    serializer.validated_data["uidb64"]
+                ).decode()
+                user = User.objects.get(pk=uid)
+            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+                user = None
+
+            if user and default_token_generator.check_token(
+                user, serializer.validated_data["token"]
+            ):
+                user.set_password(serializer.validated_data["new_password"])
+                user.save()
+                return response.Response(
+                    {"message": "Contraseña actualizada con éxito."},
+                    status=status.HTTP_200_OK,
+                )
+
+            return response.Response(
+                {"error": "El enlace es inválido o ha expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

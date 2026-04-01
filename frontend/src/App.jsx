@@ -6,6 +6,8 @@ import ProfilePage from "./pages/auth/ProfilePage";
 import DashboardPage from "./pages/DashboardPage";
 import AuthPage from "./pages/auth/AuthPage";
 import { authService } from "./services/authService";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPasswordConfirm from "./components/auth/ResetPasswordConfirm";
 
 function App() {
   const user = authService.getCurrentUser();
@@ -20,6 +22,8 @@ function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/register" element={<AuthPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:uid/:token" element={<ResetPasswordConfirm />} />
 
           {/* Perfil de Cliente: Solo si NO es admin (o si quieres que el admin vea la tienda) */}
           <Route
