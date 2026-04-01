@@ -6,6 +6,8 @@ import ProfilePage from "./pages/auth/ProfilePage";
 import DashboardPage from "./pages/DashboardPage";
 import AuthPage from "./pages/auth/AuthPage";
 import { authService } from "./services/authService";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import ProductFormPage from "./pages/admin/ProductFormPage";
 
 function App() {
   const user = authService.getCurrentUser();
@@ -36,9 +38,9 @@ function App() {
 
           {/* Perfil de Administrador: Misma página, distinto Layout */}
           <Route path="/admin/profile" element={<ProfilePage />} />
-
-          {/* Futuras rutas de gestión */}
-          <Route path="/admin/products" element={<div>Gestión de Productos</div>} />
+          <Route path="/admin/products" element={<AdminProductsPage />} />
+          <Route path="/admin/products/new" element={<ProductFormPage />} />
+          <Route path="/admin/products/edit/:id" element={<ProductFormPage />} />
         </Route>
 
         {/* Redirección de seguridad */}

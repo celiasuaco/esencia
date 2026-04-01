@@ -56,7 +56,7 @@ export default function AdminDashboardPage() {
         <div className="p-6">
             <div className="mb-10">
                 <h1 className="text-5xl font-serif text-[#2C3632] mb-2">Dashboard</h1>
-                <p className="text-[#6B7F72]">Métricas reales de tu plataforma</p>
+                <p className="text-[#6B7F72]">Métricas de tu plataforma</p>
             </div>
 
             {/* KPI Cards Dinámicas */}
