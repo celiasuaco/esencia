@@ -1,12 +1,10 @@
-import axios from 'axios';
-
-const API_URL = 'http://127.0.0.1:8000/api/auth/';
+import api from './api';
 
 export const authService = {
   // Registro de usuario
   register: async (userData) => {
     try {
-      const response = await axios.post(`${API_URL}register/`, userData);
+      const response = await api.post('/auth/register/', userData);
       return response.data;
     } catch (error) {
       throw error.response?.data || "Error en el servidor";
@@ -16,14 +14,13 @@ export const authService = {
   // Inicio de sesión
   login: async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}login/`, { email, password });
+      const response = await api.post('/auth/login/', { email, password });
       
       if (response.data.access) {
         // Guardamos los tokens y el user
         localStorage.setItem('access', response.data.access);
         localStorage.setItem('refresh', response.data.refresh);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        
         return response.data; 
       }
     } catch (error) {
@@ -31,21 +28,16 @@ export const authService = {
     }
   },
 
-  // Cierre de sesión mejorado para evitar el estado "pending"
+  // Cierre de sesión mejorado
   logout: async () => {
     const refreshToken = localStorage.getItem('refresh');
-    const accessToken = localStorage.getItem('access');
     
     try {
-      if (refreshToken && accessToken) {
-        // Añadimos un timeout para que si el backend no responde en 2 seg, 
-        // el frontend limpie la sesión de todos modos.
-        await axios.post(`${API_URL}logout/`, 
+      if (refreshToken) {
+        // Usamos api en lugar de axios. Los headers se inyectan automáticamente en api.js
+        await api.post('/auth/logout/', 
           { refresh: refreshToken },
-          { 
-            headers: { 'Authorization': `Bearer ${accessToken}` },
-            timeout: 2000 
-          }
+          { timeout: 2000 } 
         );
       }
     } catch (error) {
@@ -61,14 +53,13 @@ export const authService = {
   // Actualizar perfil (maneja texto y archivos)
   updateProfile: async (formData) => {
     try {
-      const token = localStorage.getItem('access');
-      const response = await axios.patch(`${API_URL}profile/`, formData, {
+      // El interceptor de api.js ya añade el Authorization header automáticamente
+      const response = await api.patch('/auth/profile/', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
-      // Sincronizamos el localStorage inmediatamente tras el éxito
+      
       if (response.data) {
         authService.updateLocalUser(response.data);
       }
@@ -78,22 +69,46 @@ export const authService = {
     }
   },
 
-  // Helper para sincronizar los datos locales
+  // Enviar email de recuperación
+  sendPasswordResetEmail: async (email) => {
+    try {
+      const response = await api.post('/auth/password-reset/', { email });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || "Error al enviar el email";
+    }
+  },
+
+  // Confirmar nueva contraseña
+  confirmPasswordReset: async (uidb64, token, newPassword) => {
+    try {
+      const response = await api.post('/auth/password-reset-confirm/', {
+        uidb64,
+        token,
+        new_password: newPassword
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || "El enlace ha expirado o es inválido";
+    }
+  },
+
+  // --- HELPERS DE UTILIDAD ---
+  
   updateLocalUser: (userData) => {
-    // Mantenemos la estructura del objeto usuario
     localStorage.setItem('user', JSON.stringify(userData));
   },
 
-  // Helpers de utilidad
   getCurrentUser: () => {
     try {
-        const user = localStorage.getItem('user');
-        // Añadimos un chequeo de seguridad por si el JSON está mal formado
-        return user ? JSON.parse(user) : null;
+      const user = localStorage.getItem('user');
+      return user ? JSON.parse(user) : null;
     } catch (e) {
-        return null;
+      return null;
     }
   },
+
   getAccessToken: () => localStorage.getItem('access'),
+  
   isAuthenticated: () => !!localStorage.getItem('access'),
 };

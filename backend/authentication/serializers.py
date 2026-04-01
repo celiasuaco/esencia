@@ -75,3 +75,20 @@ class UserSerializer(serializers.ModelSerializer):
                 "Este correo electrónico ya está en uso por otro usuario."
             )
         return value
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uidb64 = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_new_password(self, value):
+        if not re.search(r"\d", value) or not re.search(r"[A-Z]", value):
+            raise serializers.ValidationError(
+                "La contraseña debe contener un número y una mayúscula."
+            )
+        return value
