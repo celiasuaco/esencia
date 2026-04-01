@@ -1,0 +1,76 @@
+name: "🔧 Reportar un Fix / Bug"
+description: "Algo no funciona y necesita una corrección"
+title: "[FIX]: "
+labels: ["🐛 bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # 🐛 Reporte de Error
+        Describe el problema para que podamos reproducirlo.
+        ---
+
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: "📝 Descripción del error"
+      placeholder: "Ejemplo: El contenedor de backend no conecta con la DB tras reiniciar Docker."
+    validations:
+      required: true
+
+  - type: textarea
+    id: pasos
+    attributes:
+      label: "🚶 Pasos para reproducir"
+      placeholder: "1. Ejecutar docker-compose up\n2. Ir a /login\n3. Ver error 500 en consola."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modulo
+    attributes:
+      label: "📍 Módulo afectado"
+      options:
+        - "🔒 Autenticación"
+        - "🛒 Compra / Pedidos"
+        - "📊 Estadísticas / Dashboard"
+        - "📦 Infraestructura (Docker/DB)"
+        - "⚙️ Configuración / Backend"
+        - "🏠 Home / Core"
+        - "➕ Otro"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severidad
+    attributes:
+      label: "⚠️ Severidad"
+      options:
+        - "🔥 Crítico (App caída)"
+        - "🔴 Alto (Feature rota)"
+        - "🟡 Medio (UI bug / Molesto)"
+        - "🟢 Bajo (Typo / Visual)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "📸 Logs o Capturas"
+      description: "Pega aquí el traceback de Django o capturas de pantalla."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: sprint
+    attributes:
+      label: "🔔 Entrega para corregir"
+      options:
+        - "Sprint 1"
+        - "Sprint 2"
+        - "Sprint 3"
+        - "Sprint 4"
+        - "Sprint 5"
+        - "Sprint 6"
+    validations:
+      required: true
