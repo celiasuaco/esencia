@@ -14,7 +14,7 @@ export default function ForgotPassword() {
         try {
             await authService.sendPasswordResetEmail(email);
             setSent(true);
-        } catch (err) {
+        } catch {
             alert("Error al enviar el correo. Inténtalo de nuevo.");
         } finally {
             setLoading(false);
@@ -86,7 +86,7 @@ export default function ForgotPassword() {
                         {loading ? (
                             <span className="flex items-center gap-2">
                                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                Enviando...
+                                {' '}Enviando...
                             </span>
                         ) : 'Enviar enlace de recuperación'}
                     </button>

@@ -17,7 +17,7 @@ export default function ResetPasswordConfirm() {
             await authService.confirmPasswordReset(uid, token, password);
             alert("Contraseña actualizada con éxito. Ya puedes iniciar sesión.");
             navigate('/login');
-        } catch (err) {
+        } catch {
             alert("El enlace ha expirado o es inválido. Solicita uno nuevo.");
         } finally {
             setLoading(false);
@@ -78,7 +78,7 @@ export default function ResetPasswordConfirm() {
                         {loading ? (
                             <span className="flex items-center gap-2">
                                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                Actualizando...
+                                {' '}Actualizando...
                             </span>
                         ) : 'Restablecer contraseña'}
                     </button>
