@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-export default function ProductForm({ product, onSubmit, onCancel }) {
+export default function ProductForm({
+    product = null,
+    onSubmit = () => { },
+    onCancel = () => { }
+}) {
     const [formData, setFormData] = useState(product || {
         name: '',
         description: '',
@@ -16,7 +20,7 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
         e.preventDefault();
 
         // Validación rápida frontend
-        if (parseFloat(formData.price) <= 0) {
+        if (Number.parseFloat(formData.price) <= 0) {
             return toast.error("El precio debe ser mayor a 0");
         }
 
@@ -88,8 +92,14 @@ export default function ProductForm({ product, onSubmit, onCancel }) {
             />
 
             <div>
-                <label className="block text-xs font-bold text-[#A3937B] uppercase mb-1">Imagen de producto</label>
+                <label
+                    htmlFor="photo-upload" // Añade esto
+                    className="block text-xs font-bold text-[#A3937B] uppercase mb-1"
+                >
+                    Imagen de producto
+                </label>
                 <input
+                    id="photo-upload" // Añade este ID igual al htmlFor
                     type="file"
                     onChange={(e) => setPhoto(e.target.files[0])}
                     className="text-sm"

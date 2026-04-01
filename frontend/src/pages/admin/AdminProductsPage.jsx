@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productService } from '../../services/productService';
 import { Plus, Edit2, Trash2, Search, Package, Filter } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminProductsPage() {
     const navigate = useNavigate();
@@ -32,14 +33,35 @@ export default function AdminProductsPage() {
             const data = await productService.getAll();
             setProducts(data);
             setFilteredProducts(data);
-        } catch (err) { alert("Error cargando inventario"); }
+        } catch (err) {
+            toast.error("Error al cargar el inventario", { description: err });
+        }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("¿Desactivar este producto?")) {
-            await productService.delete(id);
-            loadProducts();
-        }
+    const handleDelete = (id) => {
+        // Sustituimos window.confirm por un toast con acción (más profesional)
+        toast.warning("¿Desactivar este producto?", {
+            description: "El producto dejará de ser visible para los clientes.",
+            action: {
+                label: "Confirmar",
+                onClick: async () => {
+                    try {
+                        await productService.delete(id);
+                        toast.success("Producto actualizado");
+                        loadProducts();
+                    } catch (err) {
+                        toast.error("No se pudo desactivar el producto");
+                    }
+                },
+            },
+        });
+    };
+
+    // SOLUCIÓN SONARQUBE: Extraemos el ternario anidado de los botones de filtro
+    const getStatusLabel = (status) => {
+        if (status === 'ALL') return 'Todos';
+        if (status === 'ACTIVE') return 'Activos';
+        return 'Inactivos';
     };
 
     return (
@@ -52,7 +74,7 @@ export default function AdminProductsPage() {
                 </div>
                 <button
                     onClick={() => navigate('/admin/products/new')}
-                    className="bg-[#A86447] text-white px-6 py-2.5 rounded-xl hover:bg-[#A86447] transition-all flex items-center gap-2 shadow-sm font-medium text-sm"
+                    className="bg-[#A86447] text-white px-6 py-2.5 rounded-xl hover:opacity-90 transition-all flex items-center gap-2 shadow-sm font-medium text-sm"
                 >
                     <Plus size={18} /> Crear Producto
                 </button>
@@ -84,15 +106,17 @@ export default function AdminProductsPage() {
                                 : 'text-[#8FA895] hover:text-[#2C3632]'
                                 }`}
                         >
-                            {status === 'ALL' ? 'Todos' : status === 'ACTIVE' ? 'Activos' : 'Inactivos'}
+                            {getStatusLabel(status)}
                         </button>
                     ))}
                 </div>
 
                 {/* Filtro de Categoría */}
                 <div className="relative w-full md:w-auto md:flex-1">
+                    <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
                     <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3937B]" size={16} />
                     <select
+                        id="category-filter"
                         className="w-full pl-11 pr-8 py-3 bg-[#FDFBF7] border border-gray-200 rounded-xl text-sm text-[#2C3632] outline-none focus:ring-2 focus:ring-[#A86447]/20 focus:border-[#A86447] appearance-none cursor-pointer"
                         value={filterCategory}
                         onChange={e => setFilterCategory(e.target.value)}
@@ -103,9 +127,8 @@ export default function AdminProductsPage() {
                         <option value="PENDIENTE">Pendientes</option>
                         <option value="PULSERA">Pulseras</option>
                     </select>
-                    {/* Flecha personalizada para el select */}
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#A3937B]">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="19 9l-7 7-7-7" /></svg>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                     </div>
                 </div>
 
@@ -119,19 +142,22 @@ export default function AdminProductsPage() {
                     </button>
                 )}
             </div>
-            <p className="text-sm text-[#8FA895] mb-6 font-medium tracking-tight">Mostrando {filteredProducts.length} de {products.length} productos</p>
+
+            <p className="text-sm text-[#8FA895] mb-6 font-medium tracking-tight">
+                Mostrando {filteredProducts.length} de {products.length} productos
+            </p>
 
             {/* GRID DE PRODUCTOS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map(p => (
                     <div key={p.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group">
-                        {/* CONTENEDOR DE IMAGEN HOMOGÉNEO */}
                         <div className="relative aspect-square bg-[#FDFBF7] overflow-hidden">
                             <img
                                 src={p.photo}
                                 alt={p.name}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
+                            {/* Badges de Stock */}
                             <div className="absolute top-3 left-3 flex flex-col gap-2">
                                 {p.stock < 10 && p.stock > 0 && (
                                     <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#B38B4D] text-white shadow-md border border-white/20 uppercase tracking-wider">
@@ -144,6 +170,7 @@ export default function AdminProductsPage() {
                                     </span>
                                 )}
                             </div>
+                            {/* Badge de Estado */}
                             <div className="absolute top-3 right-3">
                                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold shadow-md border border-white/20 uppercase tracking-widest ${p.is_active
                                     ? 'bg-[#4A5D4E] text-white'
@@ -169,13 +196,14 @@ export default function AdminProductsPage() {
                             <div className="flex gap-2 mt-auto">
                                 <button
                                     onClick={() => navigate(`/admin/products/edit/${p.id}`)}
-                                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#A86447] hover:bg-[#A86447] text-white rounded-lg transition-colors text-sm font-medium"
+                                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#A86447] hover:opacity-90 text-white rounded-lg transition-colors text-sm font-medium"
                                 >
                                     <Edit2 size={16} /> Editar
                                 </button>
                                 <button
                                     onClick={() => handleDelete(p.id)}
                                     className="p-2 border border-red-100 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                                    aria-label="Desactivar producto"
                                 >
                                     <Trash2 size={18} />
                                 </button>
