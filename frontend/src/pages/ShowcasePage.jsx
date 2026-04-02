@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { showcaseService } from '../services/showcaseService';
 import ProductCard from '../components/product/ProductCard';
 
-const DashboardPage = () => {
+const ShowcasePage = () => {
     const [data, setData] = useState({ last_units: [], best_sellers: [] });
     const [loading, setLoading] = useState(true);
 
@@ -37,7 +37,7 @@ const DashboardPage = () => {
             </section>
 
             {/* CONTENIDO PRODUCTOS */}
-            <div className="max-w-7xl mx-auto px-8 py-24 space-y-32">
+            <div className="max-w-7xl mx-auto pt-16 px-8 py-24 space-y-32">
 
                 {/* 2. ÚLTIMAS UNIDADES */}
                 {data.last_units.length > 0 && (
@@ -71,4 +71,4 @@ const DashboardPage = () => {
     );
 };
 
-export default DashboardPage;
+export default ShowcasePage;
