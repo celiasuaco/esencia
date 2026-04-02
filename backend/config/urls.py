@@ -16,6 +16,7 @@ Including another URLconf
 """
 
 from authentication import urls as authentication_urls
+from checkout import urls as checkout_urls
 from dashboard import urls as dashboard_urls
 from dashboard.views import ShowcaseView
 from django.conf import settings
@@ -29,6 +30,7 @@ urlpatterns = [
     path("api/auth/", include(authentication_urls)),
     path("api/dashboard/", include(dashboard_urls)),
     path("api/products/", include(product_urls)),
+    path("api/cart/", include(checkout_urls)),
     path("api/", ShowcaseView.as_view(), name="showcase-products"),
 ]
 

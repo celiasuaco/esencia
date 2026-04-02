@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import Footer from './Footer';
+import { ShoppingBag, User } from 'lucide-react'; // Importamos User de lucide
 
 const Navbar = () => {
     const isAuthenticated = authService.isAuthenticated();
@@ -22,26 +23,31 @@ const Navbar = () => {
                         Esencia
                     </Link>
 
-                    <Link to="/catalog" className="text-lg font-serif text-[#324339] tracking-tight hover:opacity-80 transition-opacity">
+                    <Link to="/catalog" className="font-serif text-[15px] text-[#324339]/70 hover:text-[#D48A66] transition-colors duration-500 italic tracking-wide">
                         colección
                     </Link>
                 </div>
 
-                {/* LADO DERECHO: Iconos de usuario */}
-                <div className="flex-1 flex justify-end items-center gap-4">
+                {/* LADO DERECHO: Iconos de Carrito y Usuario */}
+                <div className="flex-1 flex justify-end items-center gap-2">
+
+                    {/* Carrito */}
+                    <Link to="/cart" className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
+                        <ShoppingBag
+                            size={20}
+                            strokeWidth={1.5}
+                            className="text-[#324339] group-hover:text-[#D48A66] group-hover:scale-110 transition-all duration-300"
+                        />
+                    </Link>
+
+                    {/* Perfil (Re-añadido y corregido) */}
                     <Link to={getProfilePath()} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
-                        <svg
-                            width="22"
-                            height="22"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke={isAuthenticated ? "#A86447" : "#324339"}
-                            strokeWidth="1.5"
-                            className="group-hover:scale-110 transition-transform duration-300"
-                        >
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+                        <User
+                            size={22}
+                            strokeWidth={1.5}
+                            className={`${isAuthenticated ? "text-[#D48A66]" : "text-[#324339]"
+                                } group-hover:scale-110 transition-all duration-300`}
+                        />
                     </Link>
                 </div>
             </nav>

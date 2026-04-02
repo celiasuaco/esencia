@@ -12,6 +12,7 @@ import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPasswordConfirm from "./components/auth/ResetPasswordConfirm";
 import ProductListPage from "./pages/ProductListPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import CartPage from "./pages/CartPage";
 import { Toaster } from 'sonner';
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
           <Route path="/reset-password/:uid/:token" element={<ResetPasswordConfirm />} />
           <Route path="/catalog" element={<ProductListPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
+          <Route path="/cart" element={<CartPage />} />
 
           {/* Perfil de Cliente: Solo si NO es admin (o si quieres que el admin vea la tienda) */}
           <Route
