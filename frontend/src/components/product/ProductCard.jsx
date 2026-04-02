@@ -1,4 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
+
+ProductCard.propTypes = {
+    product: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        name: PropTypes.string.isRequired,
+        photo: PropTypes.string,
+        price: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    }).isRequired,
+    badge: PropTypes.string
+};
 
 export default function ProductCard({ product, badge }) {
     const navigate = useNavigate();
@@ -64,3 +75,12 @@ export default function ProductCard({ product, badge }) {
         </div>
     );
 }
+
+ProductCard.propTypes = {
+    product: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        name: PropTypes.string.isRequired,
+        photo: PropTypes.string,
+        price: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    }).isRequired
+};

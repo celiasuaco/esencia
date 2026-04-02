@@ -1,5 +1,13 @@
 import { authService } from '../../services/authService';
 import { User, LogOut } from 'lucide-react';
+import PropTypes from 'prop-types';
+
+ProfileSidebar.propTypes = {
+    user: PropTypes.shape({
+        full_name: PropTypes.string,
+        email: PropTypes.string
+    }).isRequired
+};
 
 const ProfileSidebar = ({ user, activeTab }) => {
     const API_BASE_URL = 'http://127.0.0.1:8000';
@@ -11,6 +19,7 @@ const ProfileSidebar = ({ user, activeTab }) => {
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
         return `${API_BASE_URL}${normalizedPath}`;
     };
+
 
     const photoUrl = getPhotoUrl(user?.photo);
 
@@ -37,8 +46,8 @@ const ProfileSidebar = ({ user, activeTab }) => {
 
                 <nav className="mt-12 space-y-2 text-left">
                     <button className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-medium transition-all ${activeTab === 'data'
-                            ? 'bg-[#324339] text-white shadow-lg shadow-[#324339]/20'
-                            : 'text-[#324339]/60 hover:bg-[#FDFBF9]'
+                        ? 'bg-[#324339] text-white shadow-lg shadow-[#324339]/20'
+                        : 'text-[#324339]/60 hover:bg-[#FDFBF9]'
                         }`}>
                         <User className="w-5 h-5" />
                         <span>Mis Datos</span>

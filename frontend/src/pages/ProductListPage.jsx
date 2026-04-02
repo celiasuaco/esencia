@@ -21,7 +21,7 @@ export default function ProductListPage() {
             try {
                 const data = await productService.getAll();
                 setProducts(data);
-            } catch (err) {
+            } catch {
                 toast.error("No se pudo cargar el catálogo");
             } finally {
                 setLoading(false);
