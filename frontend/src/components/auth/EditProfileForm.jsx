@@ -54,9 +54,8 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
 
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-8">
+        <form onSubmit={handleSubmit} className="flex flex-col items-center pt-5 space-y-8">
 
-            {/* Selector de Foto Circular - CAMBIADO DE <div> A <button> PARA SONARQUBE */}
             <button
                 type="button"
                 className="relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5B7B63] focus:ring-offset-4 rounded-full border-none bg-transparent p-0"
