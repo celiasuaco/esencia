@@ -37,19 +37,14 @@ export default function ProductDetailPage() {
         fetchProduct();
     }, [id, navigate]);
 
-    // Función de añadir a la bolsa optimizada
-    const handleAddToCart = async () => {
-        // Redirección instantánea para eliminar la sensación de espera
+    const handleAddToCart = async (e) => {
+        if (e) e.stopPropagation();
         navigate('/cart');
-
         try {
-            // Se ejecuta en segundo plano mientras el usuario ya está viendo el carrito
             await cartService.addToCart(product.id, 1);
         } catch (err) {
-            // Manejo de error silencioso o notificación en el carrito
-            toast.error("No se pudo añadir el producto", {
-                description: "Por favor, inténtalo de nuevo."
-            });
+            console.error("Error al añadir al carrito:", err);
+            toast.error("No se pudo añadir el producto");
         }
     };
 
@@ -65,7 +60,6 @@ export default function ProductDetailPage() {
     return (
         <div className="min-h-screen bg-[#FDFBF9] py-12 px-6">
             <div className="max-w-5xl mx-auto">
-                {/* Botón Volver - Acento Terracota al pasar el mouse */}
                 <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-[#324339]/60 hover:text-[#A86447] transition-colors text-[10px] uppercase tracking-widest mb-10 group"
@@ -75,7 +69,6 @@ export default function ProductDetailPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-12 lg:gap-20 items-start">
 
-                    {/* COLUMNA IZQUIERDA: ALERTA + FOTO */}
                     <div className="space-y-6 w-full max-w-[350px] mx-auto lg:mx-0">
                         {isLowStock && (
                             <div className="flex items-center justify-center gap-3 py-2.5 border border-[#A86447]/20 rounded-xl bg-[#A86447]/5 transition-all animate-in fade-in slide-in-from-top-2">
@@ -89,10 +82,7 @@ export default function ProductDetailPage() {
                             </div>
                         )}
 
-                        {/* FOTO CON BORDE VERDE RESALTADO */}
-                        {/* He cambiado border-[#A86447]/30 por border-[#324339] (Verde puro) para que destaque */}
                         <div className="relative aspect-square flex justify-center items-center p-8 border border-[#324339] rounded-[2rem] bg-white shadow-sm transition-all duration-500 hover:shadow-xl hover:border-[#A86447]">
-                            {/* He quitado los detalles decorativos de las esquinas para simplificar y unificar con el estilo 'sin recuadros' */}
 
                             <img
                                 src={getPhotoUrl(product.photo)}
@@ -103,7 +93,6 @@ export default function ProductDetailPage() {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA: Información */}
                     <div className="space-y-8 lg:-mt-6 lg:pt-0">
                         <header className="space-y-2">
                             <span className="text-[#A86447] text-[10px] uppercase tracking-[0.35em] font-bold block">
@@ -112,7 +101,6 @@ export default function ProductDetailPage() {
                             <h1 className="text-4xl md:text-5xl font-serif text-[#324339] italic leading-tight">
                                 {product.name}
                             </h1>
-                            {/* Precio resaltado en Terracota */}
                             <p className="text-2xl font-serif italic text-[#A86447] pt-2">
                                 {Number(product.price).toFixed(2)} €
                             </p>
@@ -144,7 +132,6 @@ export default function ProductDetailPage() {
                             </div>
                         </div>
 
-                        {/* Botón de Acción Principal - Cambiado hover a Terracota */}
                         <div className="pt-4">
                             <button
                                 onClick={handleAddToCart}

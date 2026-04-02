@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
+from django.db.models import F, Sum
 from product.models import Product
 
 
@@ -13,11 +14,16 @@ class Cart(models.Model):
 
     @property
     def subtotal(self):
-        return sum(item.subtotal for item in self.items.all())
+        result = self.items.aggregate(total=Sum(F("product__price") * F("quantity")))[
+            "total"
+        ]
+        return result or Decimal("0.00")
 
     @property
     def shipping(self):
-        return Decimal(4.99 if self.subtotal < 100 else 0)
+        if self.subtotal >= 100 or self.subtotal == 0:
+            return Decimal("0.00")
+        return Decimal("4.99")
 
     @property
     def total(self):

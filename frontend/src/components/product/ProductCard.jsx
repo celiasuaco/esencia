@@ -16,12 +16,13 @@ export default function ProductCard({ product, badge }) {
     };
 
     const handleAddToCart = async (e) => {
-        e.stopPropagation();
+        if (e) e.stopPropagation();
         navigate('/cart');
         try {
             await cartService.addToCart(product.id, 1);
         } catch (err) {
-            toast.error("Error al sincronizar");
+            console.error("Error al añadir al carrito:", err);
+            toast.error("No se pudo añadir el producto");
         }
     };
 
@@ -33,7 +34,6 @@ export default function ProductCard({ product, badge }) {
             {/* Contenedor Principal con Borde de Lujo */}
             <div className="relative rounded-[2rem] border border-[#324339]/10 bg-white p-4 shadow-[0_15px_40px_rgba(50,67,57,0.05)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_30px_60px_rgba(50,67,57,0.12)] group-hover:border-[#A86447]/30">
 
-                {/* Badge Flotante Estilizado */}
                 {badge && (
                     <span className="absolute top-6 left-6 bg-[#A86447] text-white px-3 py-1 rounded-full text-[9px] font-bold tracking-[0.15em] uppercase z-20 shadow-lg shadow-[#A86447]/20">
                         {badge}
