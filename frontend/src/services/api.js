@@ -47,7 +47,7 @@ api.interceptors.response.use(
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
         window.location.href = '/login'; // O redirige a tu ruta de login
-        return Promise.reject(refreshError);
+        throw refreshError;
       }
     }
 

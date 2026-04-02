@@ -28,7 +28,7 @@ export default function ProductCard({ product, badge }) {
     };
 
     return (
-        <div
+        <button
             onClick={() => navigate(`/product/${product.id}`)}
             className="group cursor-pointer"
         >
@@ -72,7 +72,7 @@ export default function ProductCard({ product, badge }) {
                     </p>
                 </div>
             </div>
-        </div>
+        </button>
     );
 }
 

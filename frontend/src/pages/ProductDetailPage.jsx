@@ -16,6 +16,7 @@ export default function ProductDetailPage() {
                 const data = await productService.getById(id);
                 setProduct(data);
             } catch (err) {
+                console.error("Error al cargar el producto:", err);
                 toast.error("Producto no encontrado");
                 navigate('/catalog');
             } finally {
