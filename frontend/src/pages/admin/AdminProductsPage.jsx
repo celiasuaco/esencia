@@ -50,6 +50,7 @@ export default function AdminProductsPage() {
                         toast.success("Producto actualizado");
                         loadProducts();
                     } catch (err) {
+                        console.error(err);
                         toast.error("No se pudo desactivar el producto");
                     }
                 },

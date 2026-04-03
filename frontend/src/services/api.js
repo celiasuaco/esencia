@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: 'http://localhost:8000/api',
+  withCredentials: true,
 });
 
 // 1. Interceptor de SOLICITUD: Añadir el token a cada petición
@@ -26,27 +27,24 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh');
         
-        // Intentamos obtener un nuevo access token usando el refresh
-        const response = await axios.post('http://127.0.0.1:8000/api/token/refresh/', {
-          refresh: refreshToken,
-        });
+        const response = await axios.post('http://localhost:8000/api/token/refresh/', 
+          { refresh: refreshToken },
+          { withCredentials: true }
+        );
 
         const { access } = response.data;
 
         // Guardamos el nuevo access token
         localStorage.setItem('access', access);
 
-        // Actualizamos el header de la petición que falló originalmente
         originalRequest.headers.Authorization = `Bearer ${access}`;
 
-        // Reintentamos la petición original con el nuevo token
         return api(originalRequest);
         
       } catch (refreshError) {
-        // Si el refresco también falla, cerramos sesión
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
-        window.location.href = '/login'; // O redirige a tu ruta de login
+        globalThis.location.href = '/login';
         throw refreshError;
       }
     }
