@@ -13,6 +13,8 @@ import ResetPasswordConfirm from "./components/auth/ResetPasswordConfirm";
 import ProductListPage from "./pages/ProductListPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import { Toaster } from 'sonner';
 
 function App() {
@@ -59,6 +61,8 @@ function App() {
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route path="/admin/products/new" element={<ProductFormPage />} />
           <Route path="/admin/products/edit/:id" element={<ProductFormPage />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/orders/:id" element={<AdminOrderDetailPage />} />
         </Route>
 
         {/* Redirección de seguridad */}
