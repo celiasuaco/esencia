@@ -44,7 +44,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('access');
         localStorage.removeItem('refresh');
-        window.location.href = '/login';
+        globalThis.location.href = '/login';
         throw refreshError;
       }
     }

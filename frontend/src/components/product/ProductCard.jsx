@@ -27,7 +27,7 @@ export default function ProductCard({ product, badge }) {
     };
 
     return (
-        <div
+        <button
             onClick={() => navigate(`/product/${product.id}`)}
             className="group cursor-pointer w-full relative"
         >
@@ -89,7 +89,7 @@ export default function ProductCard({ product, badge }) {
                 <div className="absolute -top-1 -right-1 w-6 h-6 border-t-2 border-r-2 border-[#A86447] opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-tr-xl"></div>
                 <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-2 border-l-2 border-[#A86447] opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-bl-xl"></div>
             </div>
-        </div>
+        </button>
     );
 }
 
