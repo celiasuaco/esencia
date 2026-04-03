@@ -47,7 +47,6 @@ export default function AdminProductsPage() {
                 onClick: async () => {
                     try {
                         await productService.delete(id);
-                        toast.success("Producto actualizado");
                         loadProducts();
                     } catch (err) {
                         console.error(err);

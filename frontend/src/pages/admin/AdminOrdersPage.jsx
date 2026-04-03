@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { orderService } from '../../services/orderService';
 import OrderCard from '../../components/order/OrderCard';
 import { Search, Filter, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function AdminOrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -16,7 +15,6 @@ export default function AdminOrdersPage() {
             setOrders(data);
         } catch (err) {
             console.error(err);
-            toast.error("Error al cargar pedidos");
         } finally {
             setLoading(false);
         }
@@ -26,17 +24,6 @@ export default function AdminOrdersPage() {
         const timer = setTimeout(() => fetchOrders(), 500); // Debounce de búsqueda
         return () => clearTimeout(timer);
     }, [search]);
-
-    const handleStatusUpdate = async (orderId, newStatus) => {
-        try {
-            await orderService.updateStatus(orderId, newStatus);
-            toast.success(`Pedido #${orderId} actualizado a ${newStatus}`);
-            fetchOrders();
-        } catch (err) {
-            console.error(err);
-            toast.error("No se pudo actualizar el estado");
-        }
-    };
 
     return (
         <div className="min-h-screen bg-[#FDFBF9] pt-10 pb-20 px-6">

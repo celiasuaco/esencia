@@ -22,7 +22,7 @@ export default function OrderCard({ order, isAdmin = false }) {
     const navigate = useNavigate();
 
     return (
-        <div
+        <button
             onClick={() => navigate(`/admin/orders/${order.id}`)}
             className="group bg-white rounded-[2rem] border border-[#324339]/5 p-6 shadow-sm hover:shadow-xl hover:border-[#A86447]/30 transition-all duration-500 cursor-pointer relative overflow-hidden"
         >
@@ -68,7 +68,7 @@ export default function OrderCard({ order, isAdmin = false }) {
                     </div>
                 </div>
             </div>
-        </div>
+        </button>
     );
 }
 

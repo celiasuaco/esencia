@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
 import {
     ArrowLeft,
-    Package,
     MapPin,
     CreditCard,
     User,
@@ -13,9 +12,7 @@ import {
     Calendar,
     ShieldCheck,
     AlertCircle,
-    Hash
 } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function AdminOrderDetailPage() {
     const { id } = useParams();
@@ -49,7 +46,6 @@ export default function AdminOrderDetailPage() {
             const data = await orderService.getOrderDetails(id);
             setOrder(data);
         } catch {
-            toast.error('Archivo no encontrado');
             navigate('/admin/orders');
         } finally {
             setLoading(false);
@@ -60,10 +56,9 @@ export default function AdminOrderDetailPage() {
         setUpdatingStatus(status);
         try {
             await orderService.updateStatus(id, status);
-            toast.success('Registro actualizado');
             fetchOrder();
-        } catch {
-            toast.error('Error en la sincronización');
+        } catch (error) {
+            console.error('Error al actualizar el estado:', error);
         } finally {
             setUpdatingStatus(null);
         }
@@ -195,38 +190,44 @@ export default function AdminOrderDetailPage() {
                             {order.order_items.map((item) => (
                                 <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 group">
                                     <div className="flex items-center gap-8">
-                                        {/* FOTO DEL PRODUCTO */}
-                                        <div className="w-24 h-24 bg-[#FDFBF9] rounded-3xl border border-[#324339]/10 overflow-hidden flex-shrink-0 group-hover:border-[#A86447]/40 transition-colors duration-500 shadow-sm relative">
+
+                                        {/* FOTO DEL PRODUCTO - Ajuste Cover */}
+                                        <div className="w-24 h-24 bg-[#FDFBF9] rounded-3xl border border-[#324339]/10 overflow-hidden flex-shrink-0 group-hover:border-[#A86447]/40 transition-all duration-500 shadow-sm relative">
                                             <img
                                                 src={getPhotoUrl(item.product_photo)}
                                                 alt={item.product_name}
-                                                className="w-full h-full object-cover" // <-- CAMBIADO A object-cover
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 onError={(e) => {
                                                     e.target.onerror = null;
                                                     e.target.src = '/default-product.png';
                                                 }}
                                             />
-                                            {/* Overlay sutil para mejorar la integración visual */}
-                                            <div className="absolute inset-0 bg-[#324339]/5 mix-blend-multiply opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                            {/* Overlay sutil al pasar el ratón */}
+                                            <div className="absolute inset-0 bg-[#324339]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         </div>
 
-                                        <div className="space-y-2">
+                                        <div className="space-y-3">
                                             <p className="text-2xl font-serif italic text-[#324339] group-hover:text-[#A86447] transition-colors duration-500">
                                                 {item.product_name}
                                             </p>
                                             <div className="flex items-center gap-3">
-                                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#324339]/40 bg-[#FDFBF9] px-3 py-1 rounded-full border border-[#324339]/5">
+                                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#A86447] bg-[#A86447]/5 px-4 py-1.5 rounded-full border border-[#A86447]/10">
                                                     Cantidad: {item.quantity}
                                                 </span>
-                                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#324339]/30">
-                                                    × {Number(item.price_at_purchase).toFixed(2)} €
+                                                <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#324339]/40">
+                                                    <span className="text-[#324339]/20 font-sans mr-2">@</span>
+                                                    {Number(item.price_at_purchase).toFixed(2)} €
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="text-left sm:text-right border-l sm:border-l-0 sm:border-r border-[#324339]/5 pl-4 sm:pr-8">
-                                        <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-[#324339]/30 mb-1">Subtotal Pieza</p>
-                                        <p className="font-serif text-2xl text-[#324339]">{Number(item.subtotal).toFixed(2)} €</p>
+
+                                    {/* Subtotal resaltado con borde lateral */}
+                                    <div className="text-left sm:text-right border-l-2 sm:border-l-0 sm:border-r-2 border-[#A86447]/20 pl-4 sm:pr-8 py-1">
+                                        <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-[#324339]/30 mb-1 italic">Subtotal Pieza</p>
+                                        <p className="font-serif text-3xl text-[#324339] tracking-tighter">
+                                            {Number(item.subtotal).toFixed(2)} <span className="text-lg ml-1 text-[#A86447]">€</span>
+                                        </p>
                                     </div>
                                 </div>
                             ))}
