@@ -23,6 +23,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from order import urls as order_urls
 from product import urls as product_urls
 
 urlpatterns = [
@@ -31,6 +32,7 @@ urlpatterns = [
     path("api/dashboard/", include(dashboard_urls)),
     path("api/products/", include(product_urls)),
     path("api/cart/", include(checkout_urls)),
+    path("api/orders/", include(order_urls)),
     path("api/", ShowcaseView.as_view(), name="showcase-products"),
 ]
 
