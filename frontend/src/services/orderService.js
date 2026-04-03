@@ -4,13 +4,13 @@ import api from './api';
 export const orderService = {
     // Para Clientes: Crear pedido desde el carrito
     createOrder: async (address) => {
-        const response = await api.post('/orders/', { address });
+        const response = await api.post('/orders', { address });
         return response.data;
     },
 
     // Para Clientes: Ver mis pedidos
     getMyOrders: async () => {
-        const response = await api.get('/orders/');
+        const response = await api.get('/orders');
         return response.data;
     },
 

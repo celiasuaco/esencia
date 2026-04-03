@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
+import { authService } from '../../services/authService'; // Importamos para verificar el rol
 import {
     ArrowLeft,
+    Package,
     MapPin,
     CreditCard,
     User,
@@ -13,6 +15,7 @@ import {
     ShieldCheck,
     AlertCircle,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminOrderDetailPage() {
     const { id } = useParams();
@@ -22,15 +25,19 @@ export default function AdminOrderDetailPage() {
     const [loading, setLoading] = useState(true);
     const [updatingStatus, setUpdatingStatus] = useState(null);
 
+    // Obtenemos el usuario actual para verificar permisos
+    const currentUser = authService.getCurrentUser();
+    const isAdmin = currentUser?.role === 'ADMIN';
+
     const STATUS_FLOW = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED'];
     const STATUS_LABELS = {
         'PENDING': 'Pendiente',
         'PAID': 'Pagado',
         'SHIPPED': 'Enviado',
-        'DELIVERED': 'Entregado'
+        'DELIVERED': 'Entregado',
+        'CANCELLED': 'Anulado'
     };
 
-    // URL Base para las imágenes (ajusta según tu config de Django)
     const API_BASE_URL = 'http://localhost:8000';
 
     const getPhotoUrl = (photoPath) => {
@@ -46,19 +53,22 @@ export default function AdminOrderDetailPage() {
             const data = await orderService.getOrderDetails(id);
             setOrder(data);
         } catch {
-            navigate('/admin/orders');
+            toast.error('Pedido no encontrado');
+            navigate(isAdmin ? '/admin/orders' : '/profile');
         } finally {
             setLoading(false);
         }
     };
 
     const handleStatusUpdate = async (status) => {
+        if (!isAdmin) return; // Doble validación de seguridad
         setUpdatingStatus(status);
         try {
             await orderService.updateStatus(id, status);
+            toast.success('Estado actualizado correctamente');
             fetchOrder();
         } catch (error) {
-            console.error('Error al actualizar el estado:', error);
+            toast.error('Error al actualizar el registro');
         } finally {
             setUpdatingStatus(null);
         }
@@ -83,16 +93,16 @@ export default function AdminOrderDetailPage() {
                 <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                     <div className="space-y-4">
                         <button
-                            onClick={() => navigate('/admin/orders')}
+                            onClick={() => navigate(-1)} // Regresa a la página anterior (funciona para ambos roles)
                             className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] font-bold text-[#324339]/40 hover:text-[#A86447] transition-all group"
                         >
                             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                            Volver al índice
+                            Regresar
                         </button>
                         <div className="space-y-1">
-                            <span className="text-[10px] uppercase tracking-[0.4em] text-[#A86447] font-bold">Registro de Venta</span>
+                            <span className="text-[10px] uppercase tracking-[0.4em] text-[#A86447] font-bold">Certificado de Orden</span>
                             <h1 className="text-5xl font-serif italic leading-none tracking-tighter">
-                                Order #{order.tracking_code}
+                                #{order.tracking_code}
                             </h1>
                         </div>
                     </div>
@@ -102,25 +112,29 @@ export default function AdminOrderDetailPage() {
                     </div>
                 </header>
 
-                {/* 2. PROGRESS FLOW (Mantenido intacto por petición) */}
+                {/* 2. PROGRESS FLOW (Condicionado por Rol) */}
                 <div className="px-4 py-8 bg-white rounded-[2rem] border border-[#324339]/5 shadow-sm">
                     <div className="flex items-center justify-between relative max-w-4xl mx-auto">
                         <div className="absolute top-[15px] left-0 w-full h-[1px] bg-[#324339]/5 -z-0" />
                         {STATUS_FLOW.map((status, i) => {
                             const isCompleted = i < currentIndex;
                             const isCurrent = i === currentIndex;
+
+                            // Si es ADMIN, es un botón. Si es CLIENT, es un DIV (estático)
+                            const Element = isAdmin ? 'button' : 'div';
+
                             return (
                                 <div key={status} className="flex-1 flex items-center relative z-10">
                                     <div className="flex flex-col items-center w-full group">
-                                        <button
-                                            onClick={() => handleStatusUpdate(status)}
-                                            disabled={isCurrent || updatingStatus}
-                                            className={`w-8 h-8 rounded-full mb-4 flex items-center justify-center transition-all duration-500 border shadow-sm ${isCurrent
-                                                ? 'bg-[#A86447] border-[#A86447] text-white scale-110 shadow-[#A86447]/20'
-                                                : isCompleted
-                                                    ? 'bg-[#324339] border-[#324339] text-white'
-                                                    : 'bg-white border-[#324339]/10 text-[#324339]/20 hover:border-[#A86447]/40'
-                                                }`}
+                                        <Element
+                                            onClick={isAdmin ? () => handleStatusUpdate(status) : undefined}
+                                            className={`w-8 h-8 rounded-full mb-4 flex items-center justify-center transition-all duration-500 border shadow-sm ${isAdmin ? 'cursor-pointer' : 'cursor-default'
+                                                } ${isCurrent
+                                                    ? 'bg-[#A86447] border-[#A86447] text-white scale-110 shadow-[#A86447]/20'
+                                                    : isCompleted
+                                                        ? 'bg-[#324339] border-[#324339] text-white'
+                                                        : 'bg-white border-[#324339]/10 text-[#324339]/20'
+                                                } ${isAdmin && !isCurrent ? 'hover:border-[#A86447]/40' : ''}`}
                                         >
                                             {updatingStatus === status ? (
                                                 <Loader2 size={14} className="animate-spin" />
@@ -129,7 +143,7 @@ export default function AdminOrderDetailPage() {
                                             ) : (
                                                 <Circle size={12} strokeWidth={isCurrent ? 3 : 1} />
                                             )}
-                                        </button>
+                                        </Element>
                                         <span className={`text-[9px] uppercase tracking-[0.2em] font-bold transition-colors ${isCurrent ? 'text-[#A86447]' : isCompleted ? 'text-[#324339]' : 'text-[#324339]/30'
                                             }`}>
                                             {STATUS_LABELS[status]}
@@ -144,54 +158,54 @@ export default function AdminOrderDetailPage() {
                             );
                         })}
                     </div>
+                    {!isAdmin && (
+                        <p className="text-center text-[8px] uppercase tracking-[0.3em] text-[#324339]/20 mt-6">
+                            El estado es gestionado por el equipo de Esencia Archive
+                        </p>
+                    )}
                 </div>
 
                 {/* 3. PANEL UNIFICADO: DATOS + PRODUCTOS */}
                 <div className="bg-white border border-[#324339]/10 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col">
-
-                    {/* Sección A: Datos de envío y pago (Horizontal) */}
                     <div className="grid grid-cols-1 md:grid-cols-3 border-b border-[#324339]/5 bg-[#324339]/[0.02]">
                         <div className="p-8 border-r border-[#324339]/5 space-y-3">
                             <div className="flex items-center gap-3 text-[#A86447]">
                                 <User size={14} />
-                                <span className="text-[9px] uppercase tracking-[0.3em] font-bold">Cliente</span>
+                                <span className="text-[9px] uppercase tracking-[0.3em] font-bold">Titular</span>
                             </div>
                             <p className="font-serif italic text-lg leading-tight break-all">{order.user_email}</p>
                         </div>
                         <div className="p-8 border-r border-[#324339]/5 space-y-3">
                             <div className="flex items-center gap-3 text-[#A86447]">
                                 <MapPin size={14} />
-                                <span className="text-[9px] uppercase tracking-[0.3em] font-bold">Dirección</span>
+                                <span className="text-[9px] uppercase tracking-[0.3em] font-bold">Destino</span>
                             </div>
                             <p className="text-sm text-[#324339]/70 leading-relaxed italic">{order.address}</p>
                         </div>
                         <div className="p-8 space-y-3">
                             <div className="flex items-center gap-3 text-[#A86447]">
                                 <CreditCard size={14} />
-                                <span className="text-[9px] uppercase tracking-[0.3em] font-bold">Estado de Cobro</span>
+                                <span className="text-[9px] uppercase tracking-[0.3em] font-bold">Pago</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className={`h-2 w-2 rounded-full ${order.is_paid ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
                                 <p className={`text-[10px] uppercase font-bold tracking-widest ${order.is_paid ? 'text-emerald-600' : 'text-amber-600'}`}>
-                                    {order.is_paid ? 'Transacción Verificada' : 'Esperando Fondos'}
+                                    {order.is_paid ? 'Confirmado' : 'Pendiente'}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Sección B: Manifiesto con Fotos */}
                     <div className="p-8 sm:p-12 space-y-10">
                         <div className="flex items-center gap-4 border-b border-[#324339]/5 pb-6">
                             <ShieldCheck size={20} className="text-[#A86447]" />
-                            <h2 className="font-serif text-2xl italic text-[#324339]">Detalle de Artículos Certificados</h2>
+                            <h2 className="font-serif text-2xl italic text-[#324339]">Detalle de Artículos</h2>
                         </div>
 
                         <div className="space-y-12">
                             {order.order_items.map((item) => (
                                 <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 group">
                                     <div className="flex items-center gap-8">
-
-                                        {/* FOTO DEL PRODUCTO - Ajuste Cover */}
                                         <div className="w-24 h-24 bg-[#FDFBF9] rounded-3xl border border-[#324339]/10 overflow-hidden flex-shrink-0 group-hover:border-[#A86447]/40 transition-all duration-500 shadow-sm relative">
                                             <img
                                                 src={getPhotoUrl(item.product_photo)}
@@ -202,7 +216,6 @@ export default function AdminOrderDetailPage() {
                                                     e.target.src = '/default-product.png';
                                                 }}
                                             />
-                                            {/* Overlay sutil al pasar el ratón */}
                                             <div className="absolute inset-0 bg-[#324339]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         </div>
 
@@ -212,7 +225,7 @@ export default function AdminOrderDetailPage() {
                                             </p>
                                             <div className="flex items-center gap-3">
                                                 <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#A86447] bg-[#A86447]/5 px-4 py-1.5 rounded-full border border-[#A86447]/10">
-                                                    Cantidad: {item.quantity}
+                                                    Cant: {item.quantity}
                                                 </span>
                                                 <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#324339]/40">
                                                     <span className="text-[#324339]/20 font-sans mr-2">@</span>
@@ -222,9 +235,8 @@ export default function AdminOrderDetailPage() {
                                         </div>
                                     </div>
 
-                                    {/* Subtotal resaltado con borde lateral */}
                                     <div className="text-left sm:text-right border-l-2 sm:border-l-0 sm:border-r-2 border-[#A86447]/20 pl-4 sm:pr-8 py-1">
-                                        <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-[#324339]/30 mb-1 italic">Subtotal Pieza</p>
+                                        <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-[#324339]/30 mb-1 italic">Subtotal</p>
                                         <p className="font-serif text-3xl text-[#324339] tracking-tighter">
                                             {Number(item.subtotal).toFixed(2)} <span className="text-lg ml-1 text-[#A86447]">€</span>
                                         </p>
@@ -234,10 +246,8 @@ export default function AdminOrderDetailPage() {
                         </div>
                     </div>
 
-                    {/* Sección C: Totales (Fondo Verde Esencia) */}
                     <div className="bg-[#324339] p-8 sm:p-12 text-white relative">
                         <div className="absolute top-0 right-12 w-32 h-1 bg-[#A86447]" />
-
                         <div className="max-w-md ml-auto space-y-4">
                             <div className="flex justify-between text-white/40 text-[10px] uppercase tracking-[0.3em] font-bold">
                                 <span>Suma de Colección</span>
@@ -247,7 +257,6 @@ export default function AdminOrderDetailPage() {
                                 <span>Logística de Envío</span>
                                 <span>{Number(order.shipping_amount).toFixed(2)} €</span>
                             </div>
-
                             <div className="flex justify-between items-end pt-4">
                                 <div className="space-y-1">
                                     <span className="font-serif text-3xl italic text-white leading-none">Inversión Final</span>
@@ -261,8 +270,8 @@ export default function AdminOrderDetailPage() {
                     </div>
                 </div>
 
-                {/* BOTÓN DE CANCELACIÓN (Fuera del panel principal para evitar errores) */}
-                {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                {/* 4. BOTÓN DE CANCELACIÓN (Solo Visible para ADMIN) */}
+                {isAdmin && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
                     <div className="flex justify-center pt-4">
                         <button
                             onClick={() => handleStatusUpdate('CANCELLED')}

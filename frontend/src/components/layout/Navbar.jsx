@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import Footer from './Footer';
-import { ShoppingBag, User } from 'lucide-react'; // Importamos User de lucide
+import { ShoppingBag, User, Package } from 'lucide-react'; // Añadimos Package
 
 const Navbar = () => {
     const isAuthenticated = authService.isAuthenticated();
@@ -28,8 +28,19 @@ const Navbar = () => {
                     </Link>
                 </div>
 
-                {/* LADO DERECHO: Iconos de Carrito y Usuario */}
+                {/* LADO DERECHO: Iconos */}
                 <div className="flex-1 flex justify-end items-center gap-2">
+
+                    {/* Pedidos (Nuevo: Solo si está autenticado) */}
+                    {isAuthenticated && (
+                        <Link to={user?.role === 'CLIENT' ? "/orders" : "/profile"} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
+                            <Package
+                                size={20}
+                                strokeWidth={1.5}
+                                className="text-[#324339] group-hover:text-[#D48A66] group-hover:scale-110 transition-all duration-300"
+                            />
+                        </Link>
+                    )}
 
                     {/* Carrito */}
                     <Link to="/cart" className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
@@ -40,7 +51,7 @@ const Navbar = () => {
                         />
                     </Link>
 
-                    {/* Perfil (Re-añadido y corregido) */}
+                    {/* Perfil */}
                     <Link to={getProfilePath()} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
                         <User
                             size={22}
