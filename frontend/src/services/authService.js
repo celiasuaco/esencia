@@ -122,6 +122,19 @@ export const authService = {
     }
   },
 
+  getProfile: async () => {
+    try {
+      const response = await api.get('/auth/profile/'); // Ajusta a tu endpoint real de perfil
+      
+      if (response.data) {
+        authService.updateLocalUser(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      throw getErrorMessage(error.response?.data) || "Error al obtener perfil";
+    }
+  },
+
   getAccessToken: () => localStorage.getItem('access'),
   
   isAuthenticated: () => !!localStorage.getItem('access'),

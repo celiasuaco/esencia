@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
-import { User, LogOut, Edit, Mail } from 'lucide-react';
+import { User, LogOut, Edit, Mail, Package, Loader2 } from 'lucide-react';
 import { authService } from '../../services/authService';
 import EditProfileForm from '../../components/auth/EditProfileForm';
+// CORRECCIÓN: Importación correcta con llaves
+import { useNavigate } from 'react-router-dom';
 
 export default function ProfilePage() {
+    const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState('data');
     const [isEditing, setIsEditing] = useState(false);
     const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(true);
 
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return null;
@@ -17,14 +21,30 @@ export default function ProfilePage() {
         return `${baseUrl}${normalizedPath}`;
     };
 
-    const fetchUserData = () => {
-        const currentUser = authService.getCurrentUser();
-        if (currentUser) setUser(currentUser);
+    const fetchUserData = async () => {
+        setLoading(true);
+        try {
+            // Sincronizamos con el servidor para tener el rol actualizado
+            const freshUser = await authService.getProfile();
+            setUser(freshUser);
+        } catch (error) {
+            console.error("Error cargando perfil:", error);
+            const localUser = authService.getCurrentUser();
+            if (localUser) setUser(localUser);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
         fetchUserData();
     }, []);
+
+    if (loading) return (
+        <div className="h-screen flex items-center justify-center bg-[#FDFBF9]">
+            <Loader2 className="animate-spin text-[#A86447]" size={40} />
+        </div>
+    );
 
     if (!user) return null;
 
@@ -39,8 +59,8 @@ export default function ProfilePage() {
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-3xl shadow-xl p-8 border border-[#5B7B63]/10">
                             <div className="text-center mb-8">
-                                <div className="w-28 h-28 bg-gradient-to-br from-[#C77C5D] to-[#A86447] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-4xl text-white font-serif overflow-hidden relative">
-                                    <span className="absolute z-0">{user.full_name.charAt(0).toUpperCase()}</span>
+                                <div className="w-28 h-28 bg-gradient-to-br from-[#C77C5D] to-[#A86447] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-4xl text-white font-serif overflow-hidden relative border-4 border-white">
+                                    <span className="absolute z-0">{user.full_name?.charAt(0).toUpperCase()}</span>
                                     {user.photo && (
                                         <img
                                             src={photoUrl}
@@ -51,18 +71,29 @@ export default function ProfilePage() {
                                     )}
                                 </div>
                                 <h2 className="text-xl font-serif text-[#2C3632]">{user.full_name}</h2>
-                                <p className="text-sm text-[#6B7F72] mt-1 break-all">{user.email}</p>
+                                <p className="text-xs text-[#6B7F72] mt-1 uppercase tracking-widest opacity-60">{user.role}</p>
                             </div>
 
                             <nav className="space-y-2">
                                 <button
                                     onClick={() => { setActiveTab('data'); setIsEditing(false); }}
-                                    className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl transition-all ${activeTab === 'data' ? 'bg-gradient-to-r from-[#5B7B63] to-[#3D5742] text-white shadow-lg' : 'text-[#6B7F72] hover:bg-[#F5F1ED]'}`}
+                                    className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl transition-all ${activeTab === 'data' ? 'bg-[#324339] text-white shadow-lg' : 'text-[#6B7F72] hover:bg-[#F5F1ED]'}`}
                                 >
                                     <User className="w-5 h-5" />
                                     <span className="font-medium">Mis Datos</span>
                                 </button>
-                                <button onClick={() => authService.logout()} className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-[#6B7F72] hover:bg-red-50 hover:text-red-600 transition-all">
+
+                                {user.role === 'CLIENT' && (
+                                    <button
+                                        onClick={() => navigate('/orders')}
+                                        className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-[#6B7F72] hover:bg-[#F5F1ED] transition-all"
+                                    >
+                                        <Package className="w-5 h-5" />
+                                        <span className="font-medium">Mis Pedidos</span>
+                                    </button>
+                                )}
+
+                                <button onClick={() => authService.logout()} className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-red-500 hover:bg-red-50 transition-all mt-6 pt-6 border-t border-gray-100">
                                     <LogOut className="w-5 h-5" />
                                     <span className="font-medium">Cerrar Sesión</span>
                                 </button>
@@ -71,7 +102,7 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="lg:col-span-3">
-                        <div className="bg-white rounded-3xl shadow-xl p-10 border border-[#5B7B63]/10 h-full">
+                        <div className="bg-white rounded-3xl shadow-xl p-10 border border-[#5B7B63]/10 h-full min-h-[400px]">
                             {isEditing ? (
                                 <div>
                                     <h2 className="text-2xl font-serif text-[#2C3632] mb-8">Editar Perfil</h2>
@@ -80,9 +111,7 @@ export default function ProfilePage() {
                                         onCancel={() => setIsEditing(false)}
                                         onUpdateSuccess={(msg) => {
                                             setSuccess(msg);
-                                            // IMPORTANTE: Refrescar el usuario tras el cambio
-                                            const freshUser = authService.getCurrentUser();
-                                            setUser(freshUser);
+                                            fetchUserData();
                                             setIsEditing(false);
                                         }}
                                     />
@@ -99,26 +128,15 @@ export default function ProfilePage() {
                                             <span>Editar</span>
                                         </button>
                                     </div>
-
                                     {success && <p className="mb-6 p-4 bg-green-50 text-green-700 rounded-2xl text-center border border-green-100">{success}</p>}
-
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-8 py-10">
-                                        <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-2">
-                                            <label className="flex items-center gap-2 text-sm text-[#6B7F72] font-medium">
-                                                <User className="w-4 h-4" /> Nombre completo
-                                            </label>
-                                            <p className="text-[#2C3632] text-xl font-serif border-b-2 border-[#F5F1ED] pb-1 w-full md:w-auto">
-                                                {user.full_name}
-                                            </p>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center gap-2 text-sm text-[#6B7F72] font-medium"><User size={16} /> Nombre completo</label>
+                                            <p className="text-[#2C3632] text-xl font-serif border-b-2 border-[#F5F1ED] pb-1">{user.full_name}</p>
                                         </div>
-
-                                        <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-2">
-                                            <label className="flex items-center gap-2 text-sm text-[#6B7F72] font-medium">
-                                                <Mail className="w-4 h-4" /> Correo Electrónico
-                                            </label>
-                                            <p className="text-[#2C3632] text-xl font-serif border-b-2 border-[#F5F1ED] pb-1 w-full md:w-auto">
-                                                {user.email}
-                                            </p>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center gap-2 text-sm text-[#6B7F72] font-medium"><Mail size={16} /> Correo Electrónico</label>
+                                            <p className="text-[#2C3632] text-xl font-serif border-b-2 border-[#F5F1ED] pb-1">{user.email}</p>
                                         </div>
                                     </div>
                                 </div>

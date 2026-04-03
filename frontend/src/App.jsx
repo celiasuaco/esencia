@@ -15,6 +15,7 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
 import { Toaster } from 'sonner';
 
 function App() {
@@ -48,6 +49,8 @@ function App() {
             path="/profile"
             element={user && !isAdmin ? <ProfilePage /> : <Navigate to="/login" />}
           />
+          <Route path="/orders" element={user && !isAdmin ? <MyOrdersPage /> : <Navigate to="/login" />} />
+          <Route path="/orders/:id" element={user && !isAdmin ? <AdminOrderDetailPage /> : <Navigate to="/login" />} />
         </Route>
 
         {/* GRUPO 2: ADMINISTRADORES (Con Sidebar lateral) */}
