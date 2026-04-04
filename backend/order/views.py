@@ -19,13 +19,36 @@ class OrderViewSet(viewsets.ModelViewSet):
         if not user.is_staff:
             return queryset.filter(user=user)
 
-        # Filtros para Admin
+        # Capturamos filtros
         email = self.request.query_params.get("email")
         tracking = self.request.query_params.get("tracking")
+        status_filter = self.request.query_params.get("status")
+        date_from = self.request.query_params.get("date_from")
+        date_to = self.request.query_params.get("date_to")
+        price_min = self.request.query_params.get("price_min")
+        price_max = self.request.query_params.get("price_max")
+
         if email:
             queryset = queryset.filter(user__email__icontains=email)
         if tracking:
             queryset = queryset.filter(tracking_code__iexact=tracking)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+
+        # Filtros de fecha (Aseguramos que no sea string vacío '')
+        if date_from and date_from.strip():
+            queryset = queryset.filter(placed_at__date__gte=date_from)
+        if date_to and date_to.strip():
+            queryset = queryset.filter(placed_at__date__lte=date_to)
+
+        # Filtros de precio (Clave: Convertir a número y evitar strings vacíos)
+        try:
+            if price_min and price_min.strip():
+                queryset = queryset.filter(total_amount__gte=float(price_min))
+            if price_max and price_max.strip():
+                queryset = queryset.filter(total_amount__lte=float(price_max))
+        except ValueError:
+            pass
 
         return queryset
 
