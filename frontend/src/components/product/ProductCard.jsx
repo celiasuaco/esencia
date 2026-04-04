@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { cartService } from '../../services/cartService';
-import { toast } from 'sonner';
 import { ShoppingBag, Eye } from 'lucide-react';
 
 export default function ProductCard({ product, badge }) {
@@ -22,7 +21,6 @@ export default function ProductCard({ product, badge }) {
             await cartService.addToCart(product.id, 1);
         } catch (err) {
             console.error("Error al añadir al carrito:", err);
-            toast.error("No se pudo añadir el producto");
         }
     };
 

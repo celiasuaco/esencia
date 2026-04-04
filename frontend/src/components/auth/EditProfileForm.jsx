@@ -34,7 +34,6 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
         try {
             const updatedUser = await authService.updateProfile(formData);
             authService.updateLocalUser(updatedUser);
-            toast.success("Perfil actualizado");
             onUpdateSuccess();
         } catch (err) {
             toast.error(err);

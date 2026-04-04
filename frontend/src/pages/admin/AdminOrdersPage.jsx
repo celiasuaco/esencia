@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { orderService } from '../../services/orderService';
 import OrderCard from '../../components/order/OrderCard';
 import { Search, Filter, Loader2, Calendar, Euro, X, Mail, ChevronDown } from 'lucide-react';
-import { toast } from 'sonner';
 
 const INITIAL_FILTERS = {
     email: '',
@@ -25,7 +24,6 @@ export default function AdminOrdersPage() {
             const data = await orderService.getAllOrders(search);
             setOrders(data);
         } catch (err) {
-            toast.error("Error al sincronizar el historial");
             console.error("Fetch error:", err);
         } finally {
             setLoading(false);

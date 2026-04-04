@@ -9,10 +9,6 @@ const RegisterForm = ({ onSwitchForm }) => {
         e.preventDefault();
         try {
             await authService.register(formData);
-            // 2. Éxito con Toast
-            toast.success("¡Cuenta creada con éxito!", {
-                description: "Ya puedes acceder a tu cuenta exclusiva."
-            });
             onSwitchForm();
         } catch (err) {
             toast.error(err);

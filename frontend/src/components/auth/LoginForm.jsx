@@ -13,7 +13,6 @@ const LoginForm = ({ onSwitchForm }) => {
         e.preventDefault();
         try {
             const data = await authService.login(email, password);
-            toast.success(`Bienvenido de nuevo, ${data.user.full_name}`); // Notificación de éxito
 
             if (data.user.role === 'ADMIN') {
                 window.location.href = '/dashboard';
