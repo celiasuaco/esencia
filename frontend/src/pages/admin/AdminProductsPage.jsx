@@ -34,7 +34,7 @@ export default function AdminProductsPage() {
             setProducts(data);
             setFilteredProducts(data);
         } catch (err) {
-            toast.error("Error al cargar el inventario", { description: err });
+            console.error(err);
         }
     };
 

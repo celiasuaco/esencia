@@ -77,14 +77,12 @@ export default function ProductFormPage() {
         try {
             if (id) {
                 await productService.update(id, data);
-                toast.success("Producto actualizado correctamente");
             } else {
                 await productService.create(data);
-                toast.success("Producto creado exitosamente");
             }
             navigate('/admin/products');
         } catch (err) {
-            toast.error("Error al guardar los cambios", { description: err });
+            console.error("Error al guardar el producto:", err);
         } finally {
             setLoading(false);
         }

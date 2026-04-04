@@ -16,7 +16,6 @@ export default function ResetPasswordConfirm() {
         setLoading(true);
         try {
             await authService.confirmPasswordReset(uid, token, password);
-            toast.success("Contraseña actualizada con éxito"); // Reemplaza alert
             navigate('/login');
         } catch (err) {
             toast.error(err); // Reemplaza alert

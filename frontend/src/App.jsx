@@ -16,6 +16,7 @@ import CartPage from "./pages/CartPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
+import AdminUserListPage from "./pages/admin/AdminUserListPage";
 import { Toaster } from 'sonner';
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
           <Route path="/admin/products/edit/:id" element={<ProductFormPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />
           <Route path="/admin/orders/:id" element={<AdminOrderDetailPage />} />
+          <Route path="/admin/users" element={<AdminUserListPage />} />
         </Route>
 
         {/* Redirección de seguridad */}

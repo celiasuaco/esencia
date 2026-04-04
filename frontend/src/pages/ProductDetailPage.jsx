@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { productService } from '../services/productService';
-import { cartService } from '../services/cartService'; // Importar el servicio del carrito
+import { cartService } from '../services/cartService';
 import { ArrowLeft, ShoppingBag, ShieldCheck, Sparkles } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
@@ -28,7 +27,6 @@ export default function ProductDetailPage() {
                 setProduct(data);
             } catch (err) {
                 console.error("Error al cargar el producto:", err);
-                toast.error("Producto no encontrado");
                 navigate('/catalog');
             } finally {
                 setLoading(false);
@@ -44,7 +42,6 @@ export default function ProductDetailPage() {
             await cartService.addToCart(product.id, 1);
         } catch (err) {
             console.error("Error al añadir al carrito:", err);
-            toast.error("No se pudo añadir el producto");
         }
     };
 

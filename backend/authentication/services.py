@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Count, DecimalField, Sum, Value
+from django.db.models.functions import Coalesce
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.html import strip_tags
@@ -69,3 +71,20 @@ def send_password_reset_email(user):
     except Exception as e:
         logger.error(f"Error enviando correo a {user.email}: {str(e)}")
         raise e
+
+
+def get_users_with_order_stats():
+    """
+    Retorna clientes con conteo de pedidos y volumen total de gasto
+    Ordenados de mayor a menor inversión [ES-21].
+    """
+    return (
+        User.objects.filter(role=User.Role.CLIENT)
+        .annotate(
+            orders_count=Count("orders", distinct=True),
+            total_spent=Coalesce(
+                Sum("orders__total_amount"), Value(0), output_field=DecimalField()
+            ),
+        )
+        .order_by("-total_spent", "-orders_count")  # De mayor a menor inversión
+    )

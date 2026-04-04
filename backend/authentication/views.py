@@ -3,20 +3,22 @@ import logging
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
-from rest_framework import response, status, views
+from rest_framework import generics, response, status, views
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
+from .permissions import IsAdminRole
 from .serializers import (
     LoginSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
     RegisterSerializer,
+    UserAdminStatsSerializer,
     UserSerializer,
 )
-from .services import create_user, send_password_reset_email
+from .services import create_user, get_users_with_order_stats, send_password_reset_email
 
 logger = logging.getLogger("authentication")
 
@@ -160,3 +162,13 @@ class PasswordResetConfirmView(views.APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminUserStatsListView(generics.ListAPIView):
+    """Vista administrativa para análisis de base de clientes."""
+
+    serializer_class = UserAdminStatsSerializer
+    permission_classes = [IsAdminRole]
+
+    def get_queryset(self):
+        return get_users_with_order_stats()

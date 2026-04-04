@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { productService } from '../services/productService';
 import ProductCard from '../components/product/ProductCard';
-import { toast } from 'sonner';
 
 const CATEGORIES = [
     { id: 'ALL', label: 'Colección Completa' },
@@ -21,8 +20,8 @@ export default function ProductListPage() {
             try {
                 const data = await productService.getAll();
                 setProducts(data);
-            } catch {
-                toast.error("No se pudo cargar el catálogo");
+            } catch (error) {
+                console.error(error);
             } finally {
                 setLoading(false);
             }

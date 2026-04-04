@@ -26,7 +26,6 @@ export default function CartPage() {
             setCart(data);
         } catch (err) {
             console.error("Error al cargar el carrito:", err);
-            toast.error("Error al cargar el carrito");
         } finally {
             setLoading(false);
         }
@@ -44,7 +43,6 @@ export default function CartPage() {
             loadCart();
         } catch (err) {
             console.error("Error al actualizar cantidad:", err);
-            toast.error("Stock insuficiente o error al actualizar");
         }
     };
 
@@ -52,11 +50,9 @@ export default function CartPage() {
         const idToRemove = isAuthenticated ? item.id : item.product;
         try {
             await cartService.removeItem(idToRemove);
-            toast.success("Bolsa actualizada");
             loadCart();
         } catch (err) {
             console.error("Error al eliminar el producto:", err);
-            toast.error("Error al eliminar");
         }
     };
 

@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
-import { authService } from '../../services/authService'; // Importamos para verificar el rol
+import { authService } from '../../services/authService';
 import {
     ArrowLeft,
-    Package,
     MapPin,
     CreditCard,
     User,
@@ -15,7 +14,6 @@ import {
     ShieldCheck,
     AlertCircle,
 } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function AdminOrderDetailPage() {
     const { id } = useParams();
@@ -52,8 +50,8 @@ export default function AdminOrderDetailPage() {
         try {
             const data = await orderService.getOrderDetails(id);
             setOrder(data);
-        } catch {
-            toast.error('Pedido no encontrado');
+        } catch (error) {
+            console.error("Error al cargar el detalle del pedido:", error);
             navigate(isAdmin ? '/admin/orders' : '/profile');
         } finally {
             setLoading(false);
@@ -65,10 +63,9 @@ export default function AdminOrderDetailPage() {
         setUpdatingStatus(status);
         try {
             await orderService.updateStatus(id, status);
-            toast.success('Estado actualizado correctamente');
             fetchOrder();
         } catch (error) {
-            toast.error('Error al actualizar el registro');
+            console.error("Error al actualizar el estado del pedido:", error);
         } finally {
             setUpdatingStatus(null);
         }
