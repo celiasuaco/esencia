@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ExternalLink, LogOut, User, Package, Store } from 'lucide-react';
+import { LayoutDashboard, ExternalLink, LogOut, User, Package, Store, Users } from 'lucide-react';
 import { authService } from '../../services/authService';
 
 export default function AdminLayout() {
@@ -9,6 +9,7 @@ export default function AdminLayout() {
         { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/admin/products', icon: Store, label: 'Productos' },
         { path: '/admin/orders', icon: Package, label: 'Pedidos' },
+        { path: '/admin/users', icon: Users, label: 'Clientes' },
     ];
 
     return (

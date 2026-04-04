@@ -92,3 +92,23 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
                 "La contraseña debe contener un número y una mayúscula."
             )
         return value
+
+
+class UserAdminStatsSerializer(serializers.ModelSerializer):
+    orders_count = serializers.IntegerField(read_only=True)
+    total_spent = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True, default=0
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "full_name",
+            "date_joined",
+            "role",
+            "orders_count",
+            "total_spent",
+            "photo",
+        ]

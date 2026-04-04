@@ -4,6 +4,7 @@ import pytest
 from django.contrib.auth.tokens import default_token_generator
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -284,3 +285,32 @@ class TestPasswordReset:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         # El error viene de la validación del serializer que definiste
         assert "new_password" in response.data
+
+
+class UserStatsAdminTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.admin_user = User.objects.create_user(
+            email="admin@esencia.com",
+            password="Pass1234",
+            role=User.Role.ADMIN,
+            is_staff=True,
+            username="admin",
+        )
+        self.client_user = User.objects.create_user(
+            email="client@test.com",
+            password="Pass1234",
+            role=User.Role.CLIENT,
+            username="client",
+        )
+        self.url = reverse("admin-users")
+
+    def test_admin_can_access_stats(self):
+        self.client.force_authenticate(user=self.admin_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_client_cannot_access_stats(self):
+        self.client.force_authenticate(user=self.client_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

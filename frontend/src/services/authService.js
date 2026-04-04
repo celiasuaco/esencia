@@ -135,6 +135,16 @@ export const authService = {
     }
   },
 
+  // Obtener estadísticas de clientes para administración
+  getUsersStats: async () => {
+    try {
+      const response = await api.get('/auth/admin/users/');
+      return response.data;
+    } catch (error) {
+      throw getErrorMessage(error.response?.data) || "Error al obtener estadísticas de clientes";
+    }
+  },
+
   getAccessToken: () => localStorage.getItem('access'),
   
   isAuthenticated: () => !!localStorage.getItem('access'),
