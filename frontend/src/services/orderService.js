@@ -16,12 +16,15 @@ export const orderService = {
 
     // Para Admin: Ver todos los pedidos con filtros (tracking o email)
     getAllOrders: async (filters = {}) => {
-        const params = new URLSearchParams();
-        if (filters.email) params.append('email', filters.email);
-        if (filters.tracking) params.append('tracking', filters.tracking);
-        
-        const response = await api.get(`/orders/?${params.toString()}`);
-        return response.data;
+        try {
+            const response = await api.get('/orders/', { 
+                params: filters 
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error en orderService.getAllOrders:", error);
+            throw error;
+        }
     },
 
     // Para Admin: Cambiar estado (Trigger automático de is_paid en backend)
