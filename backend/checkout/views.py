@@ -7,19 +7,14 @@ from .services import CartService
 
 
 class CartDetailView(APIView):
-    # Permitimos acceso a anónimos para que vean su carrito de sesión
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         if request.user.is_authenticated:
-            # Flujo para usuario logueado: Base de Datos
             cart = CartService.get_or_create_cart(request.user)
             serializer = CartSerializer(cart)
             return Response(serializer.data)
-        else:
-            # Flujo para usuario invitado: Sesión
-            cart_data = CartService.get_anonymous_cart_data(request)
-            return Response(cart_data)
+        return Response(CartService.get_anonymous_cart_data(request))
 
 
 class AddToCartView(APIView):
@@ -34,17 +29,13 @@ class AddToCartView(APIView):
                 {"error": "Cantidad inválida"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Pasamos el request completo al servicio
         result = CartService.add_item_to_cart(request, product_id, quantity)
 
         if request.user.is_authenticated:
-            # Si está logueado, result es un objeto CartItem, usamos el Serializer
             return Response(
                 CartItemSerializer(result).data, status=status.HTTP_201_CREATED
             )
-        else:
-            # Si es anónimo, result es el diccionario de la sesión
-            return Response(result, status=status.HTTP_201_CREATED)
+        return Response(result, status=status.HTTP_201_CREATED)
 
 
 class CartItemUpdateView(APIView):
@@ -52,7 +43,6 @@ class CartItemUpdateView(APIView):
 
     def patch(self, request, item_id):
         quantity = request.data.get("quantity")
-
         if quantity is None:
             return Response(
                 {"error": "Cantidad requerida"}, status=status.HTTP_400_BAD_REQUEST

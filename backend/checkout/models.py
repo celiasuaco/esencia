@@ -31,9 +31,20 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
+    class Status(models.TextChoices):
+        ACTIVE = "ACTIVE", "Activo"
+        CONVERTED = "CONVERTED", "Convertido a Venta"
+        ABANDONED = "ABANDONED", "Abandonado/Eliminado"
+
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="cart_items"
+    )
     quantity = models.PositiveIntegerField(default=1)
+    status = models.CharField(
+        max_length=15, choices=Status.choices, default=Status.ACTIVE
+    )
+    updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def subtotal(self):

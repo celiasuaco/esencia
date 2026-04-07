@@ -1,5 +1,6 @@
 import os
 import secrets
+from datetime import datetime
 from decimal import Decimal
 
 import django
@@ -14,9 +15,6 @@ from order.models import Order, OrderItem
 from product.models import Product
 
 fake = Faker(["es_ES"])  # Datos en español
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-django.setup()
 
 PASSWORD = "admin123"  # NOSONAR
 
@@ -50,8 +48,16 @@ def secure_sample(population, k):
 def run_seeder():
     print("🚀 Iniciando Seeder Masivo para Esencia...")
 
+    # --- 0. LIMPIEZA DE BASE DE DATOS ---
+    print("🗑️ Limpiando tablas previas...")
+    OrderItem.objects.all().delete()
+    Order.objects.all().delete()
+    Product.objects.all().delete()
+    User.objects.filter(is_superuser=False).delete()
+    print("✅ Tablas limpias")
+
     # --- 1. CREAR ADMINISTRADOR ---
-    if not User.objects.filter(role="ADMIN").exists():
+    if not User.objects.filter(username="admin").exists():
         User.objects.create_superuser(
             username="admin",
             email="admin@esencia.com",
@@ -63,27 +69,20 @@ def run_seeder():
 
     # --- 2. CREAR CLIENTES ---
     clientes = []
-    for i in range(5):
+    for i in range(10):  # Aumentado a 10 clientes para más variedad
         email = f"cliente{i + 1}@test.com"
-        user, created = User.objects.get_or_create(
+        user = User.objects.create(
             email=email,
-            defaults={
-                "username": f"user_{i + 1}",
-                "full_name": fake.name(),
-                "role": "CLIENT",
-            },
+            username=f"user_{i + 1}",
+            full_name=fake.name(),
+            role="CLIENT",
         )
-        if created:
-            user.set_password("cliente123")
-            user.save()
+        user.set_password("cliente123")
+        user.save()
         clientes.append(user)
-    print(f"✅ {len(clientes)} Clientes creados/verificados")
+    print(f"✅ {len(clientes)} Clientes creados")
 
     # --- 3. CREAR PRODUCTOS ---
-    print("🗑️ Eliminando productos antiguos...")
-    OrderItem.objects.all().delete()  # Evitar errores de integridad si hay pedidos
-    Product.objects.all().delete()
-
     categorias = ["Anillo", "Collar", "Pendientes", "Pulsera"]
     materiales = [
         "Oro 18k",
@@ -92,7 +91,6 @@ def run_seeder():
         "Platino",
         "Acero Quirúrgico",
     ]
-
     fotos_por_tipo = {
         "Anillo": "products/seed_anillo.jpg",
         "Collar": "products/seed_collar.jpg",
@@ -101,19 +99,14 @@ def run_seeder():
     }
 
     productos = []
-
     print("Generando nuevos productos...")
     for i in range(30):
         tipo_joya = secure_choice(categorias)
         nombre = f"{tipo_joya} {fake.word().capitalize()} {secure_choice(['Eterno', 'Gala', 'Minimal', 'Luxury', 'Esencia'])}"
+        precio_val = secure_uniform(25.0, 150.0)
+        stock_val = secure_randint(10, 100)
 
-        precio_val = secure_uniform(25.0, 100.0)
-        stock_val = secure_randint(0, 50)
-
-        # Lógica de foto:
-        foto_path = None
-        if i % 5 != 0:
-            foto_path = fotos_por_tipo.get(tipo_joya)
+        foto_path = fotos_por_tipo.get(tipo_joya) if i % 5 != 0 else None
 
         prod = Product.objects.create(
             name=nombre,
@@ -126,22 +119,25 @@ def run_seeder():
             photo=foto_path,
         )
         productos.append(prod)
+    print(f"✅ {len(productos)} Productos creados")
 
-    print(f"✅ {len(productos)} Productos creados con fotos y materiales variados")
-
-    # --- 4. CREAR PEDIDOS ---
+    # --- 4. CREAR PEDIDOS (30 PEDIDOS CON FECHAS VARIADAS) ---
     estados = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"]
 
-    for _ in range(10):
-        cliente = secure_choice(clientes)
+    # Definimos el rango de fechas: Diciembre 2025 a Marzo 2026
+    start_date = datetime(2025, 12, 1)
+    end_date = datetime(2026, 3, 31)
 
-        # Creamos el pedido (los campos amount se inicializan en 0 por defecto)
+    print(f"Generando 30 pedidos entre {start_date.date()} y {end_date.date()}...")
+
+    for _ in range(30):
+        cliente = secure_choice(clientes)
         pedido = Order.objects.create(
             user=cliente,
             address=fake.address(),
             status=secure_choice(estados),
             placed_at=fake.date_time_between(
-                start_date="-30d", end_date="now", tzinfo=None
+                start_date=start_date, end_date=end_date, tzinfo=None
             ),
         )
 
@@ -157,11 +153,10 @@ def run_seeder():
                 price_at_purchase=p.price,
             )
 
-        # --- CAMBIO CLAVE ---
         pedido.update_totals()
 
-    print("✅ 10 Pedidos creados y totales calculados en DB")
-    print("✨ Seeder finalizado. El Dashboard debería mostrar datos reales ahora.")
+    print("✅ 30 Pedidos creados y totales calculados en DB")
+    print("✨ Seeder finalizado con éxito.")
 
 
 if __name__ == "__main__":
