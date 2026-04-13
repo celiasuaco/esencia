@@ -44,21 +44,26 @@ class CartService:
 
         return CartService._update_session_quantity(request, str(item_id), val_quantity)
 
-    # --- MÉTODOS PRIVADOS PARA REDUCIR COMPLEJIDAD ---
-
     @staticmethod
     def _add_to_db_cart(user, product, quantity):
         cart = CartService.get_or_create_cart(user)
-        item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        # Buscamos si ya existe un item ACTIVO para este producto
+        item = CartItem.objects.filter(
+            cart=cart, product=product, status=CartItem.Status.ACTIVE
+        ).first()
 
-        if not created:
+        if item:
             if product.stock < (item.quantity + quantity):
                 raise ValidationError(
                     "No puedes añadir más unidades, stock límite alcanzado."
                 )
             item.quantity += quantity
         else:
-            item.quantity = quantity
+            # Si no hay uno activo, creamos uno nuevo (o reutilizamos uno abandonado si prefieres,
+            # pero por simplicidad de métricas creamos uno nuevo ACTIVE)
+            item = CartItem.objects.create(
+                cart=cart, product=product, quantity=quantity
+            )
 
         item.save()
         return item
@@ -95,9 +100,14 @@ class CartService:
 
     @staticmethod
     def _update_db_quantity(user, item_id, quantity):
-        item = get_object_or_404(CartItem, id=item_id, cart__user=user)
+        # IMPORTANTE: Solo permitimos actualizar items que estén ACTUAMENTE activos
+        item = get_object_or_404(
+            CartItem, id=item_id, cart__user=user, status=CartItem.Status.ACTIVE
+        )
+
         if quantity <= 0:
-            item.delete()
+            item.status = CartItem.Status.ABANDONED
+            item.save()
             return None
 
         if item.product.stock < quantity:
@@ -110,7 +120,6 @@ class CartService:
     @staticmethod
     def _update_session_quantity(request, str_item_id, quantity):
         cart = CartService.get_anonymous_cart_data(request)
-
         for item in cart["items"]:
             if str(item["product"]) == str_item_id:
                 if quantity <= 0:
@@ -121,7 +130,6 @@ class CartService:
                         raise ValidationError("Stock insuficiente.")
                     item["quantity"] = quantity
                 break
-
         return CartService._save_session_cart(request, cart)
 
     @staticmethod
@@ -133,14 +141,19 @@ class CartService:
 
     @staticmethod
     def remove_item(request, item_id):
-        str_item_id = str(item_id)
         if request.user.is_authenticated:
-            item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
-            item.delete()
+            item = get_object_or_404(
+                CartItem,
+                id=item_id,
+                cart__user=request.user,
+                status=CartItem.Status.ACTIVE,
+            )
+            item.status = CartItem.Status.ABANDONED
+            item.save()
         else:
             cart = CartService.get_anonymous_cart_data(request)
             cart["items"] = [
-                i for i in cart["items"] if str(i["product"]) != str_item_id
+                i for i in cart["items"] if str(i["product"]) != str(item_id)
             ]
             CartService._save_session_cart(request, cart)
 

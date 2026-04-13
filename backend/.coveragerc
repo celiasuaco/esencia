@@ -1,0 +1,12 @@
+[run]
+# Excluye archivos de la ejecución de la medición
+omit =
+    manage.py
+    seed.py
+    config/*
+    */migrations/*
+
+[report]
+# Muestra solo lo relevante en la terminal
+show_missing = True
+skip_covered = True

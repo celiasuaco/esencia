@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .permissions import IsSuperAdmin
+from .serializers import AdminDashboardStatsSerializer
 from .services import get_admin_dashboard_stats
 
 
@@ -13,8 +14,11 @@ class AdminDashboardStatsView(APIView):
     permission_classes = [IsSuperAdmin]
 
     def get(self, request):
-        stats = get_admin_dashboard_stats()
-        return Response(stats)
+        data = get_admin_dashboard_stats()
+
+        serializer = AdminDashboardStatsSerializer(data)
+
+        return Response(serializer.data)
 
 
 class ShowcaseView(APIView):

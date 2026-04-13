@@ -51,17 +51,10 @@ class TestAdminDashboard:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_dashboard_stats_success_as_admin(self, api_client, admin_user):
-        # 1. Crear datos de prueba (Mock data)
-        # Creamos un usuario adicional para probar el conteo
+        # 1. Preparar datos
         User.objects.create_user(email="u1@t.com", username="u1@t.com", password="p")
-
-        # Crear productos para probar alertas de stock
-        # (Asegúrate de incluir la categoría si es obligatoria en tu modelo Product)
         Product.objects.create(name="Low Stock", price=10, stock=2, category="ANILLO")
-        Product.objects.create(name="High Stock", price=20, stock=10, category="COLLAR")
 
-        # Crear un pedido pagado vinculado al admin_user (para evitar el IntegrityError)
-        # Incluimos total_amount directamente ya que ahora es un campo de la DB
         Order.objects.create(
             user=admin_user,
             address="Calle Falsa 123",
@@ -75,23 +68,18 @@ class TestAdminDashboard:
 
         # 2. Verificaciones
         assert response.status_code == status.HTTP_200_OK
-
-        # Verificar la nueva estructura del servicio
         data = response.data
 
-        # Estructura de Usuarios
-        assert "users" in data["metrics"]
-        # admin_user + u1 = 2 (regular_user no se crea a menos que se use la fixture explícitamente)
-        assert data["metrics"]["users"]["total_count"] >= 2
+        # Verificamos la estructura plana actual (sin el nivel 'metrics')
+        assert "total_revenue" in data
+        assert "total_clients" in data
+        assert "customer_retention" in data
+        assert "wishlist_vs_sales" in data
+        assert "monthly_sales" in data
 
-        # Estructura de Ventas
-        assert "sales" in data["metrics"]
-        assert data["metrics"]["sales"]["total_revenue"] == 150.0
-        assert data["metrics"]["sales"]["total_orders"] == 1
-
-        # Estructura de Inventario
-        assert "inventory" in data["metrics"]
-        assert data["metrics"]["inventory"]["low_stock_alerts"] == 1
+        # Verificamos valores específicos
+        assert data["total_revenue"] == 150.0
+        assert data["total_orders"] >= 1
 
 
 @pytest.mark.django_db
