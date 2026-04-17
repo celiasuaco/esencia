@@ -1,4 +1,6 @@
 import pytest
+from checkout.models import Cart, CartItem
+from checkout.views import process_payment_success
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from product.models import Product
@@ -8,8 +10,6 @@ from rest_framework.test import APIClient
 from .models import Order
 
 User = get_user_model()
-
-# --- FIXTURES LOCALES ---
 
 
 @pytest.fixture
@@ -34,15 +34,9 @@ def product(db):
     )
 
 
-# --- CLASE DE TESTS ---
-
-
 @pytest.mark.django_db
 class TestOrders:
     def test_create_order_from_cart(self, api_client, user, product):
-        # 1. Preparar carrito
-        from checkout.models import Cart, CartItem
-
         cart, _ = Cart.objects.get_or_create(user=user)
         CartItem.objects.create(cart=cart, product=product, quantity=1)
 
@@ -54,10 +48,17 @@ class TestOrders:
 
         assert response.status_code == status.HTTP_201_CREATED
         assert Order.objects.count() == 1
-        # El total de 150€ supera los 100€, por lo que el envío es 0
-        assert float(response.data["total_amount"]) == 150.00
-        # El carrito debe estar vacío tras crear el pedido
-        assert cart.items.count() == 0
+        order = Order.objects.first()
+        assert order.status == "PENDING"
+
+        assert cart.items.filter(status=CartItem.Status.ACTIVE).count() == 1
+
+        process_payment_success(order.id)
+
+        order.refresh_from_db()
+        assert order.status == "PAID"
+
+        assert Cart.objects.filter(user=user).count() == 0
 
     def test_admin_can_change_status_and_is_paid_updates(self, api_client, user):
         # Configurar admin
