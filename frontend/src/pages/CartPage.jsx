@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cartService } from '../services/cartService';
+import { orderService } from '../services/orderService';
+import { checkoutService } from '../services/checkoutService';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { authService } from '../services/authService';
+import AddressModal from '../components/order/AddressModal';
 import { toast } from 'sonner';
 
 export default function CartPage() {
@@ -10,6 +13,32 @@ export default function CartPage() {
     const navigate = useNavigate();
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Función que dispara el proceso final
+    const handleConfirmAddress = async (direccionConfirmada) => {
+        setIsModalOpen(false);
+        const toastId = toast.loading("Iniciando proceso de pago seguro...");
+
+        try {
+            const order = await orderService.createOrder(direccionConfirmada);
+
+            const { url } = await checkoutService.createPaymentSession(order.id);
+
+            if (url) {
+                toast.success("Redirigiendo a Stripe...", { id: toastId });
+                window.location.href = url;
+            } else {
+                throw new Error("No se recibió la URL de pago");
+            }
+        } catch (error) {
+            console.error("Error en el proceso de compra:", error);
+            toast.error("Hubo un fallo al preparar tu pedido", {
+                id: toastId,
+                description: error.response?.data?.error || "Inténtalo de nuevo."
+            });
+        }
+    };
 
     const API_BASE_URL = 'http://localhost:8000';
 
@@ -56,6 +85,44 @@ export default function CartPage() {
         }
     };
 
+    const handleFinalizarCompra = async () => {
+        if (!isAuthenticated) {
+            toast.error("Identificación requerida", {
+                description: "Por favor, inicia sesión para finalizar tu pedido."
+            });
+            navigate('/login', { state: { from: '/cart' } });
+            return;
+        }
+
+        const direccionUsuario = window.prompt("Por favor, introduce tu dirección de envío:", "Calle Mayor 1, Madrid");
+
+        if (!direccionUsuario) {
+            toast.error("La dirección es obligatoria para el envío.");
+            return;
+        }
+
+        const toastId = toast.loading("Iniciando proceso de pago seguro...");
+
+        try {
+            const order = await orderService.createOrder(direccionUsuario);
+
+            const { url } = await checkoutService.createPaymentSession(order.id);
+
+            if (url) {
+                toast.success("Redirigiendo a Stripe...", { id: toastId });
+                window.location.href = url;
+            } else {
+                throw new Error("No se recibió la URL de pago");
+            }
+        } catch (error) {
+            console.error("Error al procesar el pedido:", error);
+            toast.error("Error al procesar el pedido", {
+                id: toastId,
+                description: error.response?.data?.error || "Inténtalo de nuevo en unos minutos."
+            });
+        }
+    };
+
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-[#FDFBF9] font-serif italic text-[#324339]">
             <span className="animate-pulse text-xl">Preparando tu selección...</span>
@@ -76,6 +143,11 @@ export default function CartPage() {
 
     return (
         <div className="min-h-screen bg-[#FDFBF9] pt-4 pb-20">
+            <AddressModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={handleConfirmAddress}
+            />
             <div className="max-w-6xl mx-auto px-6">
 
                 <button
@@ -195,11 +267,9 @@ export default function CartPage() {
                                 className="w-full bg-[#324339] text-white py-5 rounded-full uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-[#A86447] transition-all duration-500 shadow-xl shadow-[#324339]/20 active:scale-95"
                                 onClick={() => {
                                     if (isAuthenticated) {
-                                        navigate('/checkout');
+                                        setIsModalOpen(true);
                                     } else {
-                                        toast.error("Identificación requerida", {
-                                            description: "Por favor, inicia sesión para finalizar tu pedido."
-                                        });
+                                        toast.error("Identificación requerida");
                                         navigate('/login', { state: { from: '/cart' } });
                                     }
                                 }}

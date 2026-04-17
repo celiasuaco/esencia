@@ -17,6 +17,7 @@ import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import AdminUserListPage from "./pages/admin/AdminUserListPage";
+import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
 import { Toaster } from 'sonner';
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
           <Route path="/catalog" element={<ProductListPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
 
           {/* Perfil de Cliente: Solo si NO es admin (o si quieres que el admin vea la tienda) */}
           <Route

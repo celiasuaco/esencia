@@ -76,3 +76,47 @@ class TestCart:
         api_client.post(reverse("cart-add"), {"product_id": p_cheap.id, "quantity": 5})
         res2 = api_client.get(reverse("cart-detail"))
         assert float(res2.data["shipping"]) == 0.00
+
+    def test_create_checkout_session_authenticated(self, api_client, user):
+        """Verifica que se genera una URL de Stripe para un pedido válido"""
+        from order.models import Order
+
+        order = Order.objects.create(
+            user=user, total_amount=Decimal("100.00"), address="Test"
+        )
+
+        api_client.force_authenticate(user=user)
+        url = reverse("create-payment-session")
+        response = api_client.post(url, {"order_id": order.id})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert "url" in response.data
+        assert "stripe.com" in response.data["url"]
+
+    def test_payment_success_logic(self, db, user, product):
+        """Verifica que tras el pago el stock baja y el item se marca como CONVERTED"""
+        from order.models import Order
+
+        from .views import process_payment_success
+
+        cart = Cart.objects.create(user=user)
+        item = CartItem.objects.create(
+            cart=cart, product=product, quantity=2, status=CartItem.Status.ACTIVE
+        )
+        order = Order.objects.create(
+            user=user, total_amount=Decimal("300.00"), address="Test"
+        )
+
+        initial_stock = product.stock  # 10
+
+        # Simulamos la llamada que haría el Webhook
+        process_payment_success(order.id)
+
+        # Verificaciones
+        product.refresh_from_db()
+        item.refresh_from_db()
+        order.refresh_from_db()
+
+        assert order.status == Order.Status.PAID
+        assert item.status == CartItem.Status.CONVERTED
+        assert product.stock == initial_stock - 2  # 8

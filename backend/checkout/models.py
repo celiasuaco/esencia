@@ -14,9 +14,10 @@ class Cart(models.Model):
 
     @property
     def subtotal(self):
-        result = self.items.aggregate(total=Sum(F("product__price") * F("quantity")))[
-            "total"
-        ]
+        # FILTRO CRÍTICO: Solo sumamos items con status ACTIVE
+        result = self.items.filter(status=CartItem.Status.ACTIVE).aggregate(
+            total=Sum(F("product__price") * F("quantity"))
+        )["total"]
         return result or Decimal("0.00")
 
     @property
@@ -36,7 +37,13 @@ class CartItem(models.Model):
         CONVERTED = "CONVERTED", "Convertido a Venta"
         ABANDONED = "ABANDONED", "Abandonado/Eliminado"
 
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="items",
+    )
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="cart_items"
     )

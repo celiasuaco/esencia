@@ -1,10 +1,14 @@
 from decimal import Decimal
 
+import stripe
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from product.models import Product
 from rest_framework.exceptions import ValidationError
 
 from .models import Cart, CartItem
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class CartService:
@@ -16,9 +20,12 @@ class CartService:
         )
 
     @staticmethod
-    def get_or_create_cart(user):
-        cart, _ = Cart.objects.get_or_create(user=user)
-        return cart
+    def get_user_cart(user):
+        """
+        Simplemente intenta obtener el carrito.
+        Si no existe, devuelve None (no crea nada en DB).
+        """
+        return Cart.objects.filter(user=user).first()
 
     @staticmethod
     def add_item_to_cart(request, product_id, quantity):
@@ -40,32 +47,43 @@ class CartService:
             raise ValidationError("La cantidad debe ser un número válido.")
 
         if request.user.is_authenticated:
-            return CartService._update_db_quantity(request.user, item_id, val_quantity)
+            # Solo permitimos actualizar items que estén ACTUALMENTE activos
+            item = get_object_or_404(
+                CartItem,
+                id=item_id,
+                cart__user=request.user,
+                status=CartItem.Status.ACTIVE,
+            )
+
+            if val_quantity <= 0:
+                item.status = CartItem.Status.ABANDONED
+                item.save()
+                CartService._check_empty_cart_and_delete(item.cart)
+                return None
+
+            if item.product.stock < val_quantity:
+                raise ValidationError("Stock insuficiente.")
+
+            item.quantity = val_quantity
+            item.save()
+            return item
 
         return CartService._update_session_quantity(request, str(item_id), val_quantity)
 
     @staticmethod
     def _add_to_db_cart(user, product, quantity):
-        cart = CartService.get_or_create_cart(user)
-        # Buscamos si ya existe un item ACTIVO para este producto
-        item = CartItem.objects.filter(
-            cart=cart, product=product, status=CartItem.Status.ACTIVE
-        ).first()
+        cart, _ = Cart.objects.get_or_create(user=user)
 
-        if item:
-            if product.stock < (item.quantity + quantity):
-                raise ValidationError(
-                    "No puedes añadir más unidades, stock límite alcanzado."
-                )
+        item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            status=CartItem.Status.ACTIVE,
+            defaults={"quantity": quantity},
+        )
+
+        if not created:
             item.quantity += quantity
-        else:
-            # Si no hay uno activo, creamos uno nuevo (o reutilizamos uno abandonado si prefieres,
-            # pero por simplicidad de métricas creamos uno nuevo ACTIVE)
-            item = CartItem.objects.create(
-                cart=cart, product=product, quantity=quantity
-            )
-
-        item.save()
+            item.save()
         return item
 
     @staticmethod
@@ -99,8 +117,17 @@ class CartService:
         return CartService._save_session_cart(request, cart)
 
     @staticmethod
+    def _check_empty_cart_and_delete(cart):
+        """
+        Regla: Si no quedan items ACTIVE, el carrito se elimina.
+        """
+        if not cart.items.filter(status=CartItem.Status.ACTIVE).exists():
+            cart.delete()
+            return True
+        return False
+
+    @staticmethod
     def _update_db_quantity(user, item_id, quantity):
-        # IMPORTANTE: Solo permitimos actualizar items que estén ACTUAMENTE activos
         item = get_object_or_404(
             CartItem, id=item_id, cart__user=user, status=CartItem.Status.ACTIVE
         )
@@ -150,6 +177,7 @@ class CartService:
             )
             item.status = CartItem.Status.ABANDONED
             item.save()
+            CartService._check_empty_cart_and_delete(item.cart)
         else:
             cart = CartService.get_anonymous_cart_data(request)
             cart["items"] = [
@@ -173,8 +201,52 @@ class CartService:
     @staticmethod
     def merge_carts(request, user):
         anon_cart = request.session.get("anon_cart")
-        if anon_cart and anon_cart.get("items"):
+        if anon_cart and anon_cart.get("items") and len(anon_cart["items"]) > 0:
+            cart, _ = Cart.objects.get_or_create(user=user)
+
             for item in anon_cart["items"]:
-                CartService.add_item_to_cart(request, item["product"], item["quantity"])
+                cart_item, created = CartItem.objects.get_or_create(
+                    cart=cart,
+                    product_id=item["product"],
+                    status=CartItem.Status.ACTIVE,
+                    defaults={"quantity": item["quantity"]},
+                )
+                if not created:
+                    cart_item.quantity += item["quantity"]
+                    cart_item.save()
+
             del request.session["anon_cart"]
             request.session.modified = True
+
+
+class StripeService:
+    @staticmethod
+    def create_checkout_session(order):
+        """
+        Crea una sesión de pago en Stripe basada en una orden de Esencia.
+        """
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "eur",
+                            "product_data": {
+                                "name": f"Pedido #{order.id} - Esencia Joyería",
+                            },
+                            "unit_amount": int(
+                                order.total_amount * 100
+                            ),  # Stripe usa céntimos
+                        },
+                        "quantity": 1,
+                    }
+                ],
+                mode="payment",
+                success_url=f"{settings.SITE_URL}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
+                cancel_url=f"{settings.SITE_URL}/checkout/cancel",
+                metadata={"order_id": order.id, "user_id": order.user.id},
+            )
+            return checkout_session.url
+        except Exception as e:
+            return str(e)
