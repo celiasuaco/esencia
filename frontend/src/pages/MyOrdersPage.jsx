@@ -9,7 +9,6 @@ export default function MyOrdersPage() {
     const navigate = useNavigate();
 
     const STATUS_LABELS = {
-        'PENDING': 'Pendiente',
         'PAID': 'Pagado',
         'SHIPPED': 'Enviado',
         'DELIVERED': 'Entregado',

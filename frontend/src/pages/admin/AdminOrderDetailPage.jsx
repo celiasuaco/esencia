@@ -27,9 +27,8 @@ export default function AdminOrderDetailPage() {
     const currentUser = authService.getCurrentUser();
     const isAdmin = currentUser?.role === 'ADMIN';
 
-    const STATUS_FLOW = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED'];
+    const STATUS_FLOW = ['PAID', 'SHIPPED', 'DELIVERED'];
     const STATUS_LABELS = {
-        'PENDING': 'Pendiente',
         'PAID': 'Pagado',
         'SHIPPED': 'Enviado',
         'DELIVERED': 'Entregado',

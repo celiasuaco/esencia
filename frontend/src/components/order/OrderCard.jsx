@@ -3,7 +3,6 @@ import { Calendar, ChevronRight, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const STATUS_STYLES = {
-    'PENDING': 'text-amber-700 bg-amber-50 border-amber-200',
     'PAID': 'text-emerald-700 bg-emerald-50 border-emerald-200',
     'SHIPPED': 'text-[#324339] bg-[#324339]/5 border-[#324339]/10',
     'DELIVERED': 'text-[#A86447] bg-[#A86447]/5 border-[#A86447]/10',
@@ -11,7 +10,6 @@ const STATUS_STYLES = {
 };
 
 const STATUS_LABELS = {
-    'PENDING': 'Pendiente',
     'PAID': 'Pagado',
     'SHIPPED': 'Enviado',
     'DELIVERED': 'Entregado',

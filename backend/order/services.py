@@ -1,4 +1,5 @@
-from checkout.models import Cart
+# order/services.py
+from checkout.models import Cart, CartItem
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
@@ -11,22 +12,23 @@ class OrderService:
     @transaction.atomic
     def create_from_cart(user, address):
         cart = get_object_or_404(Cart, user=user)
-        if not cart.items.exists():
+        active_items = cart.items.filter(status=CartItem.Status.ACTIVE)
+
+        if not active_items.exists():
             raise ValidationError("El carrito está vacío.")
 
-        # 1. Crear la instancia del pedido
+        for item in active_items:
+            if item.product.stock < item.quantity:
+                raise ValidationError(
+                    f"Lo sentimos, el producto {item.product.name} ya no tiene stock suficiente (Disponible: {item.product.stock})."
+                )
+
         order = Order.objects.create(user=user, address=address)
 
-        # 2. Crear los OrderItems basados en el carrito actual
-        for item in cart.items.all():
+        for item in active_items:
             OrderService._create_order_item(order, item)
-            # Reducir stock del producto
-            item.product.stock -= item.quantity
-            item.product.save()
 
-        # 3. Calcular totales finales y limpiar carrito
         order.update_totals()
-        cart.items.all().delete()
 
         return order
 
@@ -41,7 +43,10 @@ class OrderService:
 
     @staticmethod
     def update_order_status(order, new_status):
-        """El modelo Order.save() ya gestiona el campo is_paid automáticamente"""
+        """
+        Si el estado pasa a PAID desde aquí (ej. acción manual del admin),
+        deberíamos asegurar que se ejecute la lógica de process_payment_success.
+        """
         order.status = new_status
         order.save()
         return order

@@ -203,8 +203,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,  # Devuelve un nuevo refresh token al usar uno
     "BLACKLIST_AFTER_ROTATION": True,  # El token usado entra en lista negra
     "AUTH_HEADER_TYPES": ("Bearer",),
@@ -224,6 +224,12 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "Esencia <info@esenciajoyeria.app>"
 )
+
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
+SITE_URL = os.environ.get("SITE_URL", "http://localhost:8000")
+
 
 # URL del Frontend (Necesaria para construir el enlace de reset en el email)
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")

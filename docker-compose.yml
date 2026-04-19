@@ -20,6 +20,10 @@ services:
   backend:
     build: ./backend
     container_name: esencia_backend
+    environment:
+      - PYTHONUNBUFFERED=1 # <--- AÑADE ESTO
+    tty: true
+    stdin_open: true
     env_file: .env
     volumes:
       - ./backend:/app

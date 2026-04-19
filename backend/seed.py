@@ -122,7 +122,7 @@ def run_seeder():
     print(f"✅ {len(productos)} Productos creados")
 
     # --- 4. CREAR PEDIDOS (30 PEDIDOS CON FECHAS VARIADAS) ---
-    estados = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"]
+    estados = ["PAID", "SHIPPED", "DELIVERED", "CANCELLED"]
 
     # Definimos el rango de fechas: Diciembre 2025 a Marzo 2026
     start_date = datetime(2025, 12, 1)
