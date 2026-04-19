@@ -3,6 +3,7 @@
 import stripe
 from django.conf import settings
 from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 from order.models import Order
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -72,6 +73,7 @@ class CartItemUpdateView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@require_POST
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
