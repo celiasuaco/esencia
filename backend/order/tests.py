@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 from checkout.models import Cart, CartItem
 from checkout.views import process_payment_success
@@ -36,27 +38,22 @@ def product(db):
 
 @pytest.mark.django_db
 class TestOrders:
-    def test_create_order_from_cart(self, api_client, user, product):
+    def test_create_order_flow(self, api_client, user, product):
+        """Test del flujo completo: Carrito -> Pago -> Creación de Pedido"""
         cart, _ = Cart.objects.get_or_create(user=user)
         CartItem.objects.create(cart=cart, product=product, quantity=1)
 
-        api_client.force_authenticate(user=user)
-        url = reverse("order-list")
-        data = {"address": "Calle de la Joyería, 1"}
+        mock_session = MagicMock()
+        mock_session.metadata = {"user_id": user.id, "address": "Calle Mayor, 1"}
 
-        response = api_client.post(url, data)
+        process_payment_success(mock_session)
 
-        assert response.status_code == status.HTTP_201_CREATED
         assert Order.objects.count() == 1
         order = Order.objects.first()
-        assert order.status == "PENDING"
-
-        assert cart.items.filter(status=CartItem.Status.ACTIVE).count() == 1
-
-        process_payment_success(order.id)
-
-        order.refresh_from_db()
+        assert order.user == user
         assert order.status == "PAID"
+        assert order.is_paid is True
+        assert float(order.total_amount) > 0
 
         assert Cart.objects.filter(user=user).count() == 0
 
@@ -67,7 +64,7 @@ class TestOrders:
         admin.save()
 
         order = Order.objects.create(
-            user=user, address="Test Address", status=Order.Status.PENDING
+            user=user, address="Test Address", status=Order.Status.PAID
         )
         api_client.force_authenticate(user=admin)
 

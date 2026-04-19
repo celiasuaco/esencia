@@ -87,7 +87,6 @@ export default function AdminOrdersPage() {
                                     onChange={handleFilterChange}
                                 >
                                     <option value="">Todos los estados</option>
-                                    <option value="PENDING">Pendiente</option>
                                     <option value="PAID">Pagado</option>
                                     <option value="SHIPPED">Enviado</option>
                                     <option value="DELIVERED">Entregado</option>

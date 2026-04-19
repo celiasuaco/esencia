@@ -10,7 +10,6 @@ from product.models import Product
 
 class Order(models.Model):
     class Status(models.TextChoices):
-        PENDING = "PENDING", "Pendiente"
         PAID = "PAID", "Pagado"
         SHIPPED = "SHIPPED", "Enviado"
         DELIVERED = "DELIVERED", "Entregado"
@@ -22,13 +21,11 @@ class Order(models.Model):
     address = models.CharField(max_length=255)
     placed_at = models.DateTimeField(default=timezone.now)
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.PENDING
+        max_length=20, choices=Status.choices, default=Status.PAID
     )
     tracking_code = models.CharField(max_length=8, unique=True, editable=False)
-    is_paid = models.BooleanField(default=False)
+    is_paid = models.BooleanField(default=True)
 
-    # --- NUEVOS CAMPOS FIJOS EN DB ---
-    # Guardamos los valores finales para que sean consultables por SQL y no cambien en el futuro
     subtotal_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     shipping_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)

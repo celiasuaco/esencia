@@ -2,16 +2,18 @@
 
 import stripe
 from django.conf import settings
+from django.db import transaction
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
-from order.models import Order
+from order.models import Order, OrderItem
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Cart, CartItem
+from checkout.models import CartItem
+
 from .serializers import CartItemSerializer, CartSerializer
-from .services import CartService
+from .services import CartService, StripeService
 
 
 class CartDetailView(APIView):
@@ -96,88 +98,92 @@ def stripe_webhook(request):
     return HttpResponse(status=200)
 
 
-def process_payment_success(order_id):
+@transaction.atomic
+def process_payment_success(session):
+    from authentication.models import User
+
+    from checkout.models import Cart, CartItem
 
     try:
-        order = Order.objects.get(id=order_id)
+        # 1. Extraer datos de la metadata de Stripe
+        user_id = session.metadata.get("user_id")
+        address = session.metadata.get("address")
+        user = User.objects.get(id=user_id)
 
-        if order.status == Order.Status.PAID:
-            print(f"Pedido {order_id} ya procesado anteriormente.")
+        # 2. Obtener el carrito activo
+        cart = Cart.objects.filter(user=user).first()
+        if not cart:
             return
 
-        order.status = Order.Status.PAID
-        order.save()
-        print(f"Pedido {order_id} marcado como PAGADO.")
+        active_items = cart.items.filter(status=CartItem.Status.ACTIVE)
+        if not active_items.exists():
+            return
 
-        cart = Cart.objects.filter(user=order.user).first()
+        # 3. CREAR EL PEDIDO FÍSICO
+        order = Order.objects.create(
+            user=user, address=address, status=Order.Status.PAID, is_paid=True
+        )
 
-        if cart:
-            active_items = cart.items.filter(status=CartItem.Status.ACTIVE)
-
-            for item in active_items:
-                product = item.product
-                product.stock -= item.quantity
-                product.save()
-                print(f"Stock restado: {product.name} (-{item.quantity})")
-
-                item.status = CartItem.Status.CONVERTED
-                item.save()
-
-            cart.delete()
-            print(f"Carrito de {order.user.email} eliminado tras compra.")
-        else:
-            print(
-                f"No se encontró carrito para el usuario {order.user.email}. Quizás ya fue procesado."
+        # 4. TRASPASAR ITEMS, RESTAR STOCK Y CONVERTIR
+        for item in active_items:
+            # Crear item de pedido
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                price_at_purchase=item.product.price,
+                quantity=item.quantity,
             )
 
+            # Restar Stock
+            product = item.product
+            product.stock -= item.quantity
+            product.save()
+
+            # BI: Marcar como convertido
+            item.status = CartItem.Status.CONVERTED
+            item.save()
+
+        # 5. ACTUALIZAR TOTALES Y BORRAR CARRITO
+        order.update_totals()
+        cart.delete()
+
+        print(f"✅ Pedido {order.tracking_code} creado tras confirmación de Stripe.")
+
     except Exception as e:
-        print(f"Error en process_payment_success: {str(e)}")
+        print(f"❌ Error procesando el éxito del pago: {str(e)}")
+        raise e
 
 
 class CreateCheckoutSessionView(APIView):
-    """
-    Endpoint que recibe un order_id y devuelve la URL de pago de Stripe.
-    """
-
-    permission_classes = [permissions.IsAuthenticated]
-
     def post(self, request):
-        order_id = request.data.get("order_id")
-        if not order_id:
-            return Response(
-                {"error": "ID de pedido requerido"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        address = request.data.get("address")
+        if not address:
+            return Response({"error": "Dirección requerida"}, status=400)
 
-        try:
-            # Buscamos el pedido (importar Order de la app order)
-            from order.models import Order
+        cart = CartService.get_user_cart(request.user)
+        if not cart or not cart.items.filter(status=CartItem.Status.ACTIVE).exists():
+            return Response({"error": "Carrito vacío"}, status=400)
 
-            order = Order.objects.get(id=order_id, user=request.user)
+        url = StripeService.create_checkout_session(request.user, cart, address)
+        return Response({"url": url}, status=200)
 
-            # Generamos la URL usando el servicio que ya tienes
-            from .services import StripeService
 
-            checkout_url = StripeService.create_checkout_session(order)
-
-            return Response({"url": checkout_url}, status=status.HTTP_200_OK)
-        except Order.DoesNotExist:
-            return Response(
-                {"error": "Pedido no encontrado"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+# checkout/views.py
 
 
 class ConfirmPaymentView(APIView):
     def post(self, request):
         session_id = request.data.get("session_id")
-        session = stripe.checkout.Session.retrieve(session_id)
+        if not session_id:
+            return Response({"error": "Falta session_id"}, status=400)
 
-        if session.payment_status == "paid":
-            order_id = session.metadata.get("order_id")
-            process_payment_success(order_id)
-            return Response({"status": "success"})
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
 
-        return Response({"status": "failed"}, status=400)
+            if session.payment_status == "paid":
+                process_payment_success(session)
+                return Response({"status": "success"})
+
+            return Response({"status": "failed"}, status=400)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

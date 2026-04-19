@@ -221,10 +221,7 @@ class CartService:
 
 class StripeService:
     @staticmethod
-    def create_checkout_session(order):
-        """
-        Crea una sesión de pago en Stripe basada en una orden de Esencia.
-        """
+    def create_checkout_session(user, cart, address):
         try:
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
@@ -233,11 +230,11 @@ class StripeService:
                         "price_data": {
                             "currency": "eur",
                             "product_data": {
-                                "name": f"Pedido #{order.id} - Esencia Joyería",
+                                "name": "Compra en Esencia Joyería",
                             },
                             "unit_amount": int(
-                                order.total_amount * 100
-                            ),  # Stripe usa céntimos
+                                cart.total * 100
+                            ),  # Usamos el total del carrito
                         },
                         "quantity": 1,
                     }
@@ -245,7 +242,10 @@ class StripeService:
                 mode="payment",
                 success_url=f"{settings.SITE_URL}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
                 cancel_url=f"{settings.SITE_URL}/checkout/cancel",
-                metadata={"order_id": order.id, "user_id": order.user.id},
+                metadata={
+                    "user_id": user.id,
+                    "address": address,
+                },
             )
             return checkout_session.url
         except Exception as e:

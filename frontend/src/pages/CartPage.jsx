@@ -21,9 +21,7 @@ export default function CartPage() {
         const toastId = toast.loading("Iniciando proceso de pago seguro...");
 
         try {
-            const order = await orderService.createOrder(direccionConfirmada);
-
-            const { url } = await checkoutService.createPaymentSession(order.id);
+            const { url } = await checkoutService.createPaymentSession(direccionConfirmada);
 
             if (url) {
                 toast.success("Redirigiendo a Stripe...", { id: toastId });

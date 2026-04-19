@@ -2,9 +2,9 @@
 import api from './api';
 
 export const checkoutService = {
-    createPaymentSession: async (orderId) => {
+    createPaymentSession: async (address) => {
         const response = await api.post('/cart/create-payment-session/', {
-            order_id: orderId
+            address: address
         });
         return response.data;
     },

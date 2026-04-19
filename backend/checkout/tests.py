@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import MagicMock
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -77,46 +78,43 @@ class TestCart:
         res2 = api_client.get(reverse("cart-detail"))
         assert float(res2.data["shipping"]) == 0.00
 
-    def test_create_checkout_session_authenticated(self, api_client, user):
-        """Verifica que se genera una URL de Stripe para un pedido válido"""
-        from order.models import Order
-
-        order = Order.objects.create(
-            user=user, total_amount=Decimal("100.00"), address="Test"
-        )
+    def test_create_checkout_session_authenticated(self, api_client, user, product):
+        """Verifica que se genera una URL de Stripe enviando la dirección"""
+        cart, _ = Cart.objects.get_or_create(user=user)
+        CartItem.objects.create(cart=cart, product=product, quantity=1)
 
         api_client.force_authenticate(user=user)
         url = reverse("create-payment-session")
-        response = api_client.post(url, {"order_id": order.id})
+
+        response = api_client.post(url, {"address": "Calle Falsa 123"})
 
         assert response.status_code == status.HTTP_200_OK
         assert "url" in response.data
-        assert "stripe.com" in response.data["url"]
 
     def test_payment_success_logic(self, db, user, product):
-        """Verifica que tras el pago el stock baja y el item se marca como CONVERTED"""
-        from order.models import Order
-
+        """Verifica que tras el pago el pedido se crea y el stock baja"""
         from .views import process_payment_success
 
         cart = Cart.objects.create(user=user)
-        item = CartItem.objects.create(
+        CartItem.objects.create(
             cart=cart, product=product, quantity=2, status=CartItem.Status.ACTIVE
         )
-        order = Order.objects.create(
-            user=user, total_amount=Decimal("300.00"), address="Test"
-        )
 
-        initial_stock = product.stock  # 10
+        initial_stock = product.stock
 
-        # Simulamos la llamada que haría el Webhook
-        process_payment_success(order.id)
+        mock_session = MagicMock()
+        mock_session.metadata = {"user_id": user.id, "address": "Calle de Prueba, 10"}
+
+        # Llamamos a la lógica con el mock
+        process_payment_success(mock_session)
 
         # Verificaciones
-        product.refresh_from_db()
-        item.refresh_from_db()
-        order.refresh_from_db()
+        from order.models import Order
 
-        assert order.status == Order.Status.PAID
-        assert item.status == CartItem.Status.CONVERTED
-        assert product.stock == initial_stock - 2  # 8
+        assert Order.objects.filter(user=user).count() == 1
+
+        product.refresh_from_db()
+        assert product.stock == initial_stock - 2
+
+        # El carrito debe haber sido borrado
+        assert Cart.objects.filter(user=user).count() == 0
