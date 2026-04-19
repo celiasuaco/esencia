@@ -3,8 +3,6 @@
 import stripe
 from django.conf import settings
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from order.models import Order
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -74,8 +72,6 @@ class CartItemUpdateView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@csrf_exempt
-@require_POST
 def stripe_webhook(request):
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
@@ -86,13 +82,13 @@ def stripe_webhook(request):
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
     except Exception as e:
-        print(f"⚠️ Error de firma Webhook: {e}")  # Mira esto en los logs
+        print(f"Error de firma Webhook: {e}")
         return HttpResponse(status=400)
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
         order_id = session["metadata"]["order_id"]
-        print(f"✅ Pago confirmado para pedido: {order_id}")
+        print(f"Pago confirmado para pedido: {order_id}")
         process_payment_success(order_id)
 
     return HttpResponse(status=200)
@@ -133,7 +129,7 @@ def process_payment_success(order_id):
             )
 
     except Exception as e:
-        print(f"ERROR en process_payment_success: {str(e)}")
+        print(f"Error en process_payment_success: {str(e)}")
 
 
 class CreateCheckoutSessionView(APIView):
