@@ -12,6 +12,8 @@ from django.utils.encoding import force_bytes
 from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_encode
 
+from .emails import send_welcome_email
+
 # Instanciamos el logger con el nombre de la app
 logger = logging.getLogger("authentication")
 User = get_user_model()
@@ -32,6 +34,7 @@ def create_user(email, password, full_name=None, **extra_fields):
             full_name=full_name,
             **extra_fields,
         )
+        send_welcome_email(user)
         logger.info(f"Usuario creado con éxito: ID {user.id} - {email}")
         return user
     except Exception as e:
