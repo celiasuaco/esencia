@@ -1,6 +1,7 @@
 # order/views.py
 
 import stripe
+from authentication.emails import send_order_confirmation_email
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse
@@ -115,6 +116,11 @@ def process_payment_success(session):
         if not cart:
             return
 
+        # PROTECCIÓN: Si el carrito no tiene items, significa que este webhook ya se procesó
+        if not cart or not cart.items.filter(status=CartItem.Status.ACTIVE).exists():
+            print(f"⚠️ Webhook duplicado o carrito vacío para {user.email}. Ignorando.")
+            return
+
         active_items = cart.items.filter(status=CartItem.Status.ACTIVE)
         if not active_items.exists():
             return
@@ -145,6 +151,9 @@ def process_payment_success(session):
 
         # 5. ACTUALIZAR TOTALES Y BORRAR CARRITO
         order.update_totals()
+
+        send_order_confirmation_email(order)
+
         cart.delete()
 
         print(f"✅ Pedido {order.tracking_code} creado tras confirmación de Stripe.")
@@ -166,9 +175,6 @@ class CreateCheckoutSessionView(APIView):
 
         url = StripeService.create_checkout_session(request.user, cart, address)
         return Response({"url": url}, status=200)
-
-
-# checkout/views.py
 
 
 class ConfirmPaymentView(APIView):

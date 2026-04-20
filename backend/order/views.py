@@ -1,3 +1,4 @@
+from authentication.emails import send_order_status_update_email
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -75,4 +76,5 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
 
         updated_order = OrderService.update_order_status(order, new_status)
+        send_order_status_update_email(updated_order)
         return Response(OrderSerializer(updated_order).data)
