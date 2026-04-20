@@ -1,5 +1,4 @@
 <div style="background-color: #FDFBF9; padding: 40px 10px; font-family: Georgia, serif; color: #324339;">
-    
     <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 30px; padding: 40px; border: 1px solid #32433910; text-align: center; box-shadow: 0 10px 30px rgba(50,67,57,0.05);">
         
         <h2 style="color: #A86447; font-style: italic; font-weight: normal; font-size: 24px;">Novedades en tu envío</h2>
@@ -14,34 +13,32 @@
         </p>
 
         <div style="margin: 40px 0;">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
-                <tr>
-                    <td align="center">
-                        <div style="width: 32px; height: 32px; line-height: 32px; border-radius: 50%; 
-                            background-color: {% if order.status == 'PAID' %}#A86447{% else %}#324339{% endif %}; 
-                            color: white; font-size: 14px; display: inline-block;">✓</div>
-                        <div style="margin-top: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; 
-                            color: {% if order.status == 'PAID' %}#A86447{% else %}#324339{% endif %}; font-weight: bold;">Pagado</div>
-                    </td>
+            <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 0;">
+                <thead>
+                    <tr>
+                        <th scope="col" style="text-align: center; padding: 0;"></th>
+                        <th scope="col" style="text-align: center; padding: 0;"></th>
+                        <th scope="col" style="text-align: center; padding: 0;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: center;">
+                            <div style="width: 32px; height: 32px; line-height: 32px; border-radius: 50%; background-color: {% if order.status == 'PAID' %}#A86447{% else %}#324339{% endif %}; color: white; font-size: 14px; display: inline-block;">✓</div>
+                            <div style="margin-top: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: {% if order.status == 'PAID' %}#A86447{% else %}#324339{% endif %}; font-weight: bold;">Pagado</div>
+                        </td>
 
-                    <td align="center">
-                        <div style="width: 32px; height: 32px; line-height: 32px; border-radius: 50%; 
-                            background-color: {% if order.status == 'SHIPPED' %}#A86447{% elif order.status == 'DELIVERED' %}#324339{% else %}#FDFBF9{% endif %}; 
-                            color: {% if order.status == 'SHIPPED' or order.status == 'DELIVERED' %}white{% else %}#32433920{% endif %}; 
-                            font-size: 14px; display: inline-block; border: 1px solid #32433910;">✓</div>
-                        <div style="margin-top: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; 
-                            color: {% if order.status == 'SHIPPED' %}#A86447{% elif order.status == 'DELIVERED' %}#324339{% else %}#32433940{% endif %};">Enviado</div>
-                    </td>
+                        <td style="text-align: center;">
+                            <div style="width: 32px; height: 32px; line-height: 32px; border-radius: 50%; background-color: {% if order.status == 'SHIPPED' %}#A86447{% elif order.status == 'DELIVERED' %}#324339{% else %}#FDFBF9{% endif %}; color: {% if order.status == 'SHIPPED' or order.status == 'DELIVERED' %}white{% else %}#32433920{% endif %}; font-size: 14px; display: inline-block; border: 1px solid #32433910;">✓</div>
+                            <div style="margin-top: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: {% if order.status == 'SHIPPED' %}#A86447{% elif order.status == 'DELIVERED' %}#324339{% else %}#32433940{% endif %};">Enviado</div>
+                        </td>
 
-                    <td align="center">
-                        <div style="width: 32px; height: 32px; line-height: 32px; border-radius: 50%; 
-                            background-color: {% if order.status == 'DELIVERED' %}#A86447{% else %}#FDFBF9{% endif %}; 
-                            color: {% if order.status == 'DELIVERED' %}white{% else %}#32433920{% endif %}; 
-                            font-size: 14px; display: inline-block; border: 1px solid #32433910;">✓</div>
-                        <div style="margin-top: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; 
-                            color: {% if order.status == 'DELIVERED' %}#A86447{% else %}#32433940{% endif %};">Entregado</div>
-                    </td>
-                </tr>
+                        <td style="text-align: center;">
+                            <div style="width: 32px; height: 32px; line-height: 32px; border-radius: 50%; background-color: {% if order.status == 'DELIVERED' %}#A86447{% else %}#FDFBF9{% endif %}; color: {% if order.status == 'DELIVERED' %}white{% else %}#32433920{% endif %}; font-size: 14px; display: inline-block; border: 1px solid #32433910;">✓</div>
+                            <div style="margin-top: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: {% if order.status == 'DELIVERED' %}#A86447{% else %}#32433940{% endif %};">Entregado</div>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
 
@@ -52,6 +49,5 @@
         <div style="margin-top: 50px; border-top: 1px solid #FDFBF9; padding-top: 20px;">
             <p style="font-size: 10px; color: #32433940; text-transform: uppercase; letter-spacing: 1px;">Esencia Joyería &bull; Piezas con Alma</p>
         </div>
-
     </div>
 </div>
