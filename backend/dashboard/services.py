@@ -104,8 +104,6 @@ def get_admin_dashboard_stats():
 
     return stats
 
-    return stats
-
 
 class ShowcaseService:
     @staticmethod

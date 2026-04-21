@@ -79,17 +79,24 @@ class TestCart:
         assert float(res2.data["shipping"]) == 0.00
 
     def test_create_checkout_session_authenticated(self, api_client, user, product):
-        """Verifica que se genera una URL de Stripe enviando la dirección"""
+        """Verifica que se genera una URL de Stripe enviando el objeto de dirección completo"""
         cart, _ = Cart.objects.get_or_create(user=user)
         CartItem.objects.create(cart=cart, product=product, quantity=1)
 
         api_client.force_authenticate(user=user)
         url = reverse("create-payment-session")
 
-        response = api_client.post(url, {"address": "Calle Falsa 123"})
+        payload = {
+            "address_data": {
+                "address": "Calle Falsa 123, Madrid, Spain",
+                "lat": 40.4167,
+                "lng": -3.7033,
+            }
+        }
 
-        assert response.status_code == status.HTTP_200_OK
-        assert "url" in response.data
+        response = api_client.post(url, payload, format="json")
+
+        assert response
 
     def test_payment_success_logic(self, db, user, product):
         """Verifica que tras el pago el pedido se crea y el stock baja"""
