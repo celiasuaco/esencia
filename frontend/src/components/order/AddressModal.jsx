@@ -1,6 +1,7 @@
 // src/components/order/AddressModal.jsx
 import { useState, useCallback } from 'react';
 import { MapPin, X, Loader2 } from 'lucide-react';
+import PropTypes from 'prop-types';
 import debounce from 'lodash.debounce'; // npm install lodash.debounce
 
 export default function AddressModal({ isOpen, onClose, onConfirm }) {
@@ -98,3 +99,10 @@ export default function AddressModal({ isOpen, onClose, onConfirm }) {
         </div>
     );
 }
+
+
+AddressModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onConfirm: PropTypes.func.isRequired,
+};
