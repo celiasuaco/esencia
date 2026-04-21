@@ -3,9 +3,7 @@ import api from './api';
 
 export const checkoutService = {
     createPaymentSession: async (address) => {
-        const response = await api.post('/cart/create-payment-session/', {
-            address: address
-        });
+        const response = await api.post('/cart/create-payment-session/', address);
         return response.data;
     },
 

@@ -44,6 +44,22 @@ def secure_sample(population, k):
     return result
 
 
+CIUDADES_ESPANOLAS = [
+    {"nombre": "Madrid", "lat": 40.4167, "lng": -3.7033},
+    {"nombre": "Barcelona", "lat": 41.3851, "lng": 2.1734},
+    {"nombre": "Valencia", "lat": 39.4699, "lng": -0.3763},
+    {"nombre": "Sevilla", "lat": 37.3891, "lng": -5.9845},
+    {"nombre": "Zaragoza", "lat": 41.6488, "lng": -0.8891},
+    {"nombre": "Málaga", "lat": 36.7213, "lng": -4.4214},
+    {"nombre": "Murcia", "lat": 37.9922, "lng": -1.1307},
+    {"nombre": "Palma", "lat": 39.5693, "lng": 2.6502},
+    {"nombre": "Bilbao", "lat": 43.2630, "lng": -2.9350},
+    {"nombre": "Alicante", "lat": 38.3452, "lng": -0.4810},
+    {"nombre": "Valladolid", "lat": 41.6523, "lng": -4.7245},
+    {"nombre": "Vigo", "lat": 42.2406, "lng": -8.7207},
+]
+
+
 # --- SEEDER PRINCIPAL ---
 def run_seeder():
     print("🚀 Iniciando Seeder Masivo para Esencia...")
@@ -121,21 +137,31 @@ def run_seeder():
         productos.append(prod)
     print(f"✅ {len(productos)} Productos creados")
 
-    # --- 4. CREAR PEDIDOS (30 PEDIDOS CON FECHAS VARIADAS) ---
-    estados = ["PAID", "SHIPPED", "DELIVERED", "CANCELLED"]
-
-    # Definimos el rango de fechas: Diciembre 2025 a Marzo 2026
+    # --- 4. CREAR PEDIDOS (50 PEDIDOS PARA QUE EL MAPA SE VEA LLENO) ---
+    estados = [
+        "PAID",
+        "SHIPPED",
+        "DELIVERED",
+    ]
     start_date = datetime(2025, 12, 1)
     end_date = datetime(2026, 3, 31)
 
-    print(f"Generando 30 pedidos entre {start_date.date()} y {end_date.date()}...")
+    print("Generando 50 pedidos con geolocalización en España...")
 
-    for _ in range(30):
+    for _ in range(50):
         cliente = secure_choice(clientes)
+
+        ciudad = secure_choice(CIUDADES_ESPANOLAS)
+        lat_random = float(ciudad["lat"]) + (secure_uniform(-0.05, 0.05))
+        lng_random = float(ciudad["lng"]) + (secure_uniform(-0.05, 0.05))
+
         pedido = Order.objects.create(
             user=cliente,
-            address=fake.address(),
+            address=f"{fake.street_address()}, {ciudad['nombre']}, España",
             status=secure_choice(estados),
+            is_paid=True,
+            latitude=Decimal(lat_random).quantize(Decimal("0.000000")),
+            longitude=Decimal(lng_random).quantize(Decimal("0.000000")),
             placed_at=fake.date_time_between(
                 start_date=start_date, end_date=end_date, tzinfo=None
             ),
@@ -155,7 +181,7 @@ def run_seeder():
 
         pedido.update_totals()
 
-    print("✅ 30 Pedidos creados y totales calculados en DB")
+    print("✅ 50 Pedidos creados con Lat/Lng en España")
     print("✨ Seeder finalizado con éxito.")
 
 

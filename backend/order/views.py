@@ -55,13 +55,15 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         address = request.data.get("address")
-        if not address:
-            return Response(
-                {"error": "La dirección es obligatoria"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        lat = request.data.get("latitude")
+        lng = request.data.get("longitude")
 
-        order = OrderService.create_from_cart(request.user, address)
+        if not address:
+            return Response({"error": "La dirección es obligatoria"}, status=400)
+
+        order = OrderService.create_from_cart(
+            request.user, address, latitude=lat, longitude=lng
+        )
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
     @action(

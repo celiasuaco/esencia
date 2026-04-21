@@ -30,6 +30,13 @@ class Order(models.Model):
     shipping_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
+    latitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True
+    )
+    longitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True
+    )
+
     def update_totals(self):
         """
         Calcula y guarda los totales físicos en la DB basados en los items actuales.

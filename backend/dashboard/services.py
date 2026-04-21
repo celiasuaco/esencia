@@ -86,6 +86,22 @@ def get_admin_dashboard_stats():
         for s in monthly_stats
     ]
 
+    # --- 5. MAPA DE CALOR ---
+    heatmap_orders = (
+        Order.objects.filter(is_paid=True)
+        .exclude(latitude__isnull=True)
+        .exclude(longitude__isnull=True)
+    )
+
+    stats["heatmap_data"] = [
+        {
+            "lat": float(o.latitude),
+            "lng": float(o.longitude),
+            "amount": float(o.total_amount),
+        }
+        for o in heatmap_orders
+    ]
+
     return stats
 
 

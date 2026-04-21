@@ -106,9 +106,12 @@ def process_payment_success(session):
     from checkout.models import Cart, CartItem
 
     try:
-        # 1. Extraer datos de la metadata de Stripe
+        # 1. Extraer datos de la metadata (incluyendo coordenadas)
         user_id = session.metadata.get("user_id")
         address = session.metadata.get("address")
+        lat = session.metadata.get("latitude")
+        lng = session.metadata.get("longitude")
+
         user = User.objects.get(id=user_id)
 
         # 2. Obtener el carrito activo
@@ -127,7 +130,12 @@ def process_payment_success(session):
 
         # 3. CREAR EL PEDIDO FÍSICO
         order = Order.objects.create(
-            user=user, address=address, status=Order.Status.PAID, is_paid=True
+            user=user,
+            address=address,
+            latitude=lat,
+            longitude=lng,
+            status=Order.Status.PAID,
+            is_paid=True,
         )
 
         # 4. TRASPASAR ITEMS, RESTAR STOCK Y CONVERTIR
@@ -165,15 +173,15 @@ def process_payment_success(session):
 
 class CreateCheckoutSessionView(APIView):
     def post(self, request):
-        address = request.data.get("address")
-        if not address:
-            return Response({"error": "Dirección requerida"}, status=400)
+        address_data = request.data.get("address_data")
+        if not address_data or not address_data.get("address"):
+            return Response({"error": "Datos de dirección incompletos"}, status=400)
 
         cart = CartService.get_user_cart(request.user)
         if not cart or not cart.items.filter(status=CartItem.Status.ACTIVE).exists():
             return Response({"error": "Carrito vacío"}, status=400)
 
-        url = StripeService.create_checkout_session(request.user, cart, address)
+        url = StripeService.create_checkout_session(request.user, cart, address_data)
         return Response({"url": url}, status=200)
 
 
