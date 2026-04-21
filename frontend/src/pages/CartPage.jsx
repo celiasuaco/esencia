@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cartService } from '../services/cartService';
-import { orderService } from '../services/orderService';
 import { checkoutService } from '../services/checkoutService';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { authService } from '../services/authService';
@@ -16,7 +15,6 @@ export default function CartPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleConfirmAddress = async (addressData) => {
-        // addressData es { address, lat, lng } proveniente del Modal
         setIsModalOpen(false);
         const toastId = toast.loading("Iniciando proceso de pago seguro...");
 

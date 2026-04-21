@@ -4,7 +4,6 @@ import {
 } from 'recharts';
 
 import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip } from 'react-leaflet';
-import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 import MarkerClusterGroup from 'react-leaflet-cluster';

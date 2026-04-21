@@ -44,7 +44,7 @@ export default function AddressModal({ isOpen, onClose, onConfirm }) {
 
     const handleSelect = (feature) => {
         const { name, street, city, country } = feature.properties;
-        const fullAddress = `${street || name}, ${city || ""}, ${country || ""}`.replace(/,,/g, ',');
+        const fullAddress = `${street || name}, ${city || ""}, ${country || ""}`.replaceAll(/,,/g, ',');
         const [lng, lat] = feature.geometry.coordinates;
 
         // Enviamos el objeto completo al padre
