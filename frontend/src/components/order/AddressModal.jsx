@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { MapPin, X, Loader2 } from 'lucide-react';
 import PropTypes from 'prop-types';
-import debounce from 'lodash.debounce'; // npm install lodash.debounce
+import debounce from 'lodash.debounce';
 
 export default function AddressModal({ isOpen, onClose, onConfirm }) {
     const [query, setQuery] = useState("");
@@ -11,26 +11,20 @@ export default function AddressModal({ isOpen, onClose, onConfirm }) {
 
     const searchAddress = useCallback(
         debounce(async (text) => {
-            if (text.length < 3) {
+            if (text.trim().length < 3) {
                 setSuggestions([]);
                 return;
             }
             setLoading(true);
             try {
-                const params = new URLSearchParams({
-                    q: text,
-                    limit: '5',
-                });
-
+                const params = new URLSearchParams({ q: text, limit: '5' });
                 const resp = await fetch(`https://photon.komoot.io/api/?${params.toString()}`);
-
-                if (!resp.ok) throw new Error("Error en la respuesta de Photon");
-
+                if (!resp.ok) throw new Error("Error en Photon");
                 const data = await resp.json();
                 setSuggestions(data.features || []);
             } catch (error) {
                 console.error("Error buscando dirección:", error);
-                setSuggestions([]); // Limpiamos sugerencias si hay error
+                setSuggestions([]);
             } finally {
                 setLoading(false);
             }
@@ -45,10 +39,10 @@ export default function AddressModal({ isOpen, onClose, onConfirm }) {
 
     const handleSelect = (feature) => {
         const { name, street, city, country } = feature.properties;
-        const fullAddress = `${street || name}, ${city || ""}, ${country || ""}`.replaceAll(/,,/g, ',');
+        // ✅ Corregido a replaceAll para Sonar
+        const fullAddress = `${street || name}, ${city || ""}, ${country || ""}`.replaceAll(',,', ',');
         const [lng, lat] = feature.geometry.coordinates;
 
-        // Enviamos el objeto completo al padre
         onConfirm({ address: fullAddress, lat, lng });
         setQuery("");
         setSuggestions([]);
@@ -59,7 +53,9 @@ export default function AddressModal({ isOpen, onClose, onConfirm }) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#324339]/40 backdrop-blur-sm">
             <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-10 relative border border-[#324339]/5">
-                <button onClick={onClose} className="absolute top-6 right-6 text-[#324339]/20 hover:text-[#A86447]"><X size={20} /></button>
+                <button onClick={onClose} className="absolute top-6 right-6 text-[#324339]/20 hover:text-[#A86447] transition-colors">
+                    <X size={20} />
+                </button>
 
                 <div className="text-center mb-8">
                     <div className="bg-[#A86447]/5 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -84,9 +80,12 @@ export default function AddressModal({ isOpen, onClose, onConfirm }) {
                         <ul className="absolute z-10 w-full bg-white border border-gray-100 rounded-2xl mt-2 shadow-xl max-h-60 overflow-y-auto">
                             {suggestions.map((s, i) => (
                                 <li
-                                    key={i}
+                                    key={s.properties.osm_id || i}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => handleSelect(s)}
-                                    className="p-4 hover:bg-[#FDFBF9] cursor-pointer text-xs text-[#324339] border-b border-gray-50 last:border-none"
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSelect(s); }}
+                                    className="p-4 hover:bg-[#FDFBF9] cursor-pointer text-xs text-[#324339] border-b border-gray-50 last:border-none outline-none focus:bg-[#FDFBF9]"
                                 >
                                     <p className="font-bold">{s.properties.name} {s.properties.street || ""}</p>
                                     <p className="opacity-60">{s.properties.city}, {s.properties.country}</p>

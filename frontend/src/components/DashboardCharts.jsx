@@ -7,7 +7,7 @@ import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip } from
 import 'leaflet/dist/leaflet.css';
 
 import MarkerClusterGroup from 'react-leaflet-cluster';
-
+import PropTypes from 'prop-types';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
@@ -111,9 +111,10 @@ export const SalesHeatMap = ({ points }) => {
                     showCoverageOnHover={false}
                     maxClusterRadius={50}
                 >
-                    {points.map((point, idx) => (
+                    {points.map((point) => (
                         <CircleMarker
-                            key={idx}
+                            // ✅ Cambiado de idx a una key única basada en datos para evitar el error de Sonar
+                            key={`${point.lat}-${point.lng}-${point.amount}`}
                             center={[point.lat, point.lng]}
                             radius={7}
                             pathOptions={pointOptions}
@@ -131,3 +132,18 @@ export const SalesHeatMap = ({ points }) => {
         </div>
     );
 };
+
+
+SalesHeatMap.propTypes = {
+    points: PropTypes.arrayOf(
+        PropTypes.shape({
+            lat: PropTypes.number.isRequired,
+            lng: PropTypes.number.isRequired,
+            amount: PropTypes.number.isRequired,
+        })
+    ).isRequired,
+};
+
+WishlistVsSalesChart.propTypes = { data: PropTypes.array.isRequired };
+RetentionPieChart.propTypes = { data: PropTypes.object.isRequired };
+MonthlySalesChart.propTypes = { data: PropTypes.array.isRequired };
