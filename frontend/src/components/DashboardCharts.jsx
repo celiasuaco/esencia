@@ -1,17 +1,19 @@
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    PieChart, Pie, Cell, Legend, AreaChart, Area
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+    PieChart, Pie, Cell, Legend, AreaChart, Area, Tooltip as RechartsTooltip
 } from 'recharts';
 
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip } from 'react-leaflet';
 import L from 'leaflet';
-import 'leaflet.heat';
 import 'leaflet/dist/leaflet.css';
-import { useEffect } from 'react';
+
+import MarkerClusterGroup from 'react-leaflet-cluster';
+
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 const COLORS = ['#324339', '#A86447'];
 
-// Gráfico Opción C: Deseo vs Venta
 export const WishlistVsSalesChart = ({ data }) => (
     <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
@@ -19,7 +21,7 @@ export const WishlistVsSalesChart = ({ data }) => (
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E8DDD1" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7F72', fontSize: 12 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7F72', fontSize: 12 }} />
-                <Tooltip
+                <RechartsTooltip
                     contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                 />
                 <Legend iconType="circle" />
@@ -30,7 +32,6 @@ export const WishlistVsSalesChart = ({ data }) => (
     </div>
 );
 
-// Gráfico Opción B: Tasa de Retorno (Fidelización)
 export const RetentionPieChart = ({ data }) => {
     const chartData = [
         { name: 'Recurrentes', value: data.recurring },
@@ -52,7 +53,7 @@ export const RetentionPieChart = ({ data }) => {
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
-                    <Tooltip />
+                    <RechartsTooltip />
                     <Legend verticalAlign="bottom" height={36} />
                 </PieChart>
             </ResponsiveContainer>
@@ -60,9 +61,8 @@ export const RetentionPieChart = ({ data }) => {
     );
 };
 
-
 export const MonthlySalesChart = ({ data }) => (
-    <div className="h-72 w-200">
+    <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
@@ -72,79 +72,63 @@ export const MonthlySalesChart = ({ data }) => (
                     </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#324339" strokeOpacity={0.05} />
-                <XAxis
-                    dataKey="label"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#324339', fontSize: 10, fontWeight: 'bold' }}
-                    dy={10}
+                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#324339', fontSize: 10, fontWeight: 'bold' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#324339', fontSize: 10 }} tickFormatter={(value) => `${value}€`} />
+                <RechartsTooltip
+                    contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', padding: '15px' }}
                 />
-                <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#324339', fontSize: 10 }}
-                    tickFormatter={(value) => `${value}€`}
-                />
-                <Tooltip
-                    contentStyle={{
-                        borderRadius: '20px',
-                        border: 'none',
-                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-                        padding: '15px'
-                    }}
-                />
-                <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#324339"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#colorRevenue)"
-                />
+                <Area type="monotone" dataKey="value" stroke="#324339" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
             </AreaChart>
         </ResponsiveContainer>
     </div>
 );
 
-function HeatLayer({ points }) {
-    const map = useMap();
+export const SalesHeatMap = ({ points }) => {
+    const pointOptions = {
+        fillColor: "#A86447",
+        color: "white",
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: 0.9,
+    };
 
-    useEffect(() => {
-        if (!map || !points || points.length === 0) return;
+    return (
+        <div className="h-96 w-full rounded-[2rem] overflow-hidden border border-[#324339]/5 shadow-inner">
+            <MapContainer
+                center={[40.4167, -3.7033]}
+                zoom={6}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={true}
+                zoomAnimation={true}
+                markerZoomAnimation={true}
+            >
+                <TileLayer
+                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    attribution='&copy; CartoDB'
+                />
 
-        // 1. Convertimos los puntos
-        const heatData = points.map(p => [
-            parseFloat(p.lat),
-            parseFloat(p.lng),
-            1.0 // Intensidad máxima para que el color sea sólido pero controlado por minOpacity
-        ]);
-
-        // 2. Configuramos la capa de calor
-        const heatLayer = L.heatLayer(heatData, {
-            radius: 25,
-            blur: 20,
-            minOpacity: 0.4,
-            maxZoom: 10,
-            gradient: {
-                0.2: 'rgba(168, 100, 71, 0.3)',
-                0.6: 'rgba(168, 100, 71, 0.6)',
-                1.0: 'rgba(168, 100, 71, 0.9)'
-            }
-        }).addTo(map);
-
-        return () => {
-            if (map && heatLayer) map.removeLayer(heatLayer);
-        };
-    }, [map, points]);
-
-    return null;
-}
-
-export const SalesHeatMap = ({ points }) => (
-    <div className="h-96 w-full rounded-[2rem] overflow-hidden border border-[#324339]/5">
-        <MapContainer center={[40.4167, -3.7033]} zoom={5} style={{ height: '100%', width: '100%' }}>
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <HeatLayer points={points} />
-        </MapContainer>
-    </div>
-);
+                <MarkerClusterGroup
+                    chunkedLoading
+                    showCoverageOnHover={false}
+                    maxClusterRadius={50}
+                >
+                    {points.map((point, idx) => (
+                        <CircleMarker
+                            key={idx}
+                            center={[point.lat, point.lng]}
+                            radius={7}
+                            pathOptions={pointOptions}
+                        >
+                            <LeafletTooltip direction="top" offset={[0, -5]} opacity={1}>
+                                <div className="font-serif text-[#324339] p-1">
+                                    <span className="block text-[10px] uppercase tracking-wider text-[#A86447] font-bold">Venta</span>
+                                    <span className="text-sm italic">{point.amount.toFixed(2)} €</span>
+                                </div>
+                            </LeafletTooltip>
+                        </CircleMarker>
+                    ))}
+                </MarkerClusterGroup>
+            </MapContainer>
+        </div>
+    );
+};
