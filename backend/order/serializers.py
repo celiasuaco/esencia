@@ -23,6 +23,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, read_only=True)
     user_email = serializers.ReadOnlyField(source="user.email")
+    status_display = serializers.CharField(source="get_status_display", read_only=True)
 
     class Meta:
         model = Order
@@ -34,6 +35,10 @@ class OrderSerializer(serializers.ModelSerializer):
             "placed_at",
             "status",
             "is_paid",
+            "status_display",
+            "address",
+            "latitude",
+            "longitude",
             "subtotal_amount",
             "shipping_amount",
             "total_amount",
@@ -47,3 +52,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "shipping_amount",
             "total_amount",
         ]
+        extra_kwargs = {
+            "latitude": {"required": False, "allow_null": True},
+            "longitude": {"required": False, "allow_null": True},
+        }

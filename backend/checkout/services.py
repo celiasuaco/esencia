@@ -221,7 +221,7 @@ class CartService:
 
 class StripeService:
     @staticmethod
-    def create_checkout_session(user, cart, address):
+    def create_checkout_session(user, cart, address_data):
         try:
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
@@ -244,7 +244,9 @@ class StripeService:
                 cancel_url=f"{settings.SITE_URL}/checkout/cancel",
                 metadata={
                     "user_id": user.id,
-                    "address": address,
+                    "address": address_data.get("address"),
+                    "latitude": address_data.get("lat"),
+                    "longitude": address_data.get("lng"),
                 },
             )
             return checkout_session.url

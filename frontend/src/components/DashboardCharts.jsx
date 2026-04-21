@@ -3,6 +3,12 @@ import {
     PieChart, Pie, Cell, Legend, AreaChart, Area
 } from 'recharts';
 
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet.heat';
+import 'leaflet/dist/leaflet.css';
+import { useEffect } from 'react';
+
 const COLORS = ['#324339', '#A86447'];
 
 // Gráfico Opción C: Deseo vs Venta
@@ -56,7 +62,7 @@ export const RetentionPieChart = ({ data }) => {
 
 
 export const MonthlySalesChart = ({ data }) => (
-    <div className="h-72 w-full">
+    <div className="h-72 w-200">
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
@@ -97,5 +103,48 @@ export const MonthlySalesChart = ({ data }) => (
                 />
             </AreaChart>
         </ResponsiveContainer>
+    </div>
+);
+
+function HeatLayer({ points }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!map || !points || points.length === 0) return;
+
+        // 1. Convertimos los puntos
+        const heatData = points.map(p => [
+            parseFloat(p.lat),
+            parseFloat(p.lng),
+            1.0 // Intensidad máxima para que el color sea sólido pero controlado por minOpacity
+        ]);
+
+        // 2. Configuramos la capa de calor
+        const heatLayer = L.heatLayer(heatData, {
+            radius: 25,
+            blur: 20,
+            minOpacity: 0.4,
+            maxZoom: 10,
+            gradient: {
+                0.2: 'rgba(168, 100, 71, 0.3)',
+                0.6: 'rgba(168, 100, 71, 0.6)',
+                1.0: 'rgba(168, 100, 71, 0.9)'
+            }
+        }).addTo(map);
+
+        return () => {
+            if (map && heatLayer) map.removeLayer(heatLayer);
+        };
+    }, [map, points]);
+
+    return null;
+}
+
+export const SalesHeatMap = ({ points }) => (
+    <div className="h-96 w-full rounded-[2rem] overflow-hidden border border-[#324339]/5">
+        <MapContainer center={[40.4167, -3.7033]} zoom={5} style={{ height: '100%', width: '100%' }}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <HeatLayer points={points} />
+        </MapContainer>
     </div>
 );

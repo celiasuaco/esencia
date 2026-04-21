@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, ShoppingBag, Users, Euro, Repeat } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Users, Euro, Repeat, MapPin } from 'lucide-react';
 import { dashboardService } from '../../services/dashboardService';
-import { WishlistVsSalesChart, RetentionPieChart, MonthlySalesChart } from '../../components/DashboardCharts';
+import { WishlistVsSalesChart, RetentionPieChart, MonthlySalesChart, SalesHeatMap } from '../../components/DashboardCharts';
 
 export default function AdminDashboardPage() {
     const [stats, setStats] = useState(null);
@@ -49,7 +49,7 @@ export default function AdminDashboardPage() {
             color: 'from-[#5B7B63] to-[#3D5742]',
         },
         {
-            title: 'Clientes VIP',
+            title: 'Clientes',
             value: stats.total_clients,
             icon: Users,
             color: 'from-[#8FA895] to-[#5B7B63]',
@@ -64,18 +64,18 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
                 {kpiCards.map((card, index) => {
                     const Icon = card.icon;
                     return (
                         <div key={index} className="bg-white rounded-[2rem] shadow-xl shadow-[#324339]/5 p-8 border border-[#324339]/5 hover:-translate-y-1 transition-all">
-                            <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center justify-between mb-6 gap-5">
                                 <h3 className="text-xs text-[#324339]/40 font-bold uppercase tracking-wider">{card.title}</h3>
-                                <div className={`bg-gradient-to-br ${card.color} p-3 rounded-2xl shadow-lg`}>
-                                    <Icon className="w-5 h-5 text-white" />
+                                <div className={`bg-gradient-to-br ${card.color} p-2 rounded-xl shadow-lg`}>
+                                    <Icon className="w-6 h-6 text-white" />
                                 </div>
                             </div>
-                            <p className="text-3xl font-serif text-[#324339]">{card.value}</p>
+                            <p className="text-2xl font-serif text-[#324339]">{card.value}</p>
                         </div>
                     );
                 })}
@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Gráfico Barras: Deseo vs Venta */}
-                <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-xl shadow-[#324339]/5 p-10 border border-[#324339]/5">
+                <div className="lg:col-span-5 bg-white rounded-[2.5rem] shadow-xl shadow-[#324339]/5 p-10 border border-[#324339]/5">
                     <div className="flex items-center gap-3 mb-8">
                         <ShoppingBag className="text-[#A86447]" size={20} />
                         <h2 className="text-2xl font-serif text-[#324339]">Deseo vs Conversión Real</h2>
@@ -110,7 +110,7 @@ export default function AdminDashboardPage() {
                         </div>
                     </div>
                 </div>
-                <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-xl shadow-[#324339]/5 p-10 border border-[#324339]/5">
+                <div className="lg:col-span-6 bg-white rounded-[2.5rem] shadow-xl shadow-[#324339]/5 p-10 border border-[#324339]/5">
                     <div className="flex items-center gap-3 mb-8">
                         <ShoppingBag className="text-[#A86447]" size={20} />
                         <h2 className="text-2xl font-serif text-[#324339]">Ventas Mensuales</h2>
@@ -119,6 +119,14 @@ export default function AdminDashboardPage() {
                     <p className="mt-6 text-xs text-[#6B7F72] italic text-center">Gráfica donde se muestra el desempeño de ventas a lo largo del tiempo.</p>
                 </div>
 
+            </div>
+            <div className="mt-8 bg-white rounded-[2.5rem] shadow-xl p-10 border border-[#324339]/5">
+                <div className="flex items-center gap-3 mb-8">
+                    <MapPin className="text-[#A86447]" size={20} />
+                    <h2 className="text-2xl font-serif text-[#324339]">Distribución Geográfica de Ventas</h2>
+                </div>
+                {/* stats.heatmap_data viene ahora dentro del mismo objeto de stats */}
+                <SalesHeatMap points={stats?.heatmap_data || []} />
             </div>
         </div>
     );

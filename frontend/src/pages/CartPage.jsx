@@ -15,13 +15,14 @@ export default function CartPage() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Función que dispara el proceso final
-    const handleConfirmAddress = async (direccionConfirmada) => {
+    const handleConfirmAddress = async (addressData) => {
+        // addressData es { address, lat, lng } proveniente del Modal
         setIsModalOpen(false);
         const toastId = toast.loading("Iniciando proceso de pago seguro...");
 
         try {
-            const { url } = await checkoutService.createPaymentSession(direccionConfirmada);
+            // Enviamos el objeto con coordenadas al backend
+            const { url } = await checkoutService.createPaymentSession({ address_data: addressData });
 
             if (url) {
                 toast.success("Redirigiendo a Stripe...", { id: toastId });
@@ -36,6 +37,18 @@ export default function CartPage() {
                 description: error.response?.data?.error || "Inténtalo de nuevo."
             });
         }
+    };
+
+    const handleFinalizarCompra = () => {
+        if (!isAuthenticated) {
+            toast.error("Identificación requerida", {
+                description: "Por favor, inicia sesión para finalizar tu pedido."
+            });
+            navigate('/login', { state: { from: '/cart' } });
+            return;
+        }
+
+        setIsModalOpen(true);
     };
 
     const API_BASE_URL = 'http://localhost:8000';
@@ -80,44 +93,6 @@ export default function CartPage() {
             loadCart();
         } catch (err) {
             console.error("Error al eliminar el producto:", err);
-        }
-    };
-
-    const handleFinalizarCompra = async () => {
-        if (!isAuthenticated) {
-            toast.error("Identificación requerida", {
-                description: "Por favor, inicia sesión para finalizar tu pedido."
-            });
-            navigate('/login', { state: { from: '/cart' } });
-            return;
-        }
-
-        const direccionUsuario = window.prompt("Por favor, introduce tu dirección de envío:", "Calle Mayor 1, Madrid");
-
-        if (!direccionUsuario) {
-            toast.error("La dirección es obligatoria para el envío.");
-            return;
-        }
-
-        const toastId = toast.loading("Iniciando proceso de pago seguro...");
-
-        try {
-            const order = await orderService.createOrder(direccionUsuario);
-
-            const { url } = await checkoutService.createPaymentSession(order.id);
-
-            if (url) {
-                toast.success("Redirigiendo a Stripe...", { id: toastId });
-                window.location.href = url;
-            } else {
-                throw new Error("No se recibió la URL de pago");
-            }
-        } catch (error) {
-            console.error("Error al procesar el pedido:", error);
-            toast.error("Error al procesar el pedido", {
-                id: toastId,
-                description: error.response?.data?.error || "Inténtalo de nuevo en unos minutos."
-            });
         }
     };
 
@@ -263,14 +238,7 @@ export default function CartPage() {
 
                             <button
                                 className="w-full bg-[#324339] text-white py-5 rounded-full uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-[#A86447] transition-all duration-500 shadow-xl shadow-[#324339]/20 active:scale-95"
-                                onClick={() => {
-                                    if (isAuthenticated) {
-                                        setIsModalOpen(true);
-                                    } else {
-                                        toast.error("Identificación requerida");
-                                        navigate('/login', { state: { from: '/cart' } });
-                                    }
-                                }}
+                                onClick={handleFinalizarCompra}
                             >
                                 Finalizar Compra
                             </button>

@@ -18,6 +18,12 @@ class ComparisonChartSerializer(serializers.Serializer):
     sale_count = serializers.IntegerField()
 
 
+class HeatmapPointSerializer(serializers.Serializer):
+    lat = serializers.FloatField()
+    lng = serializers.FloatField()
+    amount = serializers.FloatField()
+
+
 class AdminDashboardStatsSerializer(serializers.Serializer):
     # KPIs base
     total_revenue = serializers.FloatField()
@@ -33,3 +39,6 @@ class AdminDashboardStatsSerializer(serializers.Serializer):
 
     # Ventas Mensuales
     monthly_sales = DashboardChartDataSerializer(many=True)
+
+    # Mapa de calor
+    heatmap_data = HeatmapPointSerializer(many=True)

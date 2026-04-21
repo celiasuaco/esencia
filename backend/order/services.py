@@ -10,7 +10,7 @@ from .models import Order, OrderItem
 class OrderService:
     @staticmethod
     @transaction.atomic
-    def create_from_cart(user, address):
+    def create_from_cart(user, address, latitude=None, longitude=None):
         cart = get_object_or_404(Cart, user=user)
         active_items = cart.items.filter(status=CartItem.Status.ACTIVE)
 
@@ -23,7 +23,9 @@ class OrderService:
                     f"Lo sentimos, el producto {item.product.name} ya no tiene stock suficiente (Disponible: {item.product.stock})."
                 )
 
-        order = Order.objects.create(user=user, address=address)
+        order = Order.objects.create(
+            user=user, address=address, latitude=latitude, longitude=longitude
+        )
 
         for item in active_items:
             OrderService._create_order_item(order, item)
