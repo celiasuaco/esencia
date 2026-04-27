@@ -26,6 +26,8 @@ SECRET_KEY = os.environ.get(
     "SECRET_KEY_DJANGO", "opbi=6$6+%zfbbv(gysk#58ex7=7iod0bt)sylqp6@!n$dyq0q"
 )
 
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -49,6 +51,7 @@ INSTALLED_APPS = [
     "checkout",
     "order",
     "dashboard",
+    "chatbot",
 ]
 
 MIDDLEWARE = [
