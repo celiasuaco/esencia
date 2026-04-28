@@ -16,6 +16,7 @@ Including another URLconf
 """
 
 from authentication import urls as authentication_urls
+from chatbot import urls as chatbot_urls
 from checkout import urls as checkout_urls
 from dashboard import urls as dashboard_urls
 from dashboard.views import ShowcaseView
@@ -33,6 +34,7 @@ urlpatterns = [
     path("api/products/", include(product_urls)),
     path("api/cart/", include(checkout_urls)),
     path("api/orders/", include(order_urls)),
+    path("api/chatbot/", include(chatbot_urls)),
     path("api/", ShowcaseView.as_view(), name="showcase-products"),
 ]
 

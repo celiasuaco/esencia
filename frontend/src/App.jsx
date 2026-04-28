@@ -18,6 +18,7 @@ import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import AdminUserListPage from "./pages/admin/AdminUserListPage";
 import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
+import Chatbot from "./components/chatbot/Chatbot";
 import { Toaster } from 'sonner';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         closeButton
         theme="light"
       />
+      <Chatbot />
       <Routes>
 
         {/* GRUPO 1: CLIENTES / PÚBLICO (Con Navbar superior) */}
