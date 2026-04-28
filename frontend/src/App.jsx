@@ -18,6 +18,7 @@ import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import AdminUserListPage from "./pages/admin/AdminUserListPage";
 import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
+import Terms from "./pages/legal/Terms";
 import Chatbot from "./components/chatbot/Chatbot";
 import { Toaster } from 'sonner';
 
@@ -48,6 +49,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+          <Route path="/terminos" element={<Terms />} />
 
           {/* Perfil de Cliente: Solo si NO es admin (o si quieres que el admin vea la tienda) */}
           <Route
