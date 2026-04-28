@@ -1,8 +1,8 @@
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .services import ChatbotService
+from .services import AdminChatbotService, ChatbotService
 
 
 class ChatbotView(APIView):
@@ -17,3 +17,13 @@ class ChatbotView(APIView):
         bot_response = service.get_response(user_message)
 
         return Response({"response": bot_response})
+
+
+class AdminChatbotView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        message = request.data.get("message")
+        service = AdminChatbotService()
+        response = service.get_admin_response(message, request.user)
+        return Response({"response": response})
