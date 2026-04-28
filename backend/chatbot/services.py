@@ -22,7 +22,7 @@ class ChatbotService:
             )
         return context
 
-    def get_response(self, user_message, chat_history=[]):
+    def get_response(self, user_message):
         """Envía el catálogo + pregunta a Gemini"""
         catalog = self._get_catalog_context()
 

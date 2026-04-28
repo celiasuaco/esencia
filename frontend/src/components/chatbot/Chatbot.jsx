@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { chatbotService } from '../../services/chatbotService';
 import { productService } from '../../services/productService';
 import ReactMarkdown from 'react-markdown';
+import PropTypes from 'prop-types';
 
 const ChatProductCard = ({ product }) => {
     const API_URL = "http://localhost:8000";
@@ -12,23 +13,26 @@ const ChatProductCard = ({ product }) => {
         : `${API_URL}${product.photo}`;
 
     return (
-        <div
+        <button
+            type="button"
             onClick={() => window.location.href = `/product/${product.id}`}
-            className="flex items-center gap-3 bg-white border border-[#324339]/10 p-2 rounded-2xl my-2 hover:border-[#A86447]/30 transition-all cursor-pointer group"
+            className="w-full flex items-center gap-3 bg-white border border-[#324339]/10 p-2 rounded-2xl my-2 hover:border-[#A86447]/30 transition-all cursor-pointer group focus:ring-2 focus:ring-[#A86447] outline-none"
+            aria-label={`Ver detalles de ${product.name}`}
         >
-            <div className="w-12 h-12 shrink-0 overflow-hidden rounded-xl bg-gray-50">
+            <div className="w-12 h-12 shrink-0 overflow-hidden rounded-xl bg-gray-50 shadow-sm">
                 <img
                     src={imageUrl}
                     alt={product.name}
+                    crossOrigin="anonymous"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=Joyas'}
+                    onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Joyas'; }}
                 />
             </div>
             <div className="flex-grow min-w-0 text-left">
                 <p className="text-[11px] font-bold text-[#324339] truncate m-0">{product.name}</p>
-                <p className="text-[10px] text-[#A86447] italic m-0">{product.price} €</p>
+                <p className="text-[10px] text-[#A86447] font-serif italic m-0">{product.price} €</p>
             </div>
-        </div>
+        </button>
     );
 };
 
@@ -124,7 +128,11 @@ export default function Chatbot() {
                             <h3 className="font-serif italic text-base m-0 text-white leading-tight">Asistente Esencia</h3>
                             <p className="text-[9px] uppercase tracking-widest opacity-60 m-0 text-white font-bold">Experto en Joyería</p>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white transition-all">
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="text-white/60 hover:text-white transition-all p-1"
+                            aria-label="Cerrar chat"
+                        >
                             <X size={18} />
                         </button>
                     </div>
@@ -180,13 +188,25 @@ export default function Chatbot() {
                 </div>
             )}
 
-            {/* Botón Flotante (Izquierda) */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-14 h-14 bg-[#324339] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-105 transition-all active:scale-95"
-            >
-                {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
-            </button>
+            {/* 2. Botón Flotante con alineación dinámica */}
+            <div className={`w-full flex ${isOpen ? 'justify-end' : 'justify-start'}`}>
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="w-14 h-14 bg-[#324339] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-105 transition-all active:scale-95"
+                    aria-label={isOpen ? "Cerrar asistente" : "Abrir asistente"}
+                >
+                    {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
+                </button>
+            </div>
         </div>
     );
 }
+
+ChatProductCard.propTypes = {
+    product: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        name: PropTypes.string.isRequired,
+        photo: PropTypes.string,
+        price: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    }).isRequired
+};
