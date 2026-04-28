@@ -13,9 +13,10 @@ const getErrorMessage = (error) => {
 };
 
 export const productService = {
-    getAll: async () => {
+    getAll: async (params = {}) => {
         try {
-            const response = await api.get('/products/');
+            const queryString = new URLSearchParams(params).toString();
+            const response = await api.get(`/products/${queryString ? `?${queryString}` : ''}`);
             return response.data;
         } catch (error) { throw getErrorMessage(error); }
     },
