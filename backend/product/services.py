@@ -3,10 +3,33 @@ from .models import Product
 
 class ProductService:
     @staticmethod
-    def get_all_products(include_inactive=False):
+    def get_all_products(include_inactive=False, filters=None, sort_by=None):
         if include_inactive:
-            return Product.objects.all().order_by("name")
-        return Product.objects.filter(is_active=True).order_by("name")
+            queryset = Product.objects.all()
+        else:
+            queryset = Product.objects.filter(is_active=True)
+
+        if filters:
+            if filters.get("material"):
+                queryset = queryset.filter(material__iexact=filters["material"])
+            if filters.get("min_price"):
+                queryset = queryset.filter(price__gte=filters["min_price"])
+            if filters.get("max_price"):
+                queryset = queryset.filter(price__lte=filters["max_price"])
+            if filters.get("category"):
+                queryset = queryset.filter(category__iexact=filters["category"])
+
+        if sort_by:
+            if sort_by == "price_asc":
+                queryset = queryset.order_by("price")
+            elif sort_by == "price_desc":
+                queryset = queryset.order_by("-price")
+            else:
+                queryset = queryset.order_by("name")
+        else:
+            queryset = queryset.order_by("name")
+
+        return queryset
 
     @staticmethod
     def create_product(validated_data):

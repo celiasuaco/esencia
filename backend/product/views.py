@@ -19,7 +19,19 @@ class ProductViewSet(viewsets.ModelViewSet):
         is_admin = user.is_authenticated and (
             user.is_staff or getattr(user, "role", None) == "ADMIN"
         )
-        return ProductService.get_all_products(include_inactive=is_admin)
+
+        # Extraer filtros y ordenación de los parámetros de la URL
+        filters = {
+            "material": self.request.query_params.get("material"),
+            "min_price": self.request.query_params.get("min_price"),
+            "max_price": self.request.query_params.get("max_price"),
+            "category": self.request.query_params.get("category"),
+        }
+        sort_by = self.request.query_params.get("sort")
+
+        return ProductService.get_all_products(
+            include_inactive=is_admin, filters=filters, sort_by=sort_by
+        )
 
     def perform_create(self, serializer):
         ProductService.create_product(serializer.validated_data)
