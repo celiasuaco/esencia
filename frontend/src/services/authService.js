@@ -103,11 +103,8 @@ export const authService = {
     }
   },
 
-  // --- HELPERS DE UTILIDAD ---
-  
   updateLocalUser: (newUserData) => {
     const currentUser = authService.getCurrentUser() || {};
-    // Hacemos un merge para no perder campos que el backend quizás no envió en el patch
     const updatedUser = { ...currentUser, ...newUserData };
     localStorage.setItem('user', JSON.stringify(updatedUser));
   },
@@ -118,7 +115,7 @@ export const authService = {
       return user ? JSON.parse(user) : null;
     } catch (e) {
       localStorage.removeItem('user');
-      return null;
+      throw getErrorMessage(e.response?.data) || "Error al obtener datos del usuario";
     }
   },
 
@@ -132,6 +129,21 @@ export const authService = {
       return response.data;
     } catch (error) {
       throw getErrorMessage(error.response?.data) || "Error al obtener perfil";
+    }
+  },
+
+  // Derecho al olvido: Anonimización y cierre de cuenta
+  deleteAccount: async () => {
+    try {
+      const response = await api.post('/auth/delete-account/');
+      
+      localStorage.removeItem('user');
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
+      
+      return response.data;
+    } catch (error) {
+      throw getErrorMessage(error.response?.data) || "No se pudo procesar la eliminación de la cuenta";
     }
   },
 
