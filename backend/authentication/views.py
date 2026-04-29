@@ -18,7 +18,12 @@ from .serializers import (
     UserAdminStatsSerializer,
     UserSerializer,
 )
-from .services import create_user, get_users_with_order_stats, send_password_reset_email
+from .services import (
+    anonymize_user,
+    create_user,
+    get_users_with_order_stats,
+    send_password_reset_email,
+)
 
 logger = logging.getLogger("authentication")
 
@@ -99,6 +104,35 @@ class LogoutView(views.APIView):
             return response.Response(
                 {"error": "Token inválido o expirado"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class DeleteAccountView(views.APIView):
+    """
+    Endpoint para que el usuario ejerza su Derecho al Olvido.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        try:
+            anonymize_user(user)
+
+            logger.info(
+                f"El usuario {user.id} ha solicitado y completado su derecho al olvido."
+            )
+            return response.Response(
+                {
+                    "message": "Su cuenta y datos personales han sido eliminados de nuestro sistema correctamente."
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception:
+            return response.Response(
+                {"error": "No se pudo procesar la solicitud de eliminación."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 

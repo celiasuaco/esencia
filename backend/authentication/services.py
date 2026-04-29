@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -41,6 +42,36 @@ def create_user(email, password, full_name=None, **extra_fields):
         logger.error(
             f"Error inesperado al crear usuario {email}: {str(e)}", exc_info=True
         )
+        raise e
+
+
+def anonymize_user(user):
+    """
+    Cumple con el Derecho al Olvido (RGPD).
+    Sustituye datos personales por valores genéricos y desactiva la cuenta.
+    """
+    logger.info(f"Iniciando proceso de anonimización para el usuario ID: {user.id}")
+
+    try:
+        random_id = uuid.uuid4().hex[:8]
+        user.email = f"deleted_{random_id}@esencia.internal"
+        user.username = user.email
+
+        user.full_name = "Usuario Eliminado"
+        if hasattr(user, "address"):
+            user.address = "Información eliminada"
+
+        if user.photo:
+            user.photo.delete(save=False)
+            user.photo = None
+
+        user.is_active = False
+        user.save()
+
+        logger.info(f"Usuario ID {user.id} anonimizado correctamente.")
+        return user
+    except Exception as e:
+        logger.error(f"Error al anonimizar usuario {user.id}: {str(e)}")
         raise e
 
 
