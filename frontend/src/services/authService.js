@@ -1,6 +1,6 @@
 import api from './api';
 
-// Función auxiliar para extraer el mensaje de error de Django REST Framework
+// Función auxiliar para extraer el mensaje de error
 const getErrorMessage = (error) => {
   if (typeof error === 'string') return error;
   
@@ -44,7 +44,6 @@ export const authService = {
   logout: async () => {
     const refreshToken = localStorage.getItem('refresh');
     
-    // 1. Limpiamos local primero para una respuesta instantánea en la UI
     const clearLocal = () => {
       localStorage.removeItem('user');
       localStorage.removeItem('access');
@@ -103,12 +102,14 @@ export const authService = {
     }
   },
 
+  // Actualizar los datos del usuario
   updateLocalUser: (newUserData) => {
     const currentUser = authService.getCurrentUser() || {};
     const updatedUser = { ...currentUser, ...newUserData };
     localStorage.setItem('user', JSON.stringify(updatedUser));
   },
 
+  // Obtener datos del usuario
   getCurrentUser: () => {
     try {
       const user = localStorage.getItem('user');
@@ -119,9 +120,10 @@ export const authService = {
     }
   },
 
+  // Sincronizar perfil con el servidor para obtener datos actualizados
   getProfile: async () => {
     try {
-      const response = await api.get('/auth/profile/'); // Ajusta a tu endpoint real de perfil
+      const response = await api.get('/auth/profile/');
       
       if (response.data) {
         authService.updateLocalUser(response.data);

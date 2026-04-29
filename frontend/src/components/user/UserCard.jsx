@@ -1,4 +1,4 @@
-import { User, Calendar, ShoppingBag, TrendingUp } from 'lucide-react';
+import { Calendar, ShoppingBag, TrendingUp } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 const UserCard = ({ client }) => {
@@ -12,12 +12,8 @@ const UserCard = ({ client }) => {
     const initial = client.full_name ? client.full_name.charAt(0).toUpperCase() : '?';
 
     return (
-        /* Borde resaltado en Verde Esencia (#324339). 
-           Al hacer hover, el borde se intensifica y el color Terracota (#A86447) aparece en la sombra.
-        */
         <div className="bg-white rounded-[2rem] border-2 border-[#324339]/20 p-6 hover:border-[#324339] hover:shadow-xl hover:shadow-[#A86447]/10 transition-all duration-500 group">
             <div className="flex items-center gap-6">
-                {/* Avatar con borde sutil en Terracota */}
                 <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-[#A86447] to-[#324339] flex-shrink-0 flex items-center justify-center text-white text-xl font-serif shadow-inner overflow-hidden border-2 border-white">
                     <span className="absolute">{initial}</span>
                     {client.photo && (
@@ -30,7 +26,6 @@ const UserCard = ({ client }) => {
                     )}
                 </div>
 
-                {/* Info Principal */}
                 <div className="flex-grow">
                     <h3 className="text-lg font-serif italic text-[#324339] transition-colors group-hover:text-[#A86447]">
                         {client.full_name}
@@ -42,7 +37,6 @@ const UserCard = ({ client }) => {
                     </div>
                 </div>
 
-                {/* Métricas Contables */}
                 <div className="flex items-center gap-8 pr-4">
                     <div className="text-center">
                         <p className="text-[9px] uppercase tracking-widest text-[#324339]/40 mb-1">Pedidos</p>

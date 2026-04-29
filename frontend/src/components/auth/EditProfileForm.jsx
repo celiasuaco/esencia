@@ -73,7 +73,6 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
                     )}
                 </div>
 
-                {/* Overlay de cámara */}
                 <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity">
                     <Camera className="text-white w-8 h-8" />
                 </div>
@@ -108,7 +107,6 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
                 </div>
             </div>
 
-            {/* Botones Centralizados */}
             <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4">
                 <button
                     type="submit"

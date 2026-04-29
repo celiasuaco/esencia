@@ -60,13 +60,11 @@ function App() {
           <Route path="/orders/:id" element={user && !isAdmin ? <AdminOrderDetailPage /> : <Navigate to="/login" />} />
         </Route>
 
-        {/* GRUPO 2: ADMINISTRADORES (Con Sidebar lateral) */}
+        {/* GRUPO 2: ADMINISTRADORES */}
         <Route
           element={isAdmin ? <AdminLayout /> : <Navigate to="/login" />}
         >
           <Route path="/dashboard" element={<AdminDashboard />} />
-
-          {/* Perfil de Administrador: Misma página, distinto Layout */}
           <Route path="/admin/profile" element={<ProfilePage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route path="/admin/products/new" element={<ProductFormPage />} />
