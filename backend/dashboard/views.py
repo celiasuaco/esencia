@@ -11,17 +11,20 @@ from .services import get_admin_dashboard_stats
 
 
 class AdminDashboardStatsView(APIView):
+    """Vista para obtener las estadísticas del dashboard de administración."""
+
     permission_classes = [IsSuperAdmin]
 
     def get(self, request):
         data = get_admin_dashboard_stats()
-
         serializer = AdminDashboardStatsSerializer(data)
 
         return Response(serializer.data)
 
 
 class ShowcaseView(APIView):
+    """Vista para obtener los datos para el escaparate."""
+
     permission_classes = [AllowAny]
 
     def get(self, request):

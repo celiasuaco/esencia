@@ -113,7 +113,6 @@ export const SalesHeatMap = ({ points }) => {
                 >
                     {points.map((point) => (
                         <CircleMarker
-                            // ✅ Cambiado de idx a una key única basada en datos para evitar el error de Sonar
                             key={`${point.lat}-${point.lng}-${point.amount}`}
                             center={[point.lat, point.lng]}
                             radius={7}

@@ -45,7 +45,6 @@ export default function Chatbot() {
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef(null);
 
-    // Cargamos los productos al inicio para poder comparar nombres
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -58,7 +57,6 @@ export default function Chatbot() {
         fetchProducts();
     }, []);
 
-    // Auto-scroll suave
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTo({
@@ -81,21 +79,17 @@ export default function Chatbot() {
             const data = await chatbotService.ask(userMsg);
             const rawResponse = data.response || "";
 
-            // 1. Separar el texto principal de la etiqueta RECOMENDACION
-            // Usamos una expresión regular que ignora mayúsculas/minúsculas
             const delimiter = /RECOMENDACION:/i;
             const parts = rawResponse.split(delimiter);
 
-            const cleanText = parts[0].trim(); // Este es el texto que verá el usuario
+            const cleanText = parts[0].trim();
             let recommended = [];
 
             if (parts.length > 1) {
-                // 2. Extraer los nombres de los productos recomendados
                 const names = parts[1].split(",").map(n => n.trim().toLowerCase());
                 console.log("Nombres detectados por la IA:", names);
                 console.log("Catálogo disponible:", allProducts);
 
-                // 3. Buscar en el catálogo local
                 recommended = allProducts.filter(p =>
                     names.some(name => p.name.toLowerCase().includes(name))
                 );
@@ -103,7 +97,7 @@ export default function Chatbot() {
             }
 
             setMessages(prev => [...prev, {
-                text: cleanText, // <--- Aquí pasamos solo el texto limpio
+                text: cleanText,
                 isBot: true,
                 recommendedProducts: recommended
             }]);
@@ -121,7 +115,6 @@ export default function Chatbot() {
             {isOpen && (
                 <div className="mb-4 w-72 sm:w-80 h-[480px] bg-white rounded-[2.5rem] shadow-2xl border border-[#324339]/10 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5">
 
-                    {/* Header */}
                     <div className="bg-[#324339] p-5 text-white flex justify-between items-center shrink-0">
                         <div className="text-left">
                             <h3 className="font-serif italic text-base m-0 text-white leading-tight">Asistente Esencia</h3>
@@ -136,7 +129,6 @@ export default function Chatbot() {
                         </button>
                     </div>
 
-                    {/* Chat Content */}
                     <div ref={scrollRef} className="flex-grow p-4 overflow-y-auto space-y-4 bg-[#FDFBF9]">
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
@@ -150,7 +142,6 @@ export default function Chatbot() {
                                         </ReactMarkdown>
                                     </div>
 
-                                    {/* Renderizado de Tarjetas de Producto */}
                                     {msg.isBot && msg.recommendedProducts?.length > 0 && (
                                         <div className="mt-3 pt-2 border-t border-[#324339]/5">
                                             <p className="text-[9px] uppercase tracking-tighter opacity-50 mb-2 font-bold">Piezas sugeridas:</p>
@@ -171,7 +162,6 @@ export default function Chatbot() {
                         )}
                     </div>
 
-                    {/* Form */}
                     <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-gray-100 flex gap-2 shrink-0">
                         <input
                             type="text"
@@ -187,7 +177,6 @@ export default function Chatbot() {
                 </div>
             )}
 
-            {/* 2. Botón Flotante con alineación dinámica */}
             <div className={`w-full flex ${isOpen ? 'justify-end' : 'justify-start'}`}>
                 <button
                     onClick={() => setIsOpen(!isOpen)}

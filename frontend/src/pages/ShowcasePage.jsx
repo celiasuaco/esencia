@@ -24,7 +24,6 @@ const ShowcasePage = () => {
 
     return (
         <div className="min-h-screen bg-[#FDFBF7]">
-            {/* 1. HERO: Marca + Botón */}
             <section className="relative h-[85vh] bg-[#2C3632] flex items-center justify-center text-center px-4 overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1531995811006-35cb42e1a022?q=80&w=2070')] bg-cover bg-center opacity-30 grayscale"></div>
                 <div className="relative z-10">
@@ -36,10 +35,8 @@ const ShowcasePage = () => {
                 </div>
             </section>
 
-            {/* CONTENIDO PRODUCTOS */}
             <div className="max-w-7xl mx-auto pt-16 px-8 py-24 space-y-32">
 
-                {/* 2. ÚLTIMAS UNIDADES */}
                 {data.last_units.length > 0 && (
                     <section>
                         <div className="flex items-center gap-8 mb-12">
@@ -54,7 +51,6 @@ const ShowcasePage = () => {
                     </section>
                 )}
 
-                {/* 3. MÁS VENDIDOS */}
                 <section>
                     <div className="flex items-center gap-8 mb-12">
                         <div className="h-[1px] w-full bg-[#E8E2D6]"></div>
