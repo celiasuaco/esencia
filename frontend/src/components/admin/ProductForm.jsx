@@ -19,13 +19,11 @@ export default function ProductForm({
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Validación rápida frontend
         if (Number.parseFloat(formData.price) <= 0) {
             return toast.error("El precio debe ser mayor a 0");
         }
 
         const data = new FormData();
-        // Creamos una copia para no ensuciar el estado del componente
         const cleanData = { ...formData };
 
         delete cleanData.category_display;
@@ -93,13 +91,13 @@ export default function ProductForm({
 
             <div>
                 <label
-                    htmlFor="photo-upload" // Añade esto
+                    htmlFor="photo-upload"
                     className="block text-xs font-bold text-[#A3937B] uppercase mb-1"
                 >
                     Imagen de producto
                 </label>
                 <input
-                    id="photo-upload" // Añade este ID igual al htmlFor
+                    id="photo-upload"
                     type="file"
                     onChange={(e) => setPhoto(e.target.files[0])}
                     className="text-sm"

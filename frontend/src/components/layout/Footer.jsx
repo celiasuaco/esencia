@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
@@ -7,7 +7,6 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 text-center md:text-left">
 
-                    {/* Sobre Esencia */}
                     <div className="flex flex-col items-center md:items-start">
                         <h3 className="text-3xl font-serif mb-4 text-[#A86447] italic">Esencia</h3>
                         <p className="text-sm text-[#FDFBF9]/70 leading-relaxed max-w-xs">
@@ -15,7 +14,6 @@ export default function Footer() {
                         </p>
                     </div>
 
-                    {/* Enlaces Legales */}
                     <div>
                         <h4 className="mb-6 font-serif text-lg text-[#A86447]">Legal</h4>
                         <ul className="space-y-4 text-sm text-[#FDFBF9]/60">
@@ -23,7 +21,6 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Contacto */}
                     <div>
                         <h4 className="mb-6 font-serif text-lg text-[#A86447]">Contacto</h4>
                         <ul className="space-y-4 text-sm text-[#FDFBF9]/60">

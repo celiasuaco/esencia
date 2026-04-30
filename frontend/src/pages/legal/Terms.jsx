@@ -5,7 +5,6 @@ export default function Terms() {
         <div className="bg-[#FDFBF9] min-h-screen py-20 px-4 sm:px-6 lg:px-8 font-sans">
             <div className="max-w-4xl mx-auto shadow-2xl bg-white p-8 md:p-16 rounded-sm border border-gray-100">
 
-                {/* Encabezado Principal */}
                 <header className="text-center border-b border-[#A86447]/20 pb-10 mb-10">
                     <h1 className="text-4xl font-serif text-[#324339] italic mb-4">Aviso Legal Unificado</h1>
                     <p className="text-[#A86447] font-bold tracking-widest text-xs uppercase">
@@ -16,7 +15,6 @@ export default function Terms() {
 
                 <div className="text-[#324339]/90 text-sm leading-relaxed text-justify space-y-10">
 
-                    {/* SECCIÓN 1: CONDICIONES DE USO */}
                     <section>
                         <h2 className="text-xl font-serif text-[#324339] font-bold mb-4 flex items-center gap-2">
                             <span className="text-[#A86447]">01.</span> DISPOSICIONES GENERALES
@@ -26,7 +24,6 @@ export default function Terms() {
                         </p>
                     </section>
 
-                    {/* SECCIÓN 2: PROPIEDAD INTELECTUAL */}
                     <section>
                         <h2 className="text-xl font-serif text-[#324339] font-bold mb-4 flex items-center gap-2">
                             <span className="text-[#A86447]">02.</span> PROPIEDAD INTELECTUAL E INDUSTRIAL
@@ -36,7 +33,6 @@ export default function Terms() {
                         </p>
                     </section>
 
-                    {/* SECCIÓN 3: POLÍTICA DE PRIVACIDAD (RGPD) */}
                     <section className="bg-[#FDFBF9] p-6 border-l-4 border-[#A86447]">
                         <h2 className="text-xl font-serif text-[#324339] font-bold mb-4 flex items-center gap-2">
                             <span className="text-[#A86447]">03.</span> PROTECCIÓN DE DATOS (RGPD)
@@ -60,7 +56,6 @@ export default function Terms() {
                         </ul>
                     </section>
 
-                    {/* SECCIÓN 4: ASISTENCIA POR INTELIGENCIA ARTIFICIAL */}
                     <section>
                         <h2 className="text-xl font-serif text-[#324339] font-bold mb-4 flex items-center gap-2">
                             <span className="text-[#A86447]">04.</span> RESPONSABILIDAD DEL ASISTENTE VIRTUAL
@@ -70,7 +65,6 @@ export default function Terms() {
                         </p>
                     </section>
 
-                    {/* SECCIÓN 5: DERECHO DE DESISTIMIENTO */}
                     <section>
                         <h2 className="text-xl font-serif text-[#324339] font-bold mb-4 flex items-center gap-2">
                             <span className="text-[#A86447]">05.</span> CONDICIONES DE COMPRA
@@ -80,7 +74,6 @@ export default function Terms() {
                         </p>
                     </section>
 
-                    {/* SECCIÓN 6: TECNOLOGÍAS DE SEGUIMIENTO */}
                     <section>
                         <h2 className="text-xl font-serif text-[#324339] font-bold mb-4 flex items-center gap-2">
                             <span className="text-[#A86447]">06.</span> COOKIES Y SEGUIMIENTO

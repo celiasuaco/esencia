@@ -19,7 +19,6 @@ export default function CartPage() {
         const toastId = toast.loading("Iniciando proceso de pago seguro...");
 
         try {
-            // Enviamos el objeto con coordenadas al backend
             const { url } = await checkoutService.createPaymentSession({ address_data: addressData });
 
             if (url) {
@@ -59,6 +58,7 @@ export default function CartPage() {
     };
 
     const loadCart = async () => {
+        setLoading(true);
         try {
             const data = await cartService.getCart();
             setCart(data);
@@ -69,7 +69,9 @@ export default function CartPage() {
         }
     };
 
-    useEffect(() => { loadCart(); }, []);
+    useEffect(() => {
+        loadCart();
+    }, []);
 
     const handleUpdateQuantity = async (item, newQuantity) => {
         if (newQuantity < 1) return;
@@ -131,7 +133,6 @@ export default function CartPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12 items-start">
 
-                    {/* Lista de Productos */}
                     <div className="space-y-6">
                         <h1 className="text-4xl font-serif text-[#324339] italic mb-8">Mi Selección</h1>
 
@@ -181,7 +182,6 @@ export default function CartPage() {
                             ))}
                         </div>
 
-                        {/* LINK ADICIONAL AL CATÁLOGO */}
                         <div className="pt-16 pb-10 mt-10">
                             <Link
                                 to="/catalog"
@@ -199,7 +199,6 @@ export default function CartPage() {
                         </div>
                     </div>
 
-                    {/* Resumen de Pedido */}
                     <div className="lg:-mt-4 z-10">
                         <div className="sticky top-24 bg-white p-10 rounded-[2.5rem] border-2 border-[#324339] shadow-[0_20px_50px_rgba(50,67,57,0.1)] space-y-8">
                             <div className="flex items-center gap-3 border-b border-[#324339]/5 pb-6">

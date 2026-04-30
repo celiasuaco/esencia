@@ -60,7 +60,6 @@ export default function ForgotPassword() {
                             Email
                         </label>
 
-                        {/* CONTENEDOR DE ENTRADA CORREGIDO */}
                         <div className="relative flex items-center">
                             <Mail
                                 className="absolute left-4 text-[#A3937B] pointer-events-none z-10"
@@ -70,7 +69,6 @@ export default function ForgotPassword() {
                                 id="email"
                                 type="email"
                                 required
-                                // He añadido !pl-12 para forzar el padding izquierdo y evitar que se pise con el icono
                                 className="input-field !pl-12 w-full focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                 placeholder="tu@email.com"
                                 value={email}

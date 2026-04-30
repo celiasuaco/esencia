@@ -2,8 +2,11 @@ from .models import Product
 
 
 class ProductService:
+    """Servicio para manejar la lógica de negocio relacionada con los productos."""
+
     @staticmethod
     def get_all_products(include_inactive=False, filters=None, sort_by=None):
+        """Obtiene todos los productos, con opciones para incluir inactivos, filtrar y ordenar."""
         if include_inactive:
             queryset = Product.objects.all()
         else:
@@ -33,11 +36,12 @@ class ProductService:
 
     @staticmethod
     def create_product(validated_data):
-        # validated_data ya incluye la foto si viene en el request
+        """Crea un nuevo producto con los datos validados."""
         return Product.objects.create(**validated_data)
 
     @staticmethod
     def update_product(product_instance, validated_data):
+        """Actualiza un producto existente con los datos validados."""
         for attr, value in validated_data.items():
             setattr(product_instance, attr, value)
         product_instance.save()
@@ -45,6 +49,7 @@ class ProductService:
 
     @staticmethod
     def soft_delete(product_instance):
+        """Realiza un borrado lógico del producto, marcándolo como inactivo."""
         product_instance.is_active = False
         product_instance.save()
         return product_instance

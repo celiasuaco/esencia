@@ -1,4 +1,3 @@
-# order/services.py
 from checkout.models import Cart, CartItem
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -8,9 +7,12 @@ from .models import Order, OrderItem
 
 
 class OrderService:
+    """Servicio para manejar la lógica de creación y actualización de órdenes."""
+
     @staticmethod
     @transaction.atomic
     def create_from_cart(user, address, latitude=None, longitude=None):
+        """Crea un pedido a partir del contenido del carrito del usuario."""
         cart = get_object_or_404(Cart, user=user)
         active_items = cart.items.filter(status=CartItem.Status.ACTIVE)
 
@@ -36,6 +38,7 @@ class OrderService:
 
     @staticmethod
     def _create_order_item(order, cart_item):
+        """Crea un OrderItem a partir de un CartItem."""
         return OrderItem.objects.create(
             order=order,
             product=cart_item.product,
@@ -45,10 +48,7 @@ class OrderService:
 
     @staticmethod
     def update_order_status(order, new_status):
-        """
-        Si el estado pasa a PAID desde aquí (ej. acción manual del admin),
-        deberíamos asegurar que se ejecute la lógica de process_payment_success.
-        """
+        """Actualiza el estado de un pedido."""
         order.status = new_status
         order.save()
         return order

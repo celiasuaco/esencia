@@ -5,7 +5,6 @@ from product.models import Product
 
 class ChatbotService:
     def __init__(self):
-        # Configuramos Gemini con tu API Key del .env
         genai.configure(api_key=settings.GEMINI_API_KEY)
         self.model = genai.GenerativeModel("models/gemini-flash-latest")
 

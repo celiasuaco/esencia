@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { User, LogOut, Edit, Mail, Package, Loader2, Trash2 } from 'lucide-react';
 import { authService } from '../../services/authService';
 import EditProfileForm from '../../components/auth/EditProfileForm';
-// CORRECCIÓN: Importación correcta con llaves
 import { useNavigate } from 'react-router-dom';
 
 export default function ProfilePage() {
@@ -25,7 +24,6 @@ export default function ProfilePage() {
     const fetchUserData = async () => {
         setLoading(true);
         try {
-            // Sincronizamos con el servidor para tener el rol actualizado
             const freshUser = await authService.getProfile();
             setUser(freshUser);
         } catch (error) {

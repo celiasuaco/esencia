@@ -5,7 +5,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// 1. Interceptor de SOLICITUD: Añadir el token a cada petición
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access');
   if (token) {
@@ -14,15 +13,13 @@ api.interceptors.request.use((config) => {
   return config;
 }, (error) => Promise.reject(error));
 
-// 2. Interceptor de RESPUESTA: Manejar el refresco cuando recibimos un 401
 api.interceptors.response.use(
-  (response) => response, // Si la respuesta es OK, la dejamos pasar
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Si el error es 401 (No autorizado) y NO hemos reintentado ya esta petición
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // Marcamos para no entrar en un bucle infinito
+      originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refresh');
@@ -34,7 +31,6 @@ api.interceptors.response.use(
 
         const { access } = response.data;
 
-        // Guardamos el nuevo access token
         localStorage.setItem('access', access);
 
         originalRequest.headers.Authorization = `Bearer ${access}`;

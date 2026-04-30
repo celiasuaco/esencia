@@ -38,6 +38,8 @@ def product(db):
 
 @pytest.mark.django_db
 class TestOrders:
+    """Pruebas para el modelo Order y su flujo de creación"""
+
     def test_create_order_flow(self, api_client, user, product):
         """Test del flujo completo: Carrito -> Pago -> Creación de Pedido"""
         cart, _ = Cart.objects.get_or_create(user=user)
@@ -58,7 +60,7 @@ class TestOrders:
         assert Cart.objects.filter(user=user).count() == 0
 
     def test_admin_can_change_status_and_is_paid_updates(self, api_client, user):
-        # Configurar admin
+        """Test que verifica que un admin puede cambiar el estado de un pedido a PAID y que is_paid se actualiza correctamente"""
         admin = user
         admin.is_staff = True
         admin.save()
@@ -77,7 +79,7 @@ class TestOrders:
         assert order.is_paid is True
 
     def test_client_cannot_see_others_orders(self, api_client, user, product):
-        # Crear otro usuario y su pedido
+        """Test que verifica que un cliente no puede acceder a los pedidos de otros usuarios"""
         otro_user = User.objects.create_user(
             username="otro", email="otro@test.com", password="123"
         )
@@ -93,6 +95,7 @@ class TestOrders:
         ]
 
     def test_admin_search_by_tracking_code(self, api_client, user):
+        """Test que verifica que un admin puede buscar pedidos por su código de seguimiento"""
         admin = user
         admin.is_staff = True
         admin.save()
@@ -100,7 +103,6 @@ class TestOrders:
         order = Order.objects.create(user=user, address="Search Test")
         api_client.force_authenticate(user=admin)
 
-        # Buscar por tracking code
         url = f"{reverse('order-list')}?tracking={order.tracking_code}"
         response = api_client.get(url)
 
@@ -109,8 +111,7 @@ class TestOrders:
         assert response.data[0]["tracking_code"] == order.tracking_code
 
     def test_admin_can_access_any_order(self, api_client, user):
-        """Path 1: is_staff=True -> True"""
-        # Crear un admin y un pedido de un tercero
+        """Test que verifica que un admin puede acceder a cualquier pedido, incluso si no es el propietario"""
         admin = user
         admin.is_staff = True
         admin.save()
@@ -127,7 +128,7 @@ class TestOrders:
         assert response.status_code == status.HTTP_200_OK
 
     def test_owner_can_access_own_order(self, api_client, user):
-        """Path 2: obj.user == request.user -> True"""
+        """Test que verifica que un cliente puede acceder a su propio pedido"""
         order_propia = Order.objects.create(user=user, address="Mi Casa")
 
         api_client.force_authenticate(user=user)
@@ -137,7 +138,7 @@ class TestOrders:
         assert response.status_code == status.HTTP_200_OK
 
     def test_user_cannot_access_other_order(self, api_client, user):
-        """Path 3: obj.user != request.user -> False"""
+        """Test que verifica que un cliente no puede acceder a los pedidos de otros usuarios"""
         otro_user = user.__class__.objects.create_user(
             username="cliente2", email="c2@t.com", password="1"
         )

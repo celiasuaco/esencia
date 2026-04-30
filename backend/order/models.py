@@ -9,6 +9,8 @@ from product.models import Product
 
 
 class Order(models.Model):
+    """Modelo que representa un pedido realizado por un usuario."""
+
     class Status(models.TextChoices):
         PAID = "PAID", "Pagado"
         SHIPPED = "SHIPPED", "Enviado"
@@ -42,22 +44,18 @@ class Order(models.Model):
         Calcula y guarda los totales físicos en la DB basados en los items actuales.
         Se debe llamar después de crear los OrderItems.
         """
-        # Calculamos el subtotal sumando los items asociados
         subtotal = sum(
             item.price_at_purchase * item.quantity for item in self.order_items.all()
         )
 
-        # Aplicamos lógica de envío (Gratis > 100€)
         shipping = (
             Decimal("4.99") if subtotal < 100 and subtotal > 0 else Decimal("0.00")
         )
 
-        # Actualizamos campos físicos
         self.subtotal_amount = subtotal
         self.shipping_amount = shipping
         self.total_amount = subtotal + shipping
 
-        # Guardamos solo estos campos para evitar re-ejecutar toda la lógica del save()
         Order.objects.filter(pk=self.pk).update(
             subtotal_amount=self.subtotal_amount,
             shipping_amount=self.shipping_amount,
@@ -65,6 +63,7 @@ class Order(models.Model):
         )
 
     def save(self, *args, **kwargs):
+        """Genera un código de seguimiento único y fija el estado de pago al guardar."""
         if not self.tracking_code:
             self.tracking_code = self._generate_unique_code()
 
@@ -78,6 +77,7 @@ class Order(models.Model):
         super().save(*args, **kwargs)
 
     def _generate_unique_code(self):
+        """Genera un código de seguimiento único de 8 caracteres alfanuméricos."""
         chars = string.ascii_uppercase + string.digits
         while True:
             code = "".join(secrets.choice(chars) for _ in range(8))
@@ -89,6 +89,8 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
+    """Modelo que representa un item específico dentro de un pedido."""
+
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name="order_items"
     )
@@ -98,7 +100,7 @@ class OrderItem(models.Model):
 
     @property
     def subtotal(self):
-        """Este sigue siendo property ya que el Order.update_totals() ya fija el valor final"""
+        """Calcula el subtotal de este item multiplicando el precio por la cantidad."""
         return self.price_at_purchase * self.quantity
 
     def __str__(self):

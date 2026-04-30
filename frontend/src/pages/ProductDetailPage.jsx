@@ -10,7 +10,6 @@ export default function ProductDetailPage() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // URL base para normalizar la imagen (asegúrate de que coincida con tu API)
     const API_BASE_URL = 'http://localhost:8000';
 
     const getPhotoUrl = (photoPath) => {

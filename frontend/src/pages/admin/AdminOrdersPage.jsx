@@ -60,11 +60,9 @@ export default function AdminOrdersPage() {
                     </button>
                 </header>
 
-                {/* PANEL DE FILTROS AVANZADOS */}
                 <div className="bg-white rounded-[2.5rem] border border-[#324339]/5 p-8 shadow-sm mb-12">
                     <div className="flex flex-col gap-8">
 
-                        {/* Fila 1: Búsqueda y Estado */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                             <div className="lg:col-span-4 relative group">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#324339]/20 group-focus-within:text-[#A86447] transition-colors" size={18} />
@@ -108,10 +106,8 @@ export default function AdminOrdersPage() {
                             </div>
                         </div>
 
-                        {/* Fila 2: Rango Contable (Diseño compacto) */}
                         <div className="flex flex-wrap lg:flex-nowrap items-center gap-10 pt-6 border-t border-[#324339]/5">
 
-                            {/* Fechas - Ocupa el espacio disponible */}
                             <div className="flex-1 min-w-[300px] space-y-3">
                                 <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#324339]/30 flex items-center gap-2">
                                     <Calendar size={14} className="text-[#A86447]" /> Rango Temporal
@@ -135,7 +131,6 @@ export default function AdminOrdersPage() {
                                 </div>
                             </div>
 
-                            {/* Importes - Input corto y fijo */}
                             <div className="space-y-3">
                                 <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#324339]/30 flex items-center gap-2">
                                     <Euro size={14} className="text-[#A86447]" /> Importe (€)
@@ -165,7 +160,6 @@ export default function AdminOrdersPage() {
                     </div>
                 </div>
 
-                {/* RESULTADOS - Usamos Grid para evitar que se monten las tarjetas */}
                 {loading ? (
                     <div className="flex flex-col items-center py-32 gap-6">
                         <Loader2 className="animate-spin text-[#A86447]" size={40} />

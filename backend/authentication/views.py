@@ -29,6 +29,8 @@ logger = logging.getLogger("authentication")
 
 
 class RegisterView(views.APIView):
+    """Registro de nuevos clientes en la plataforma."""
+
     def post(self, request):
         logger.debug(f"Petición POST recibida en RegisterView. Datos: {request.data}")
 
@@ -46,7 +48,6 @@ class RegisterView(views.APIView):
                 status=status.HTTP_201_CREATED,
             )
         except Exception:
-            # El error ya se loguea en el service, aquí solo respondemos
             return response.Response(
                 {"error": "No se pudo procesar el registro"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -54,6 +55,8 @@ class RegisterView(views.APIView):
 
 
 class LoginView(views.APIView):
+    """Autentica al usuario y genera el par de tokens JWT (Access y Refresh)."""
+
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
@@ -90,11 +93,15 @@ class LoginView(views.APIView):
 
 
 class LogoutView(views.APIView):
+    """Invalida el Refresh Token del usuario para cerrar la sesión de forma segura."""
+
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             refresh_token = request.data.get("refresh")
             token = RefreshToken(refresh_token)
-            token.blacklist()  # Invalida el token en el backend
+            token.blacklist()
             logger.info("Logout exitoso. Token invalidado.")
             return response.Response(
                 {"message": "Sesión cerrada correctamente"}, status=status.HTTP_200_OK
@@ -137,6 +144,8 @@ class DeleteAccountView(views.APIView):
 
 
 class UserProfileView(views.APIView):
+    """Endpoint para obtener o actualizar la información del perfil del usuario autenticado."""
+
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -153,6 +162,8 @@ class UserProfileView(views.APIView):
 
 
 class PasswordResetRequestView(views.APIView):
+    """Inicia el proceso de recuperación de contraseña enviando un email con el token de seguridad."""
+
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         if serializer.is_valid():
@@ -170,6 +181,8 @@ class PasswordResetRequestView(views.APIView):
 
 
 class PasswordResetConfirmView(views.APIView):
+    """Verifica el token y permite al usuario establecer una nueva contraseña de acceso."""
+
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
@@ -199,10 +212,10 @@ class PasswordResetConfirmView(views.APIView):
 
 
 class AdminUserStatsListView(generics.ListAPIView):
-    """Vista administrativa para análisis de base de clientes."""
+    """Vista para que los administradores analicen el comportamiento de compra de los clientes."""
 
-    serializer_class = UserAdminStatsSerializer
     permission_classes = [IsAdminRole]
+    serializer_class = UserAdminStatsSerializer
 
     def get_queryset(self):
         return get_users_with_order_stats()

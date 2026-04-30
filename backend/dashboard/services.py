@@ -9,10 +9,10 @@ from product.models import Product
 
 
 def get_admin_dashboard_stats():
+    """Servicio para obtener las estadísticas del dashboard admin."""
     now = timezone.now()
     six_months_ago = now - timedelta(days=180)
 
-    # --- 1. KPIs BASE ---
     valid_orders = Order.objects.filter(
         status__in=[Order.Status.PAID, Order.Status.SHIPPED, Order.Status.DELIVERED]
     )
@@ -28,7 +28,6 @@ def get_admin_dashboard_stats():
         "total_clients": User.objects.filter(role="CLIENT").count(),
     }
 
-    # --- 2. TASA DE RETORNO ---
     clients_with_orders = User.objects.filter(role="CLIENT").annotate(
         num_orders=Count(
             "orders",
@@ -44,7 +43,6 @@ def get_admin_dashboard_stats():
         "new": one_time_customers,
     }
 
-    # --- 3. DESEO (CARRITO) VS VENTA ---
     top_desired_products = (
         Product.objects.filter(is_active=True)
         .annotate(
@@ -72,7 +70,6 @@ def get_admin_dashboard_stats():
         for p in top_desired_products
     ]
 
-    # --- 4. VENTAS MENSUALES ---
     monthly_stats = (
         valid_orders.filter(placed_at__gte=six_months_ago)
         .annotate(month=TruncMonth("placed_at"))
@@ -86,7 +83,6 @@ def get_admin_dashboard_stats():
         for s in monthly_stats
     ]
 
-    # --- 5. MAPA DE CALOR ---
     heatmap_orders = (
         Order.objects.filter(is_paid=True)
         .exclude(latitude__isnull=True)
@@ -106,8 +102,11 @@ def get_admin_dashboard_stats():
 
 
 class ShowcaseService:
+    """Servicio para obtener los datos para el escaparate."""
+
     @staticmethod
     def get_showcase_data():
+        """Obtiene los productos con pocas unidades y los best sellers."""
         last_units = Product.objects.filter(
             is_active=True, stock__gt=0, stock__lte=5
         ).order_by("stock")[:4]

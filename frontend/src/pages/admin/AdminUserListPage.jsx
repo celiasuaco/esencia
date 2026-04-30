@@ -42,7 +42,6 @@ export default function AdminUserListPage() {
                         <h1 className="text-4xl font-serif text-[#324339] italic mb-2">Análisis de Clientes</h1>
                     </div>
 
-                    {/* Buscador Rápido */}
                     <div className="relative w-full md:w-80">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#324339]/20" size={18} />
                         <input
@@ -55,7 +54,6 @@ export default function AdminUserListPage() {
                     </div>
                 </header>
 
-                {/* Ranking de Valor (Sutil) */}
                 <div className="mb-8 flex items-center gap-3 px-6 py-4 bg-[#324339]/[0.02] rounded-2xl border border-[#324339]/5">
                     <Award className="text-[#A86447]" size={20} />
                     <span className="text-xs font-serif italic text-[#324339]/60">
@@ -63,7 +61,6 @@ export default function AdminUserListPage() {
                     </span>
                 </div>
 
-                {/* Listado */}
                 <div className="grid grid-cols-1 gap-6">
                     {filteredClients.length > 0 ? (
                         filteredClients.map(client => (

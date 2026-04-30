@@ -45,7 +45,6 @@ export default function ProductListPage() {
             if (extraFilters.max_price) params.max_price = extraFilters.max_price;
 
             const data = await productService.getAll(params);
-
             setProducts([...data]);
         } catch (error) {
             console.error("Error cargando productos:", error);
@@ -69,14 +68,12 @@ export default function ProductListPage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#FDFBF9] pb-24 text-left">
-
+        <div className="min-h-screen bg-[#FDFBF7] pb-24 text-left">
             <style>{`
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
             `}</style>
 
-            {/* HEADER */}
             <header className="pt-24 pb-20 px-6 relative overflow-hidden bg-white/40 border-b border-[#324339]/5">
                 <div className="absolute inset-0 opacity-[0.04] flex items-center justify-center pointer-events-none">
                     <span className="font-serif italic text-[25rem] text-[#A86447] select-none translate-y-10">E</span>
@@ -88,13 +85,12 @@ export default function ProductListPage() {
                         <span className="text-[#A86447] tracking-[0.4em] uppercase text-[10px] font-bold">Atelier de Lujo</span>
                         <span className="h-[1px] w-10 bg-[#A86447]/40"></span>
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-serif text-[#324339] italic leading-tight">
+                    <h1 className="text-5xl md:text-7xl font-serif text-[#324339] italic leading-tight text-center">
                         Nuestras <span className="text-[#A86447]">Joyas</span>
                     </h1>
                     <p className="text-[#324339]/60 max-w-lg mx-auto text-sm leading-relaxed tracking-wide font-light italic text-center">
                         Piezas forjadas a mano donde el <span className="text-[#324339] font-semibold not-italic">oro</span> y la <span className="text-[#324339] font-semibold not-italic">esencia</span> se encuentran.
                     </p>
-                    {/* Divisor decorativo recuperado */}
                     <div className="flex items-center justify-center gap-3 pt-4">
                         <div className="h-2 w-2 rounded-full bg-[#A86447]"></div>
                         <div className="h-[1px] w-32 bg-gradient-to-r from-transparent via-[#324339]/20 to-transparent"></div>
@@ -103,7 +99,6 @@ export default function ProductListPage() {
                 </div>
             </header>
 
-            {/* NAVEGACIÓN */}
             <nav className="sticky top-10 z-40 -mt-8 flex flex-col items-center gap-4 px-4">
                 <div className="flex items-center p-1.5 bg-[#324339] rounded-full shadow-2xl border border-white/5 max-w-full">
                     <div className="flex gap-1 overflow-x-auto no-scrollbar px-2">
@@ -130,7 +125,6 @@ export default function ProductListPage() {
                     </button>
                 </div>
 
-                {/* FILTROS */}
                 {isFilterOpen && (
                     <div className="w-full max-w-4xl bg-[#324339] rounded-[2rem] p-8 shadow-2xl border border-white/10 animate-in slide-in-from-top-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-left">
@@ -180,17 +174,15 @@ export default function ProductListPage() {
                 )}
             </nav>
 
-            {/* PRODUCTOS */}
-            <main className="max-w-7xl mx-auto px-8 mt-24">
+            <main className="max-w-7xl mx-auto px-8 mt-16 py-12">
                 {products.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-24">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
                         {products.map(p => (
-                            <div key={p.id} className="group relative text-left">
-                                <ProductCard
-                                    product={p}
-                                    badge={p.stock < 3 && p.stock > 0 ? "Pieza Limitada" : null}
-                                />
-                            </div>
+                            <ProductCard
+                                key={p.id}
+                                product={p}
+                                badge={p.stock < 3 && p.stock > 0 ? "Pieza Limitada" : null}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -201,8 +193,7 @@ export default function ProductListPage() {
                 )}
             </main>
 
-            {/* CIERRE DE PÁGINA */}
-            <div className="mt-40 flex flex-col items-center gap-6 opacity-30">
+            <div className="mt-40 flex flex-col items-center gap-6 opacity-30 pb-20">
                 <div className="h-20 w-[1px] bg-gradient-to-b from-[#A86447] to-transparent"></div>
                 <span className="font-serif italic text-4xl text-[#324339]">E</span>
             </div>

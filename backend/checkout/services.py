@@ -12,8 +12,11 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class CartService:
+    """Gestor de lógica de negocio para carritos."""
+
     @staticmethod
     def get_anonymous_cart_data(request):
+        """Recupera la estructura del carrito de la sesión del usuario no autenticado."""
         return request.session.get(
             "anon_cart",
             {"items": [], "subtotal": "0.00", "shipping": "4.99", "total": "4.99"},
@@ -21,14 +24,12 @@ class CartService:
 
     @staticmethod
     def get_user_cart(user):
-        """
-        Simplemente intenta obtener el carrito.
-        Si no existe, devuelve None (no crea nada en DB).
-        """
+        """Obtiene la instancia de carrito de la base de datos para un usuario específico."""
         return Cart.objects.filter(user=user).first()
 
     @staticmethod
     def add_item_to_cart(request, product_id, quantity):
+        """Añade el producto a la base de datos o a la sesión según el estado de login."""
         product = get_object_or_404(Product, id=product_id)
 
         if product.stock < quantity:
@@ -41,13 +42,13 @@ class CartService:
 
     @staticmethod
     def update_item_quantity(request, item_id, quantity):
+        """Actualiza la cantidad de un producto, gestionando el stock disponible y convirtiendo el item a 'Abandonado' si la cantidad llega a cero."""
         try:
             val_quantity = int(quantity)
         except (ValueError, TypeError):
             raise ValidationError("La cantidad debe ser un número válido.")
 
         if request.user.is_authenticated:
-            # Solo permitimos actualizar items que estén ACTUALMENTE activos
             item = get_object_or_404(
                 CartItem,
                 id=item_id,
@@ -72,6 +73,7 @@ class CartService:
 
     @staticmethod
     def _add_to_db_cart(user, product, quantity):
+        """Añade un producto al carrito de un usuario autenticado, o actualiza la cantidad si ya existe."""
         cart, _ = Cart.objects.get_or_create(user=user)
 
         item, created = CartItem.objects.get_or_create(
@@ -88,6 +90,7 @@ class CartService:
 
     @staticmethod
     def _add_to_session_cart(request, product_id, product, quantity):
+        """Añade un producto al carrito de la sesión para usuarios no autenticados, o actualiza la cantidad si ya existe."""
         cart = CartService.get_anonymous_cart_data(request)
         found = False
 
@@ -118,9 +121,7 @@ class CartService:
 
     @staticmethod
     def _check_empty_cart_and_delete(cart):
-        """
-        Regla: Si no quedan items ACTIVE, el carrito se elimina.
-        """
+        """Verifica si el carrito está vacío (sin items activos) y lo elimina para evitar acumulación de carritos huérfanos."""
         if not cart.items.filter(status=CartItem.Status.ACTIVE).exists():
             cart.delete()
             return True
@@ -128,6 +129,7 @@ class CartService:
 
     @staticmethod
     def _update_db_quantity(user, item_id, quantity):
+        """Actualiza la cantidad de un item en el carrito de un usuario autenticado, gestionando el stock y el estado del item."""
         item = get_object_or_404(
             CartItem, id=item_id, cart__user=user, status=CartItem.Status.ACTIVE
         )
@@ -146,6 +148,7 @@ class CartService:
 
     @staticmethod
     def _update_session_quantity(request, str_item_id, quantity):
+        """Actualiza la cantidad de un item en el carrito de la sesión para usuarios no autenticados, gestionando el stock y el estado del item."""
         cart = CartService.get_anonymous_cart_data(request)
         for item in cart["items"]:
             if str(item["product"]) == str_item_id:
@@ -161,6 +164,7 @@ class CartService:
 
     @staticmethod
     def _save_session_cart(request, cart):
+        """Guarda la estructura del carrito en la sesión del usuario no autenticado, recalculando los totales."""
         CartService._recalculate_session_cart(cart)
         request.session["anon_cart"] = cart
         request.session.modified = True
@@ -168,6 +172,7 @@ class CartService:
 
     @staticmethod
     def remove_item(request, item_id):
+        """Elimina un item del carrito, marcándolo como 'Abandonado' para usuarios autenticados o removiéndolo de la sesión para usuarios no autenticados."""
         if request.user.is_authenticated:
             item = get_object_or_404(
                 CartItem,
@@ -187,6 +192,7 @@ class CartService:
 
     @staticmethod
     def _recalculate_session_cart(cart):
+        """Recalcula los totales del carrito de la sesión sumando los subtotales de cada item activo y aplicando las reglas de envío."""
         subtotal = sum(
             Decimal(i["product_details"]["price"]) * i["quantity"]
             for i in cart["items"]
@@ -200,6 +206,7 @@ class CartService:
 
     @staticmethod
     def merge_carts(request, user):
+        """Sincroniza los productos añadidos de forma anónima con la cuenta del usuario tras iniciar sesión."""
         anon_cart = request.session.get("anon_cart")
         if anon_cart and anon_cart.get("items") and len(anon_cart["items"]) > 0:
             cart, _ = Cart.objects.get_or_create(user=user)
@@ -220,8 +227,11 @@ class CartService:
 
 
 class StripeService:
+    """Interacción con la API de pagos de Stripe."""
+
     @staticmethod
     def create_checkout_session(user, cart, address_data):
+        """Crea una sesión de pago en Stripe con los detalles del carrito y la dirección de envío, y devuelve la URL para redirigir al usuario."""
         try:
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
@@ -232,9 +242,7 @@ class StripeService:
                             "product_data": {
                                 "name": "Compra en Esencia Joyería",
                             },
-                            "unit_amount": int(
-                                cart.total * 100
-                            ),  # Usamos el total del carrito
+                            "unit_amount": int(cart.total * 100),
                         },
                         "quantity": 1,
                     }

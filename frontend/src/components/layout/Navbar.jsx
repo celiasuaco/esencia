@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import Footer from './Footer';
-import { ShoppingBag, User, Package } from 'lucide-react'; // Añadimos Package
+import { ShoppingBag, User, Package } from 'lucide-react';
 
 const Navbar = () => {
     const isAuthenticated = authService.isAuthenticated();
@@ -17,7 +17,6 @@ const Navbar = () => {
         <div className="flex flex-col min-h-screen bg-[#FDFBF9]">
             <nav className="flex justify-between items-center px-10 py-4 bg-white border-b border-[#324339]/10 sticky top-0 z-50 shadow-sm">
 
-                {/* LADO IZQUIERDO: Logo + Navegación */}
                 <div className="flex-1 flex items-baseline gap-10">
                     <Link to="/" className="text-2xl font-serif font-bold text-[#324339] tracking-tight hover:opacity-80 transition-opacity">
                         Esencia
@@ -28,10 +27,7 @@ const Navbar = () => {
                     </Link>
                 </div>
 
-                {/* LADO DERECHO: Iconos */}
                 <div className="flex-1 flex justify-end items-center gap-2">
-
-                    {/* Pedidos (Nuevo: Solo si está autenticado) */}
                     {isAuthenticated && (
                         <Link to={user?.role === 'CLIENT' ? "/orders" : "/profile"} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
                             <Package
@@ -42,7 +38,6 @@ const Navbar = () => {
                         </Link>
                     )}
 
-                    {/* Carrito */}
                     <Link to="/cart" className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
                         <ShoppingBag
                             size={20}
@@ -51,7 +46,6 @@ const Navbar = () => {
                         />
                     </Link>
 
-                    {/* Perfil */}
                     <Link to={getProfilePath()} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
                         <User
                             size={22}
