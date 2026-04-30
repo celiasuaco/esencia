@@ -1,4 +1,3 @@
-// src/components/order/AddressModal.jsx
 import { useState, useCallback } from 'react';
 import { MapPin, X, Loader2 } from 'lucide-react';
 import PropTypes from 'prop-types';
@@ -39,7 +38,6 @@ export default function AddressModal({ isOpen, onClose, onConfirm }) {
 
     const handleSelect = (feature) => {
         const { name, street, city, country } = feature.properties;
-        // ✅ Corregido a replaceAll para Sonar
         const fullAddress = `${street || name}, ${city || ""}, ${country || ""}`.replaceAll(',,', ',');
         const [lng, lat] = feature.geometry.coordinates;
 

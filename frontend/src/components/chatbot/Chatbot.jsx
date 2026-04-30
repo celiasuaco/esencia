@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 
 const ChatProductCard = ({ product }) => {
     const API_URL = "http://localhost:8000";
-    // Construimos la URL completa para la foto
     const imageUrl = product.photo?.startsWith('http')
         ? product.photo
         : `${API_URL}${product.photo}`;

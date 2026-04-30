@@ -15,11 +15,13 @@ User = get_user_model()
 
 @pytest.fixture
 def api_client():
+    """Proporciona un cliente de prueba de API de Django Rest Framework."""
     return APIClient()
 
 
 @pytest.fixture
 def user(db):
+    """Crea un usuario de prueba en la base de datos."""
     return User.objects.create_user(
         username="testuser", password="password123", email="test@esencia.com"
     )
@@ -27,6 +29,7 @@ def user(db):
 
 @pytest.fixture
 def product(db):
+    """Crea un producto de prueba (anillo) con stock inicial."""
     return Product.objects.create(
         name="Anillo Esencia", price=150.00, stock=10, category="ANILLO"
     )
@@ -34,7 +37,10 @@ def product(db):
 
 @pytest.mark.django_db
 class TestCart:
+    """Conjunto de pruebas para validar la lógica del carrito de compras y la integración con pagos."""
+
     def test_add_to_cart_authenticated(self, api_client, user, product):
+        """Comprueba que un usuario logueado puede añadir productos a su carrito correctamente."""
         api_client.force_authenticate(user=user)
         response = api_client.post(
             reverse("cart-add"), {"product_id": product.id, "quantity": 2}
@@ -43,7 +49,7 @@ class TestCart:
         assert CartItem.objects.filter(status=CartItem.Status.ACTIVE).count() == 1
 
     def test_remove_item_authenticated_soft_delete(self, api_client, user, product):
-        """Verifica que al eliminar un item, no se borra de la DB sino que cambia a ABANDONED"""
+        """Valida que eliminar un item no lo borra físicamente, sino que cambia su estado a ABANDONED."""
         api_client.force_authenticate(user=user)
         cart = Cart.objects.create(user=user)
         item = CartItem.objects.create(
@@ -56,21 +62,19 @@ class TestCart:
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        # Verificación de persistencia para métricas ES-20
         item.refresh_from_db()
         assert item.status == CartItem.Status.ABANDONED
 
-        # Verificamos que el detalle del carrito lo ignore
         detail = api_client.get(reverse("cart-detail"))
         assert len(detail.data["items"]) == 0
 
     def test_shipping_calculation(self, api_client, user):
+        """Verifica que los gastos de envío se aplican por debajo de 100€ y son gratuitos por encima."""
         api_client.force_authenticate(user=user)
         p_cheap = Product.objects.create(
             name="Joyita Test", price=Decimal("20.00"), stock=50, category="ANILLO"
         )
         api_client.post(reverse("cart-add"), {"product_id": p_cheap.id, "quantity": 1})
-
         res1 = api_client.get(reverse("cart-detail"))
         assert float(res1.data["shipping"]) == 4.99
 
@@ -79,7 +83,7 @@ class TestCart:
         assert float(res2.data["shipping"]) == 0.00
 
     def test_create_checkout_session_authenticated(self, api_client, user, product):
-        """Verifica que se genera una URL de Stripe enviando el objeto de dirección completo"""
+        """Valida la generación de una sesión de Stripe incluyendo los metadatos de dirección de envío."""
         cart, _ = Cart.objects.get_or_create(user=user)
         CartItem.objects.create(cart=cart, product=product, quantity=1)
 
@@ -95,11 +99,11 @@ class TestCart:
         }
 
         response = api_client.post(url, payload, format="json")
-
-        assert response
+        assert response.status_code == status.HTTP_200_OK
+        assert "url" in response.data
 
     def test_payment_success_logic(self, db, user, product):
-        """Verifica que tras el pago el pedido se crea y el stock baja"""
+        """Comprueba que tras un pago exitoso se crea el pedido, se reduce el stock y se vacía el carrito."""
         from .views import process_payment_success
 
         cart = Cart.objects.create(user=user)
@@ -110,12 +114,15 @@ class TestCart:
         initial_stock = product.stock
 
         mock_session = MagicMock()
-        mock_session.metadata = {"user_id": user.id, "address": "Calle de Prueba, 10"}
+        mock_session.metadata = {
+            "user_id": user.id,
+            "address": "Calle de Prueba, 10",
+            "latitude": 40.0,
+            "longitude": -3.0,
+        }
 
-        # Llamamos a la lógica con el mock
         process_payment_success(mock_session)
 
-        # Verificaciones
         from order.models import Order
 
         assert Order.objects.filter(user=user).count() == 1
@@ -123,5 +130,4 @@ class TestCart:
         product.refresh_from_db()
         assert product.stock == initial_stock - 2
 
-        # El carrito debe haber sido borrado
         assert Cart.objects.filter(user=user).count() == 0
