@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { cartService } from '../../services/cartService';
 import { ShoppingBag, Eye } from 'lucide-react';
 
@@ -25,10 +26,20 @@ export default function ProductCard({ product, badge }) {
         }
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            navigate(`/product/${product.id}`);
+        }
+    };
+
     return (
         <div
             onClick={() => navigate(`/product/${product.id}`)}
+            onKeyDown={handleKeyDown}
             className="group cursor-pointer w-full relative"
+            role="button"
+            tabIndex={0}
+            aria-label={`Ver detalles de ${product.name}`}
         >
             <div className="relative rounded-[2rem] border border-[#324339]/10 bg-white p-4 shadow-[0_15px_40px_rgba(50,67,57,0.05)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_30px_60px_rgba(50,67,57,0.12)] group-hover:border-[#A86447]/30">
 
@@ -48,6 +59,7 @@ export default function ProductCard({ product, badge }) {
 
                     <div className="absolute inset-0 bg-[#324339]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 px-6">
                         <button
+                            type="button"
                             onClick={(e) => handleAddToCart(e, product.id)}
                             className="w-full py-3 bg-[#A86447] text-white rounded-full text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center gap-2 hover:bg-white hover:text-[#A86447] transition-all transform active:scale-95 shadow-xl"
                         >
@@ -85,3 +97,13 @@ export default function ProductCard({ product, badge }) {
         </div>
     );
 }
+
+ProductCard.propTypes = {
+    product: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        name: PropTypes.string.isRequired,
+        photo: PropTypes.string,
+        price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    }).isRequired,
+    badge: PropTypes.string,
+};
