@@ -23,7 +23,6 @@ export default function AdminOrderDetailPage() {
     const [loading, setLoading] = useState(true);
     const [updatingStatus, setUpdatingStatus] = useState(null);
 
-    // Obtenemos el usuario actual para verificar permisos
     const currentUser = authService.getCurrentUser();
     const isAdmin = currentUser?.role === 'ADMIN';
 
@@ -58,7 +57,7 @@ export default function AdminOrderDetailPage() {
     };
 
     const handleStatusUpdate = async (status) => {
-        if (!isAdmin) return; // Doble validación de seguridad
+        if (!isAdmin) return;
         setUpdatingStatus(status);
         try {
             await orderService.updateStatus(id, status);
@@ -85,7 +84,6 @@ export default function AdminOrderDetailPage() {
         <div className="min-h-screen bg-[#FDFBF9] text-[#324339] px-6 py-12">
             <div className="max-w-5xl mx-auto space-y-10">
 
-                {/* 1. HEADER & NAVIGATION */}
                 <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                     <div className="space-y-4">
                         <button
@@ -108,7 +106,6 @@ export default function AdminOrderDetailPage() {
                     </div>
                 </header>
 
-                {/* 2. PROGRESS FLOW (Condicionado por Rol) */}
                 <div className="px-4 py-8 bg-white rounded-[2rem] border border-[#324339]/5 shadow-sm">
                     <div className="flex items-center justify-between relative max-w-4xl mx-auto">
                         <div className="absolute top-[15px] left-0 w-full h-[1px] bg-[#324339]/5 -z-0" />
@@ -116,7 +113,6 @@ export default function AdminOrderDetailPage() {
                             const isCompleted = i < currentIndex;
                             const isCurrent = i === currentIndex;
 
-                            // Si es ADMIN, es un botón. Si es CLIENT, es un DIV (estático)
                             const Element = isAdmin ? 'button' : 'div';
 
                             return (
@@ -161,7 +157,6 @@ export default function AdminOrderDetailPage() {
                     )}
                 </div>
 
-                {/* 3. PANEL UNIFICADO: DATOS + PRODUCTOS */}
                 <div className="bg-white border border-[#324339]/10 rounded-[2.5rem] shadow-sm overflow-hidden flex flex-col">
                     <div className="grid grid-cols-1 md:grid-cols-3 border-b border-[#324339]/5 bg-[#324339]/[0.02]">
                         <div className="p-8 border-r border-[#324339]/5 space-y-3">
@@ -266,7 +261,6 @@ export default function AdminOrderDetailPage() {
                     </div>
                 </div>
 
-                {/* 4. BOTÓN DE CANCELACIÓN (Solo Visible para ADMIN) */}
                 {isAdmin && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
                     <div className="flex justify-center pt-4">
                         <button

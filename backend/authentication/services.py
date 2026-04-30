@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -14,28 +15,28 @@ from django.utils.http import urlsafe_base64_encode
 
 from .emails import send_welcome_email
 
-# Instanciamos el logger con el nombre de la app
 logger = logging.getLogger("authentication")
 User = get_user_model()
 
 
 def create_user(email, password, full_name=None, **extra_fields):
-    logger.info(f"Intentando registrar nuevo usuario: {email}")
+    """Crea nuevos usuarios, validando duplicados y enviando el correo de bienvenida."""
 
+    logger.info(f"Intentando registrar nuevo usuario: {email}")
     if User.objects.filter(email=email).exists():
         logger.warning(f"Intento de registro fallido: El email {email} ya existe.")
         raise ValidationError("Este email ya está registrado.")
 
     try:
         user = User.objects.create_user(
-            username=email,  # Usamos el email como username
+            username=email,
             email=email,
             password=password,
             full_name=full_name,
             **extra_fields,
         )
         send_welcome_email(user)
-        logger.info(f"Usuario creado con éxito: ID {user.id} - {email}")
+        logger.info(f"Usuario creado con éxito con ID {user.id}: {email}")
         return user
     except Exception as e:
         logger.error(
@@ -44,27 +45,55 @@ def create_user(email, password, full_name=None, **extra_fields):
         raise e
 
 
+def anonymize_user(user):
+    """
+    Cumple con el Derecho al Olvido (RGPD).
+    Sustituye datos personales por valores genéricos y desactiva la cuenta.
+    """
+    logger.info(f"Iniciando proceso de anonimización para el usuario con ID {user.id}")
+
+    try:
+        random_id = uuid.uuid4().hex[:8]
+        user.email = f"deleted_{random_id}@esencia.internal"
+        user.username = user.email
+
+        user.full_name = "Usuario Eliminado"
+        if hasattr(user, "address"):
+            user.address = "Información eliminada"
+
+        if user.photo:
+            user.photo.delete(save=False)
+            user.photo = None
+
+        user.is_active = False
+        user.save()
+
+        logger.info(f"Usuario con ID {user.id} anonimizado correctamente.")
+        return user
+    except Exception as e:
+        logger.error(f"Error al anonimizar usuario {user.id}: {str(e)}")
+        raise e
+
+
 def send_password_reset_email(user):
+    """Genera tokens de seguridad y construye el enlace único para el correo de recuperación de contraseña."""
+
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     reset_url = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}"
 
-    # Contexto para la plantilla
     context = {
         "full_name": user.full_name,
         "reset_url": reset_url,
     }
 
-    # Renderizamos el HTML
     html_content = render_to_string("password_reset.html", context)
-    # Creamos una versión en texto plano para los gestores de correo que no admitan HTML
     text_content = strip_tags(html_content)
 
     subject = "Restablece tu contraseña - Esencia"
     from_email = settings.DEFAULT_FROM_EMAIL
     to = user.email
 
-    # Creamos el objeto de correo
     email = EmailMultiAlternatives(subject, text_content, from_email, [to])
     email.attach_alternative(html_content, "text/html")
 
@@ -77,10 +106,8 @@ def send_password_reset_email(user):
 
 
 def get_users_with_order_stats():
-    """
-    Retorna clientes con conteo de pedidos y volumen total de gasto
-    Ordenados de mayor a menor inversión [ES-21].
-    """
+    """Calcula estadísticas del cliente para el panel de administración, como el gasto total o la frecuencia de compra."""
+
     return (
         User.objects.filter(role=User.Role.CLIENT)
         .annotate(
@@ -89,5 +116,5 @@ def get_users_with_order_stats():
                 Sum("orders__total_amount"), Value(0), output_field=DecimalField()
             ),
         )
-        .order_by("-total_spent", "-orders_count")  # De mayor a menor inversión
+        .order_by("-total_spent", "-orders_count")
     )

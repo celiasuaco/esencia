@@ -7,6 +7,8 @@ from product.models import Product
 
 
 class Cart(models.Model):
+    """Contenedor principal de la cesta de compra vinculado a un usuario."""
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="cart"
     )
@@ -14,7 +16,7 @@ class Cart(models.Model):
 
     @property
     def subtotal(self):
-        # FILTRO CRÍTICO: Solo sumamos items con status ACTIVE
+        """Calcula la suma de todos los items activos en el carrito multiplicando precio por cantidad."""
         result = self.items.filter(status=CartItem.Status.ACTIVE).aggregate(
             total=Sum(F("product__price") * F("quantity"))
         )["total"]
@@ -22,16 +24,20 @@ class Cart(models.Model):
 
     @property
     def shipping(self):
+        """Calcula el coste de envío según el subtotal."""
         if self.subtotal >= 100 or self.subtotal == 0:
             return Decimal("0.00")
         return Decimal("4.99")
 
     @property
     def total(self):
+        """Suma final del subtotal de productos más los gastos de envío calculados."""
         return self.subtotal + self.shipping
 
 
 class CartItem(models.Model):
+    """Producto específico dentro de un carrito con su estado de ciclo de vida."""
+
     class Status(models.TextChoices):
         ACTIVE = "ACTIVE", "Activo"
         CONVERTED = "CONVERTED", "Convertido a Venta"
@@ -55,4 +61,5 @@ class CartItem(models.Model):
 
     @property
     def subtotal(self):
+        """Multiplicación del precio actual del producto por la cantidad seleccionada."""
         return self.product.price * self.quantity

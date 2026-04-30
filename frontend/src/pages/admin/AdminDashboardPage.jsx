@@ -63,7 +63,6 @@ export default function AdminDashboardPage() {
                 <p className="text-[#324339]/50 uppercase tracking-widest text-xs font-bold">Business Intelligence & KPIs</p>
             </div>
 
-            {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
                 {kpiCards.map((card, index) => {
                     const Icon = card.icon;
@@ -82,7 +81,6 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Gráfico Barras: Deseo vs Venta */}
                 <div className="lg:col-span-5 bg-white rounded-[2.5rem] shadow-xl shadow-[#324339]/5 p-10 border border-[#324339]/5">
                     <div className="flex items-center gap-3 mb-8">
                         <ShoppingBag className="text-[#A86447]" size={20} />
@@ -92,7 +90,6 @@ export default function AdminDashboardPage() {
                     <p className="mt-6 text-xs text-[#6B7F72] italic text-center">Relación entre productos en carritos vs ventas finalizadas por pieza.</p>
                 </div>
 
-                {/* Gráfico Pie: Fidelización */}
                 <div className="bg-white rounded-[2.5rem] shadow-xl shadow-[#324339]/5 p-10 border border-[#324339]/5">
                     <div className="flex items-center gap-3 mb-8">
                         <Repeat className="text-[#324339]" size={20} />
@@ -125,7 +122,6 @@ export default function AdminDashboardPage() {
                     <MapPin className="text-[#A86447]" size={20} />
                     <h2 className="text-2xl font-serif text-[#324339]">Distribución Geográfica de Ventas</h2>
                 </div>
-                {/* stats.heatmap_data viene ahora dentro del mismo objeto de stats */}
                 <SalesHeatMap points={stats?.heatmap_data || []} />
             </div>
         </div>

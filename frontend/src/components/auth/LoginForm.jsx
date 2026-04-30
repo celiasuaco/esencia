@@ -20,7 +20,7 @@ const LoginForm = ({ onSwitchForm }) => {
                 window.location.href = '/profile';
             }
         } catch (err) {
-            toast.error(err); // Usa el error limpio del authService
+            toast.error(err);
         }
     };
 
@@ -30,7 +30,6 @@ const LoginForm = ({ onSwitchForm }) => {
             <p className="text-secondary text-center mb-8">Ingresa a tu cuenta exclusiva</p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-                {/* CAMPO EMAIL */}
                 <div className="flex flex-col gap-1.5">
                     <label htmlFor="email" className="text-sm font-medium text-primary ml-1">
                         Email
@@ -52,7 +51,6 @@ const LoginForm = ({ onSwitchForm }) => {
                     </div>
                 </div>
 
-                {/* CAMPO CONTRASEÑA */}
                 <div className="flex flex-col gap-1.5">
                     <label htmlFor="password" className="text-sm font-medium text-primary ml-1">
                         Contraseña

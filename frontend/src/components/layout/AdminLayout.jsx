@@ -15,14 +15,12 @@ export default function AdminLayout() {
 
     return (
         <div className="flex min-h-screen bg-[#FDFBF9]">
-            {/* Sidebar Lateral */}
             <aside className="w-64 bg-[#324339] text-[#FDFBF9] flex flex-col fixed h-full shadow-2xl">
                 <div className="p-8">
                     <h2 className="text-3xl font-serif font-bold italic tracking-wider mb-1 text-[#A86447]">Esencia</h2>
                     <p className="text-[10px] text-[#FDFBF9]/50 uppercase tracking-[0.2em] font-bold">Admin Panel</p>
                 </div>
 
-                {/* Navegación Principal */}
                 <nav className="flex-1 px-4 space-y-2 mt-4">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
@@ -43,7 +41,6 @@ export default function AdminLayout() {
                     })}
                 </nav>
 
-                {/* Botón de Perfil en el Sidebar */}
                 <div className="px-4 mb-4">
                     <Link
                         to="/admin/profile"
@@ -57,7 +54,6 @@ export default function AdminLayout() {
                     </Link>
                 </div>
 
-                {/* Footer del Sidebar */}
                 <div className="p-6 border-t border-white/5 space-y-4">
                     <Link to="/" className="flex items-center gap-3 text-xs text-[#FDFBF9]/40 hover:text-[#A86447] transition-colors uppercase tracking-widest">
                         <ExternalLink className="w-4 h-4" />
@@ -73,8 +69,7 @@ export default function AdminLayout() {
                 </div>
             </aside>
 
-            {/* Contenido Principal */}
-            <main className="flex-1 ml-64 p-12 bg-[#FDFBF9] relative">
+            <main className="flex-1 ml-64 p-12 bg-[#FDFBF9]">
                 <div className="max-w-7xl mx-auto">
                     <Outlet />
                 </div>

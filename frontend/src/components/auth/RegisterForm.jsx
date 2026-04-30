@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService';
-import { toast } from 'sonner'; // 1. Importamos toast
+import { toast } from 'sonner';
 
 const RegisterForm = ({ onSwitchForm }) => {
     const [formData, setFormData] = useState({ email: '', password: '', full_name: '' });

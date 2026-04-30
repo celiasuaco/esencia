@@ -23,18 +23,20 @@ OTHER_PASSWORD = "AlthougH-It-Is-A-TeSt-99"  # NOSONAR
 
 @pytest.mark.django_db
 class TestRegistration:
-    # --- TESTS DEL MODELO ---
+    """Conjunto de pruebas para el flujo de registro de usuarios y validaciones de modelo."""
+
     def test_user_model_creation(self):
+        """Verifica la creación correcta de un usuario."""
         user = User.objects.create_user(
             username="test@esencia.com",
             email="test@esencia.com",
             password=GOOD_PASSWORD,
         )
         assert user.email == "test@esencia.com"
-        assert user.role == "CLIENT"  # Valor por defecto
+        assert user.role == "CLIENT"
 
-    # --- TESTS DEL SERVICIO ---
     def test_create_user_service_success(self):
+        """Valida que el servicio de negocio cree correctamente un usuario en la base de datos."""
         user = create_user(
             email="service@test.com", password=GOOD_PASSWORD, full_name="Service User"
         )
@@ -42,15 +44,16 @@ class TestRegistration:
         assert user.full_name == "Service User"
 
     def test_create_user_service_duplicate_email(self):
+        """Registro inválido de un email que ya existe en el sistema."""
         email = "duplicate@test.com"
         create_user(email=email, password=GOOD_PASSWORD, full_name="Test User")
 
         with pytest.raises(Exception):
             create_user(email=email, password=OTHER_PASSWORD, full_name="Other User")
 
-    # --- TESTS DE LA VISTA (API) ---
     def test_register_api_success(self, client):
-        url = reverse("register")  # Asegúrate de que tu urls.py tenga name='register'
+        """Prueba de integración del endpoint de registro con datos válidos."""
+        url = reverse("register")
         data = {
             "email": "api@test.com",
             "password": GOOD_PASSWORD,
@@ -62,8 +65,8 @@ class TestRegistration:
         assert response.data["message"] == "Usuario creado exitosamente"
 
     def test_register_api_invalid_password(self, client):
+        """Registros incorrectos con contraseñas que no cumplen con el mínimo de longitud."""
         url = reverse("register")
-        # Contraseña demasiado corta (< 8)
         data = {
             "email": "bad@test.com",
             "password": BAD_PASSWORD,
@@ -77,8 +80,10 @@ class TestRegistration:
 
 @pytest.mark.django_db
 class TestLoginLogout:
+    """Pruebas para los flujos de inicio y cierre de sesión mediante JWT."""
+
     def test_login_success(self, client):
-        # Primero creamos el usuario
+        """Valida que un usuario con credenciales correctas reciba sus tokens de acceso y refresco."""
         email = "login@test.com"
         User.objects.create_user(username=email, email=email, password=GOOD_PASSWORD)
 
@@ -90,23 +95,33 @@ class TestLoginLogout:
         assert "access" in response.data
         assert "refresh" in response.data
 
-    def test_logout_success(self, client):
+    def test_logout_success(self):
+        """Valida que el cierre de sesión invalide el token de refresco. Requiere autenticación Bearer."""
+        from rest_framework.test import APIClient
+
+        api_client = APIClient()
+
         email = "logout@test.com"
         user = User.objects.create_user(
             username=email, email=email, password=GOOD_PASSWORD
         )
         refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+
+        api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
 
         url = reverse("logout")
         data = {"refresh": str(refresh)}
-        response = client.post(url, data, content_type="application/json")
+
+        response = api_client.post(url, data, format="json")
 
         assert response.status_code == status.HTTP_200_OK
+        assert response.data["message"] == "Sesión cerrada correctamente"
 
 
 @pytest.fixture
-def auth_client(db):  # Usamos db para asegurar acceso a base de datos
-    """Fixture mejorada con APIClient de DRF"""
+def auth_client(db):
+    """Genera un cliente de API autenticado con un usuario de prueba para testear endpoints protegidos."""
     client = APIClient()
     email = "profile@test.com"
     user = User.objects.create_user(
@@ -119,7 +134,10 @@ def auth_client(db):  # Usamos db para asegurar acceso a base de datos
 
 @pytest.mark.django_db
 class TestUserProfile:
+    """Pruebas para la visualización y edición de la información de perfil del usuario."""
+
     def test_get_profile_success(self, auth_client):
+        """Verifica que un usuario autenticado pueda recuperar sus propios datos de perfil."""
         client, user = auth_client
         url = reverse("profile")
         response = client.get(url)
@@ -127,9 +145,9 @@ class TestUserProfile:
         assert response.data["email"] == user.email
 
     def test_update_profile_name_success(self, auth_client):
+        """Valida la actualización parcial del nombre completo del usuario a través de un PATCH."""
         client, user = auth_client
         url = reverse("profile")
-        # Enviamos el full_name y mantenemos el email actual para evitar conflictos de validación
         data = {"full_name": "Updated Name", "email": user.email}
 
         response = client.patch(url, data, format="json")
@@ -138,6 +156,7 @@ class TestUserProfile:
         assert response.data["full_name"] == "Updated Name"
 
     def test_update_profile_duplicate_email_error(self, auth_client):
+        """Comprueba que un usuario no pueda actualizar su email a uno que ya está ocupado por otra cuenta."""
         client, user = auth_client
         User.objects.create_user(
             username="other@test.com", email="other@test.com", password=GOOD_PASSWORD
@@ -149,14 +168,13 @@ class TestUserProfile:
         response = client.patch(url, data, format="json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        # Verificamos que el error sea sobre el email
         assert "email" in response.data
 
     def test_update_profile_photo_upload(self, auth_client):
+        """Prueba la carga y actualización de la imagen de perfil en formato multipart."""
         client, user = auth_client
         url = reverse("profile")
 
-        # 1. Preparar la imagen
         file_res = BytesIO()
         image = Image.new("RGBA", size=(100, 100), color=(155, 0, 0))
         image.save(file_res, "PNG")
@@ -166,26 +184,21 @@ class TestUserProfile:
             "test_roses.png", file_res.read(), content_type="image/png"
         )
 
-        # 2. Datos completos para el PATCH
-        # Incluimos el email para evitar el error de validación 400
         data = {"full_name": "User with Photo", "email": user.email, "photo": photo}
-
-        # 3. Ejecutar petición
         response = client.patch(url, data, format="multipart")
 
-        # 4. Aserciones
         assert response.status_code == status.HTTP_200_OK
         assert "photo" in response.data
         assert response.data["photo"] is not None
-
-        # Opcional: Verificar que el nombre también cambió
         assert response.data["full_name"] == "User with Photo"
 
 
 @pytest.mark.django_db
 class TestPasswordReset:
-    # --- TESTS DEL SERVICIO (EMAIL) ---
+    """Conjunto de pruebas para el proceso de recuperación de contraseña por email."""
+
     def test_send_password_reset_email_logic(self, db):
+        """Valida que el servicio genere el correo de recuperación con el contenido HTML esperado."""
         user = User.objects.create_user(
             username="reset@test.com",
             email="reset@test.com",
@@ -203,8 +216,8 @@ class TestPasswordReset:
         assert "Esencia Joyería" in html_body
         assert "Restablecer" in html_body
 
-    # --- TESTS DE LA VISTA: SOLICITUD ---
     def test_password_reset_request_api(self, client):
+        """Prueba la solicitud de recuperación mediante API para un email existente."""
         email = "exist@test.com"
         User.objects.create_user(username=email, email=email, password=GOOD_PASSWORD)
 
@@ -217,18 +230,16 @@ class TestPasswordReset:
         assert len(mail.outbox) == 1
 
     def test_password_reset_request_non_existent_email(self, client):
+        """Verifica que la solicitud no envíe correos si el email no está registrado (por seguridad responde 200)."""
         url = reverse("password_reset")
         data = {"email": "no-existe@test.com"}
         response = client.post(url, data, content_type="application/json")
 
-        # Por seguridad, el sistema debe responder 200 aunque el email no exista
         assert response.status_code == status.HTTP_200_OK
-        # Pero no debe enviarse ningún correo
         assert len(mail.outbox) == 0
 
-    # --- TESTS DE LA VISTA: CONFIRMACIÓN ---
     def test_password_reset_confirm_success(self, client):
-        # 1. Preparar usuario y token real
+        """Valida el cambio efectivo de contraseña usando un token de seguridad y UID válidos."""
         user = User.objects.create_user(
             username="confirm@test.com",
             email="confirm@test.com",
@@ -245,11 +256,11 @@ class TestPasswordReset:
         assert response.status_code == status.HTTP_200_OK
         assert response.data["message"] == "Contraseña actualizada con éxito."
 
-        # Verificar que la contraseña cambió realmente
         user.refresh_from_db()
         assert user.check_password(OTHER_PASSWORD)
 
     def test_password_reset_confirm_invalid_token(self, client):
+        """Comprueba que el sistema rechace el cambio de contraseña si el token de seguridad es falso."""
         user = User.objects.create_user(
             username="invalid@test.com",
             email="invalid@test.com",
@@ -270,6 +281,7 @@ class TestPasswordReset:
         assert "error" in response.data
 
     def test_password_reset_confirm_weak_password(self, client):
+        """Verifica que la nueva contraseña deba cumplir con los requisitos de complejidad (números y letras)."""
         user = User.objects.create_user(
             username="weak@test.com", email="weak@test.com", password=GOOD_PASSWORD
         )
@@ -277,18 +289,19 @@ class TestPasswordReset:
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
 
         url = reverse("password_reset_confirm")
-        # Password sin mayúsculas ni números
         data = {"uidb64": uidb64, "token": token, "new_password": "solo-letras"}
 
         response = client.post(url, data, content_type="application/json")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        # El error viene de la validación del serializer que definiste
         assert "new_password" in response.data
 
 
 class UserStatsAdminTest(TestCase):
+    """Pruebas de permisos administrativos para la visualización de estadísticas de clientes."""
+
     def setUp(self):
+        """Configuración del entorno de pruebas con un administrador y un cliente estándar."""
         self.client = APIClient()
         self.admin_user = User.objects.create_user(
             email="admin@esencia.com",
@@ -306,11 +319,13 @@ class UserStatsAdminTest(TestCase):
         self.url = reverse("admin-users")
 
     def test_admin_can_access_stats(self):
+        """Verifica que un usuario con rol ADMIN pueda acceder al listado de estadísticas de clientes."""
         self.client.force_authenticate(user=self.admin_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_client_cannot_access_stats(self):
+        """Valida que un cliente estándar tenga prohibido el acceso a datos administrativos."""
         self.client.force_authenticate(user=self.client_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

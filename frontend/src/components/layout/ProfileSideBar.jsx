@@ -4,18 +4,15 @@ import { User, LogOut, Package, Loader2 } from 'lucide-react';
 import PropTypes from 'prop-types';
 
 const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
-    // Estado local para manejar los datos frescos del backend
     const [userData, setUserData] = useState(initialUser);
     const [fetching, setFetching] = useState(false);
 
     const API_BASE_URL = 'http://127.0.0.1:8000';
 
-    // Efecto para sincronizar con el backend al cargar el componente
     useEffect(() => {
         const refreshUserData = async () => {
             setFetching(true);
             try {
-                // Llamada al nuevo método de authService
                 const freshData = await authService.getProfile();
                 setUserData(freshData);
                 console.log("Datos sincronizados en Sidebar:", freshData);
@@ -29,14 +26,11 @@ const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
         refreshUserData();
     }, []);
 
-    // Actualizar estado local si la prop 'user' cambia desde fuera
     useEffect(() => {
         setUserData(initialUser);
     }, [initialUser]);
 
     const initial = userData?.full_name ? userData.full_name.charAt(0).toUpperCase() : '?';
-
-    // Verificación de rol (CLIENT en mayúsculas según tu lógica)
     const isClient = userData && userData.role === 'CLIENT';
 
     const getPhotoUrl = (photoPath) => {
@@ -52,7 +46,6 @@ const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
         <aside className="w-full md:w-64 flex-shrink-0">
             <div className="bg-white p-8 rounded-3xl shadow-xl shadow-[#324339]/5 border border-[#324339]/5 text-center relative overflow-hidden">
 
-                {/* Indicador de carga sutil */}
                 {fetching && (
                     <div className="absolute top-2 right-2">
                         <Loader2 className="w-3 h-3 animate-spin text-[#A86447]/40" />
@@ -79,25 +72,23 @@ const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
                 </p>
 
                 <nav className="mt-12 space-y-2 text-left">
-                    {/* Botón Mis Datos */}
                     <button
                         onClick={() => onTabChange?.('data')}
                         className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-medium transition-all ${activeTab === 'data'
-                                ? 'bg-[#324339] text-white shadow-lg shadow-[#324339]/20'
-                                : 'text-[#324339]/60 hover:bg-[#FDFBF9]'
+                            ? 'bg-[#324339] text-white shadow-lg shadow-[#324339]/20'
+                            : 'text-[#324339]/60 hover:bg-[#FDFBF9]'
                             }`}
                     >
                         <User className="w-5 h-5" />
                         <span>Mis Datos</span>
                     </button>
 
-                    {/* Apartado Mis Pedidos - Solo para Clientes */}
                     {isClient && (
                         <button
                             onClick={() => onTabChange?.('orders')}
                             className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-medium transition-all ${activeTab === 'orders'
-                                    ? 'bg-[#324339] text-white shadow-lg shadow-[#324339]/20'
-                                    : 'text-[#324339]/60 hover:bg-[#FDFBF9]'
+                                ? 'bg-[#324339] text-white shadow-lg shadow-[#324339]/20'
+                                : 'text-[#324339]/60 hover:bg-[#FDFBF9]'
                                 }`}
                         >
                             <Package className="w-5 h-5" />

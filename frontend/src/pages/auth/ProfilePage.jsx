@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { User, LogOut, Edit, Mail, Package, Loader2 } from 'lucide-react';
+import { User, LogOut, Edit, Mail, Package, Loader2, Trash2 } from 'lucide-react';
 import { authService } from '../../services/authService';
 import EditProfileForm from '../../components/auth/EditProfileForm';
-// CORRECCIÓN: Importación correcta con llaves
 import { useNavigate } from 'react-router-dom';
 
 export default function ProfilePage() {
@@ -12,6 +11,7 @@ export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(true);
+    const [deleting, setDeleting] = useState(false);
 
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return null;
@@ -24,7 +24,6 @@ export default function ProfilePage() {
     const fetchUserData = async () => {
         setLoading(true);
         try {
-            // Sincronizamos con el servidor para tener el rol actualizado
             const freshUser = await authService.getProfile();
             setUser(freshUser);
         } catch (error) {
@@ -49,6 +48,26 @@ export default function ProfilePage() {
     if (!user) return null;
 
     const photoUrl = getPhotoUrl(user.photo);
+
+    const handleDeleteAccount = async () => {
+        const confirmed = window.confirm(
+            "¿Está seguro de que desea ejercer su derecho al olvido? " +
+            "Sus datos personales serán anonimizados y no podrá volver a acceder a esta cuenta. " +
+            "Esta acción es irreversible."
+        );
+
+        if (confirmed) {
+            setDeleting(true);
+            try {
+                await authService.deleteAccount();
+                navigate('/');
+                window.location.reload();
+            } catch (error) {
+                alert(error);
+                setDeleting(false);
+            }
+        }
+    };
 
     return (
         <div className="min-h-screen pt-0 bg-[#FDFBF9]">
@@ -138,6 +157,30 @@ export default function ProfilePage() {
                                             <label className="flex items-center gap-2 text-sm text-[#6B7F72] font-medium"><Mail size={16} /> Correo Electrónico</label>
                                             <p className="text-[#2C3632] text-xl font-serif border-b-2 border-[#F5F1ED] pb-1">{user.email}</p>
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+                            {!isEditing && (
+                                <div className="mt-12 pt-8 border-t border-red-50">
+                                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-red-50/30 p-6 rounded-2xl border border-red-100/50">
+                                        <div>
+                                            <h3 className="text-red-900 font-serif text-lg">Zona de Privacidad</h3>
+                                            <p className="text-red-700/60 text-sm">
+                                                Solicite la anonimización de sus datos personales conforme al RGPD.
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={handleDeleteAccount}
+                                            disabled={deleting}
+                                            className="flex items-center gap-2 px-6 py-3 bg-white border border-red-200 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all duration-300 text-sm font-medium shadow-sm"
+                                        >
+                                            {deleting ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Trash2 className="w-4 h-4" />
+                                            )}
+                                            <span>Derecho al olvido</span>
+                                        </button>
                                     </div>
                                 </div>
                             )}

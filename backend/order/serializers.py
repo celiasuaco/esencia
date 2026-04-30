@@ -4,6 +4,8 @@ from .models import Order, OrderItem
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    """Serializador para los items de un pedido, incluye información del producto al momento de la compra."""
+
     product_name = serializers.ReadOnlyField(source="product.name")
     product_photo = serializers.ImageField(source="product.photo", read_only=True)
 
@@ -21,6 +23,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    """Serializador para los pedidos, incluye información sobre los items y el usuario."""
+
     order_items = OrderItemSerializer(many=True, read_only=True)
     user_email = serializers.ReadOnlyField(source="user.email")
     status_display = serializers.CharField(source="get_status_display", read_only=True)

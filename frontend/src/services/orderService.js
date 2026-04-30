@@ -1,4 +1,3 @@
-// services/orderService.js
 import api from './api';
 
 export const orderService = {

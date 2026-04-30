@@ -18,8 +18,10 @@ import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import AdminUserListPage from "./pages/admin/AdminUserListPage";
 import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
+import Terms from "./pages/legal/Terms";
 import Chatbot from "./components/chatbot/Chatbot";
 import { Toaster } from 'sonner';
+import ScrollToTop from "./components/utils/ScrollToTop";
 
 function App() {
   const user = authService.getCurrentUser();
@@ -27,6 +29,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Toaster
         position="top-right"
         richColors
@@ -48,6 +51,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+          <Route path="/terminos" element={<Terms />} />
 
           {/* Perfil de Cliente: Solo si NO es admin (o si quieres que el admin vea la tienda) */}
           <Route
@@ -58,13 +62,11 @@ function App() {
           <Route path="/orders/:id" element={user && !isAdmin ? <AdminOrderDetailPage /> : <Navigate to="/login" />} />
         </Route>
 
-        {/* GRUPO 2: ADMINISTRADORES (Con Sidebar lateral) */}
+        {/* GRUPO 2: ADMINISTRADORES */}
         <Route
           element={isAdmin ? <AdminLayout /> : <Navigate to="/login" />}
         >
           <Route path="/dashboard" element={<AdminDashboard />} />
-
-          {/* Perfil de Administrador: Misma página, distinto Layout */}
           <Route path="/admin/profile" element={<ProfilePage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route path="/admin/products/new" element={<ProductFormPage />} />

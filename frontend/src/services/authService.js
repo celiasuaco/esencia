@@ -1,6 +1,6 @@
 import api from './api';
 
-// Función auxiliar para extraer el mensaje de error de Django REST Framework
+// Función auxiliar para extraer el mensaje de error
 const getErrorMessage = (error) => {
   if (typeof error === 'string') return error;
   
@@ -44,7 +44,6 @@ export const authService = {
   logout: async () => {
     const refreshToken = localStorage.getItem('refresh');
     
-    // 1. Limpiamos local primero para una respuesta instantánea en la UI
     const clearLocal = () => {
       localStorage.removeItem('user');
       localStorage.removeItem('access');
@@ -103,28 +102,28 @@ export const authService = {
     }
   },
 
-  // --- HELPERS DE UTILIDAD ---
-  
+  // Actualizar los datos del usuario
   updateLocalUser: (newUserData) => {
     const currentUser = authService.getCurrentUser() || {};
-    // Hacemos un merge para no perder campos que el backend quizás no envió en el patch
     const updatedUser = { ...currentUser, ...newUserData };
     localStorage.setItem('user', JSON.stringify(updatedUser));
   },
 
+  // Obtener datos del usuario
   getCurrentUser: () => {
     try {
       const user = localStorage.getItem('user');
       return user ? JSON.parse(user) : null;
     } catch (e) {
       localStorage.removeItem('user');
-      return null;
+      throw getErrorMessage(e.response?.data) || "Error al obtener datos del usuario";
     }
   },
 
+  // Sincronizar perfil con el servidor para obtener datos actualizados
   getProfile: async () => {
     try {
-      const response = await api.get('/auth/profile/'); // Ajusta a tu endpoint real de perfil
+      const response = await api.get('/auth/profile/');
       
       if (response.data) {
         authService.updateLocalUser(response.data);
@@ -132,6 +131,21 @@ export const authService = {
       return response.data;
     } catch (error) {
       throw getErrorMessage(error.response?.data) || "Error al obtener perfil";
+    }
+  },
+
+  // Derecho al olvido: Anonimización y cierre de cuenta
+  deleteAccount: async () => {
+    try {
+      const response = await api.post('/auth/delete-account/');
+      
+      localStorage.removeItem('user');
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
+      
+      return response.data;
+    } catch (error) {
+      throw getErrorMessage(error.response?.data) || "No se pudo procesar la eliminación de la cuenta";
     }
   },
 

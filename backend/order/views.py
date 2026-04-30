@@ -10,17 +10,19 @@ from .services import OrderService
 
 
 class OrderViewSet(viewsets.ModelViewSet):
+    """Vista para gestionar pedidos: creación, listado y actualización de estado"""
+
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminOrOrderOwner]
 
     def get_queryset(self):
+        """Devuelve el queryset de pedidos, aplicando filtros según el rol del usuario y los parámetros de consulta"""
         user = self.request.user
         queryset = Order.objects.all().order_by("-placed_at")
 
         if not user.is_staff:
             return queryset.filter(user=user)
 
-        # Capturamos filtros
         email = self.request.query_params.get("email")
         tracking = self.request.query_params.get("tracking")
         status_filter = self.request.query_params.get("status")
@@ -36,13 +38,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         if status_filter:
             queryset = queryset.filter(status=status_filter)
 
-        # Filtros de fecha (Aseguramos que no sea string vacío '')
         if date_from and date_from.strip():
             queryset = queryset.filter(placed_at__date__gte=date_from)
         if date_to and date_to.strip():
             queryset = queryset.filter(placed_at__date__lte=date_to)
 
-        # Filtros de precio (Clave: Convertir a número y evitar strings vacíos)
         try:
             if price_min and price_min.strip():
                 queryset = queryset.filter(total_amount__gte=float(price_min))
@@ -54,6 +54,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return queryset
 
     def create(self, request):
+        """Crea un nuevo pedido a partir del carrito del usuario, procesando el pago y guardando la dirección de envío"""
         address = request.data.get("address")
         lat = request.data.get("latitude")
         lng = request.data.get("longitude")
@@ -70,6 +71,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         detail=True, methods=["patch"], permission_classes=[permissions.IsAdminUser]
     )
     def change_status(self, request, pk=None):
+        """Permite a un admin cambiar el estado de un pedido y actualiza el campo is_paid si corresponde"""
         order = self.get_object()
         new_status = request.data.get("status")
         if new_status not in Order.Status.values:

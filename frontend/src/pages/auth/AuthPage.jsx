@@ -7,15 +7,12 @@ const AuthPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Determinamos el modo inicial basándonos en la URL (o por defecto login)
     const isRegisterInitial = location.pathname === '/register';
     const [showRegister, setShowRegister] = useState(isRegisterInitial);
 
     const handleSwitchForm = () => {
-        // Cambiamos el estado interno
         setShowRegister(!showRegister);
 
-        // Y actualizamos la URL (para que el usuario pueda compartir el link correcto)
         if (!showRegister) {
             navigate('/register', { replace: true });
         } else {

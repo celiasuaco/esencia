@@ -18,7 +18,7 @@ export default function ResetPasswordConfirm() {
             await authService.confirmPasswordReset(uid, token, password);
             navigate('/login');
         } catch (err) {
-            toast.error(err); // Reemplaza alert
+            toast.error(err);
         } finally {
             setLoading(false);
         }
@@ -28,7 +28,6 @@ export default function ResetPasswordConfirm() {
         <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] p-4">
             <div className="register-card max-w-md w-full shadow-xl border border-[#E8E2D6]">
 
-                {/* Icono decorativo de seguridad */}
                 <div className="flex justify-center mb-6">
                     <div className="w-16 h-16 bg-[#FDFBF7] rounded-full flex items-center justify-center border border-[#E8E2D6]">
                         <ShieldCheck className="text-primary w-8 h-8" />
