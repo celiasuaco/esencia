@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { cartService } from '../../services/cartService';
 import { ShoppingBag, Eye } from 'lucide-react';
 
@@ -14,18 +13,20 @@ export default function ProductCard({ product, badge }) {
         return `${API_BASE_URL}${normalizedPath}`;
     };
 
-    const handleAddToCart = async (e) => {
-        if (e) e.stopPropagation();
-        navigate('/cart');
+    const handleAddToCart = async (e, productId) => {
+        e.stopPropagation();
+        e.preventDefault();
+
         try {
-            await cartService.addToCart(product.id, 1);
-        } catch (err) {
-            console.error("Error al añadir al carrito:", err);
+            await cartService.addToCart(productId, 1);
+            navigate('/cart');
+        } catch (error) {
+            console.error("Error al añadir al carrito:", error);
         }
     };
 
     return (
-        <button
+        <div
             onClick={() => navigate(`/product/${product.id}`)}
             className="group cursor-pointer w-full relative"
         >
@@ -47,8 +48,8 @@ export default function ProductCard({ product, badge }) {
 
                     <div className="absolute inset-0 bg-[#324339]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 px-6">
                         <button
-                            onClick={handleAddToCart}
-                            className="w-full py-3 bg-[#A86447] text-white rounded-full text-[10px] uppercase tracking-[0.2em] font-bold flex items-center justify-center gap-2 hover:bg-white hover:text-[#A86447] transition-all transform active:scale-95 shadow-xl"
+                            onClick={(e) => handleAddToCart(e, product.id)}
+                            className="w-full py-3 bg-[#A86447] text-white rounded-full text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center gap-2 hover:bg-white hover:text-[#A86447] transition-all transform active:scale-95 shadow-xl"
                         >
                             <ShoppingBag size={14} />
                             Añadir a la bolsa
@@ -81,16 +82,6 @@ export default function ProductCard({ product, badge }) {
                 <div className="absolute -top-1 -right-1 w-6 h-6 border-t-2 border-r-2 border-[#A86447] opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-tr-xl"></div>
                 <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-2 border-l-2 border-[#A86447] opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-bl-xl"></div>
             </div>
-        </button>
+        </div>
     );
 }
-
-ProductCard.propTypes = {
-    product: PropTypes.shape({
-        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-        name: PropTypes.string.isRequired,
-        photo: PropTypes.string,
-        price: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-    }).isRequired,
-    badge: PropTypes.string
-};

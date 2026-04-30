@@ -58,6 +58,7 @@ export default function CartPage() {
     };
 
     const loadCart = async () => {
+        setLoading(true);
         try {
             const data = await cartService.getCart();
             setCart(data);
@@ -68,7 +69,9 @@ export default function CartPage() {
         }
     };
 
-    useEffect(() => { loadCart(); }, []);
+    useEffect(() => {
+        loadCart();
+    }, []);
 
     const handleUpdateQuantity = async (item, newQuantity) => {
         if (newQuantity < 1) return;

@@ -21,6 +21,7 @@ import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
 import Terms from "./pages/legal/Terms";
 import Chatbot from "./components/chatbot/Chatbot";
 import { Toaster } from 'sonner';
+import ScrollToTop from "./components/utils/ScrollToTop";
 
 function App() {
   const user = authService.getCurrentUser();
@@ -28,6 +29,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Toaster
         position="top-right"
         richColors
