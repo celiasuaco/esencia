@@ -1,4 +1,3 @@
-// src/services/checkoutService.js
 import api from './api';
 
 export const checkoutService = {

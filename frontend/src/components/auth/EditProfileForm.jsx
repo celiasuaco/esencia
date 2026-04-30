@@ -46,7 +46,6 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
         if (!photoPath) return null;
         if (photoPath.startsWith('http')) return photoPath;
 
-        // Normalizamos la ruta para asegurar que empiece con una sola barra
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
         return `${API_BASE_URL}${normalizedPath}`;
     };

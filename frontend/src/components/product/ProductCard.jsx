@@ -29,7 +29,6 @@ export default function ProductCard({ product, badge }) {
             onClick={() => navigate(`/product/${product.id}`)}
             className="group cursor-pointer w-full relative"
         >
-            {/* Contenedor Principal con Borde de Lujo */}
             <div className="relative rounded-[2rem] border border-[#324339]/10 bg-white p-4 shadow-[0_15px_40px_rgba(50,67,57,0.05)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_30px_60px_rgba(50,67,57,0.12)] group-hover:border-[#A86447]/30">
 
                 {badge && (
@@ -38,7 +37,6 @@ export default function ProductCard({ product, badge }) {
                     </span>
                 )}
 
-                {/* Área de Imagen con Gradiente de Profundidad */}
                 <div className="relative overflow-hidden rounded-[1.5rem] bg-[#FDFBF9] aspect-square flex items-center justify-center border border-[#324339]/5">
                     <img
                         src={getPhotoUrl(product.photo)}
@@ -47,7 +45,6 @@ export default function ProductCard({ product, badge }) {
                         onError={(e) => { e.target.src = "https://placehold.co/400x400?text=Joyas+Esencia"; }}
                     />
 
-                    {/* Overlay al hacer Hover */}
                     <div className="absolute inset-0 bg-[#324339]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 px-6">
                         <button
                             onClick={handleAddToCart}
@@ -63,9 +60,7 @@ export default function ProductCard({ product, badge }) {
                     </div>
                 </div>
 
-                {/* Información del Producto con Acentos */}
                 <div className="pt-6 pb-2 text-center">
-                    {/* Separador artesanal */}
                     <div className="flex items-center justify-center gap-2 mb-4">
                         <div className="h-[1px] w-6 bg-[#A86447]/30"></div>
                         <div className="h-1 w-1 rounded-full bg-[#A86447]"></div>
@@ -83,7 +78,6 @@ export default function ProductCard({ product, badge }) {
                     </div>
                 </div>
 
-                {/* Detalle decorativo en las esquinas al hacer hover */}
                 <div className="absolute -top-1 -right-1 w-6 h-6 border-t-2 border-r-2 border-[#A86447] opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-tr-xl"></div>
                 <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-2 border-l-2 border-[#A86447] opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-bl-xl"></div>
             </div>
