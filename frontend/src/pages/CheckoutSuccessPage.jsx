@@ -1,4 +1,3 @@
-// src/pages/CheckoutSuccessPage.jsx
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, Package, ArrowRight, Loader2 } from 'lucide-react';

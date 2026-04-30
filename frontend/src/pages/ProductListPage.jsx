@@ -76,7 +76,6 @@ export default function ProductListPage() {
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
             `}</style>
 
-            {/* HEADER */}
             <header className="pt-24 pb-20 px-6 relative overflow-hidden bg-white/40 border-b border-[#324339]/5">
                 <div className="absolute inset-0 opacity-[0.04] flex items-center justify-center pointer-events-none">
                     <span className="font-serif italic text-[25rem] text-[#A86447] select-none translate-y-10">E</span>
@@ -94,7 +93,6 @@ export default function ProductListPage() {
                     <p className="text-[#324339]/60 max-w-lg mx-auto text-sm leading-relaxed tracking-wide font-light italic text-center">
                         Piezas forjadas a mano donde el <span className="text-[#324339] font-semibold not-italic">oro</span> y la <span className="text-[#324339] font-semibold not-italic">esencia</span> se encuentran.
                     </p>
-                    {/* Divisor decorativo recuperado */}
                     <div className="flex items-center justify-center gap-3 pt-4">
                         <div className="h-2 w-2 rounded-full bg-[#A86447]"></div>
                         <div className="h-[1px] w-32 bg-gradient-to-r from-transparent via-[#324339]/20 to-transparent"></div>
@@ -103,7 +101,6 @@ export default function ProductListPage() {
                 </div>
             </header>
 
-            {/* NAVEGACIÓN */}
             <nav className="sticky top-10 z-40 -mt-8 flex flex-col items-center gap-4 px-4">
                 <div className="flex items-center p-1.5 bg-[#324339] rounded-full shadow-2xl border border-white/5 max-w-full">
                     <div className="flex gap-1 overflow-x-auto no-scrollbar px-2">
@@ -130,7 +127,6 @@ export default function ProductListPage() {
                     </button>
                 </div>
 
-                {/* FILTROS */}
                 {isFilterOpen && (
                     <div className="w-full max-w-4xl bg-[#324339] rounded-[2rem] p-8 shadow-2xl border border-white/10 animate-in slide-in-from-top-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-left">
@@ -180,7 +176,6 @@ export default function ProductListPage() {
                 )}
             </nav>
 
-            {/* PRODUCTOS */}
             <main className="max-w-7xl mx-auto px-8 mt-24">
                 {products.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-24">
@@ -201,7 +196,6 @@ export default function ProductListPage() {
                 )}
             </main>
 
-            {/* CIERRE DE PÁGINA */}
             <div className="mt-40 flex flex-col items-center gap-6 opacity-30">
                 <div className="h-20 w-[1px] bg-gradient-to-b from-[#A86447] to-transparent"></div>
                 <span className="font-serif italic text-4xl text-[#324339]">E</span>
