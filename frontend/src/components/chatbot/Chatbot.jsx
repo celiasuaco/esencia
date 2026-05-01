@@ -4,19 +4,23 @@ import { chatbotService } from '../../services/chatbotService';
 import { productService } from '../../services/productService';
 import ReactMarkdown from 'react-markdown';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
 const ChatProductCard = ({ product }) => {
+    const navigate = useNavigate();
     const API_URL = "http://localhost:8000";
-    const imageUrl = product.photo?.startsWith('http')
-        ? product.photo
-        : `${API_URL}${product.photo}`;
+    const imageUrl = product.photo?.startsWith('http') ? product.photo : `${API_URL}${product.photo}`;
+
+    const handleClick = (e) => {
+        e.stopPropagation();
+        navigate(`/product/${product.id}`);
+    };
 
     return (
         <button
             type="button"
-            onClick={() => window.location.href = `/product/${product.id}`}
-            className="w-full flex items-center gap-3 bg-white border border-[#324339]/10 p-2 rounded-2xl my-2 hover:border-[#A86447]/30 transition-all cursor-pointer group focus:ring-2 focus:ring-[#A86447] outline-none"
-            aria-label={`Ver detalles de ${product.name}`}
+            onClick={handleClick}
+            className="w-full flex items-center gap-3 bg-white border border-[#324339]/10 p-2 rounded-2xl my-2 hover:border-[#A86447]/30 transition-all group"
         >
             <div className="w-12 h-12 shrink-0 overflow-hidden rounded-xl bg-gray-50 shadow-sm">
                 <img
