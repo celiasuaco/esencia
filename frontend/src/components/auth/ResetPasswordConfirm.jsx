@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function ResetPasswordConfirm() {
     const { uid, token } = useParams();
@@ -18,7 +17,7 @@ export default function ResetPasswordConfirm() {
             await authService.confirmPasswordReset(uid, token, password);
             navigate('/login');
         } catch (err) {
-            toast.error(err);
+            console.error("Error resetting password:", err);
         } finally {
             setLoading(false);
         }

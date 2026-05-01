@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService';
-import { toast } from 'sonner';
 
 const RegisterForm = ({ onSwitchForm }) => {
     const [formData, setFormData] = useState({ email: '', password: '', full_name: '' });
@@ -11,7 +10,7 @@ const RegisterForm = ({ onSwitchForm }) => {
             await authService.register(formData);
             onSwitchForm();
         } catch (err) {
-            toast.error(err);
+            console.error("Registration error:", err);
         }
     };
 

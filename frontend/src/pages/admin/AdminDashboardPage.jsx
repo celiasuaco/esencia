@@ -8,17 +8,28 @@ export default function AdminDashboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const controller = new AbortController();
+
         const fetchStats = async () => {
             try {
-                const data = await dashboardService.getStats();
-                setStats(data);
+                setLoading(true);
+                const data = await dashboardService.getStats({ signal: controller.signal });
+
+                if (data) {
+                    setStats(data);
+                }
             } catch (error) {
-                console.error("Error cargando estadísticas", error);
+                if (error.name !== 'AbortError') {
+                    console.error("Error cargando estadísticas", error);
+                }
             } finally {
                 setLoading(false);
             }
         };
+
         fetchStats();
+
+        return () => controller.abort();
     }, []);
 
     if (loading) return (
@@ -27,30 +38,40 @@ export default function AdminDashboardPage() {
         </div>
     );
 
-    if (!stats) return <div className="p-10 text-center text-red-500">Error de conexión.</div>;
+    if (!stats) return (
+        <div className="p-10 text-center">
+            <p className="text-red-500 mb-4">Error de conexión con el servidor de datos.</p>
+            <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-[#324339] text-white rounded-full text-sm"
+            >
+                Reintentar
+            </button>
+        </div>
+    );
 
     const kpiCards = [
         {
             title: 'Ingresos Totales',
-            value: `${stats.total_revenue.toFixed(2)} €`,
+            value: `${(stats.total_revenue || 0).toFixed(2)} €`,
             icon: Euro,
             color: 'from-[#324339] to-[#4A5D52]',
         },
         {
             title: 'Pedidos Históricos',
-            value: stats.total_orders,
+            value: stats.total_orders || 0,
             icon: ShoppingBag,
             color: 'from-[#C77C5D] to-[#A86447]',
         },
         {
             title: 'Ticket Promedio',
-            value: `${stats.avg_ticket.toFixed(2)} €`,
+            value: `${(stats.avg_ticket || 0).toFixed(2)} €`,
             icon: TrendingUp,
             color: 'from-[#5B7B63] to-[#3D5742]',
         },
         {
             title: 'Clientes',
-            value: stats.total_clients,
+            value: stats.total_clients || 0,
             icon: Users,
             color: 'from-[#8FA895] to-[#5B7B63]',
         },
@@ -86,7 +107,7 @@ export default function AdminDashboardPage() {
                         <ShoppingBag className="text-[#A86447]" size={20} />
                         <h2 className="text-2xl font-serif text-[#324339]">Deseo vs Conversión Real</h2>
                     </div>
-                    <WishlistVsSalesChart data={stats.wishlist_vs_sales} />
+                    <WishlistVsSalesChart data={stats.wishlist_vs_sales || []} />
                     <p className="mt-6 text-xs text-[#6B7F72] italic text-center">Relación entre productos en carritos vs ventas finalizadas por pieza.</p>
                 </div>
 
@@ -95,34 +116,35 @@ export default function AdminDashboardPage() {
                         <Repeat className="text-[#324339]" size={20} />
                         <h2 className="text-2xl font-serif text-[#324339]">Fidelización</h2>
                     </div>
-                    <RetentionPieChart data={stats.customer_retention} />
+                    <RetentionPieChart data={stats.customer_retention || { recurring: 0, new: 0 }} />
                     <div className="mt-4 space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-[#6B7F72]">Clientes Recurrentes</span>
-                            <span className="font-bold text-[#324339]">{stats.customer_retention.recurring}</span>
+                            <span className="font-bold text-[#324339]">{stats.customer_retention?.recurring || 0}</span>
                         </div>
                         <div className="flex justify-between text-sm border-t border-gray-100 pt-2">
                             <span className="text-[#6B7F72]">Nuevos Clientes</span>
-                            <span className="font-bold text-[#A86447]">{stats.customer_retention.new}</span>
+                            <span className="font-bold text-[#A86447]">{stats.customer_retention?.new || 0}</span>
                         </div>
                     </div>
                 </div>
+
                 <div className="lg:col-span-6 bg-white rounded-[2.5rem] shadow-xl shadow-[#324339]/5 p-10 border border-[#324339]/5">
                     <div className="flex items-center gap-3 mb-8">
                         <ShoppingBag className="text-[#A86447]" size={20} />
                         <h2 className="text-2xl font-serif text-[#324339]">Ventas Mensuales</h2>
                     </div>
-                    <MonthlySalesChart data={stats.monthly_sales} />
+                    <MonthlySalesChart data={stats.monthly_sales || []} />
                     <p className="mt-6 text-xs text-[#6B7F72] italic text-center">Gráfica donde se muestra el desempeño de ventas a lo largo del tiempo.</p>
                 </div>
-
             </div>
+
             <div className="mt-8 bg-white rounded-[2.5rem] shadow-xl p-10 border border-[#324339]/5">
                 <div className="flex items-center gap-3 mb-8">
                     <MapPin className="text-[#A86447]" size={20} />
                     <h2 className="text-2xl font-serif text-[#324339]">Distribución Geográfica de Ventas</h2>
                 </div>
-                <SalesHeatMap points={stats?.heatmap_data || []} />
+                <SalesHeatMap points={stats.heatmap_data || []} />
             </div>
         </div>
     );
