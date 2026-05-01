@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { LayoutDashboard, ExternalLink, LogOut, User, Package, Store, Users } from 'lucide-react';
 import { authService } from '../../services/authService';
+import AdminChatbot from '../chatbot/AdminChatbot';
 
 export default function AdminLayout() {
     const location = useLocation();
@@ -72,6 +73,8 @@ export default function AdminLayout() {
                 <div className="max-w-7xl mx-auto">
                     <Outlet />
                 </div>
+
+                <AdminChatbot />
             </main>
         </div>
     );

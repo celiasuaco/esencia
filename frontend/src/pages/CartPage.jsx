@@ -5,7 +5,6 @@ import { checkoutService } from '../services/checkoutService';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { authService } from '../services/authService';
 import AddressModal from '../components/order/AddressModal';
-import { toast } from 'sonner';
 
 export default function CartPage() {
     const isAuthenticated = authService.isAuthenticated();
@@ -16,31 +15,22 @@ export default function CartPage() {
 
     const handleConfirmAddress = async (addressData) => {
         setIsModalOpen(false);
-        const toastId = toast.loading("Iniciando proceso de pago seguro...");
 
         try {
             const { url } = await checkoutService.createPaymentSession({ address_data: addressData });
 
             if (url) {
-                toast.success("Redirigiendo a Stripe...", { id: toastId });
                 window.location.href = url;
             } else {
                 throw new Error("No se recibió la URL de pago");
             }
         } catch (error) {
             console.error("Error en el proceso de compra:", error);
-            toast.error("Hubo un fallo al preparar tu pedido", {
-                id: toastId,
-                description: error.response?.data?.error || "Inténtalo de nuevo."
-            });
         }
     };
 
     const handleFinalizarCompra = () => {
         if (!isAuthenticated) {
-            toast.error("Identificación requerida", {
-                description: "Por favor, inicia sesión para finalizar tu pedido."
-            });
             navigate('/login', { state: { from: '/cart' } });
             return;
         }

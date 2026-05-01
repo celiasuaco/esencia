@@ -38,7 +38,7 @@ export default function ProductFormPage() {
                     });
                     if (data.photo) setImagePreview(data.photo);
                 } catch (err) {
-                    toast.error("Error al cargar el producto", { description: err });
+                    console.error("Error al cargar el producto:", err);
                     navigate('/admin/products');
                 }
             };

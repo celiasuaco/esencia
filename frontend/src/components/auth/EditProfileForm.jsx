@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { authService } from '../../services/authService';
 import { Camera, Save, X } from 'lucide-react';
-import { toast } from 'sonner';
 
 const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
 
@@ -36,7 +35,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
             authService.updateLocalUser(updatedUser);
             onUpdateSuccess();
         } catch (err) {
-            toast.error(err);
+            console.error("Error updating profile:", err);
         } finally {
             setLoading(false);
         }

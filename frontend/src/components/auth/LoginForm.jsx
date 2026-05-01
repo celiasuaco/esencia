@@ -2,15 +2,17 @@ import { useState } from 'react';
 import { authService } from '../../services/authService';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { toast } from 'sonner';
 
 const LoginForm = ({ onSwitchForm }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (loading) return;
+        setLoading(true);
         try {
             const data = await authService.login(email, password);
 
@@ -20,7 +22,8 @@ const LoginForm = ({ onSwitchForm }) => {
                 window.location.href = '/profile';
             }
         } catch (err) {
-            toast.error(err);
+            console.error("Login error:", err);
+            setLoading(false);
         }
     };
 
@@ -79,7 +82,7 @@ const LoginForm = ({ onSwitchForm }) => {
                     </div>
                 </div>
 
-                <button type="submit" className="btn-primary w-full py-4 mt-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
+                <button type="submit" className="btn-primary w-full py-4 mt-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98]" disabled={loading}>
                     Entrar
                 </button>
             </form>
