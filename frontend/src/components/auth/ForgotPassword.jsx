@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -32,7 +34,7 @@ export default function ForgotPassword() {
                     <p className="text-secondary mb-8 leading-relaxed">
                         Si el correo <strong className="text-primary">{email}</strong> está registrado, recibirás un enlace para restablecer tu contraseña en unos minutos.
                     </p>
-                    <Link to="/login" className="btn-primary inline-block w-full py-3 text-center">
+                    <Link to="/login" className="btn-primary inline-block w-full py-3 text-center transition-all hover:opacity-90">
                         Volver al inicio de sesión
                     </Link>
                 </div>
@@ -54,7 +56,7 @@ export default function ForgotPassword() {
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 text-left">
                         <label htmlFor="email" className="text-sm font-medium text-primary ml-1">
                             Email
                         </label>
@@ -67,6 +69,8 @@ export default function ForgotPassword() {
                             <input
                                 id="email"
                                 type="email"
+                                name="email"
+                                autoComplete="email"
                                 required
                                 className="input-field !pl-12 w-full focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                 placeholder="tu@email.com"
@@ -84,7 +88,7 @@ export default function ForgotPassword() {
                         {loading ? (
                             <span className="flex items-center gap-2">
                                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                {' '}Enviando...
+                                Enviando...
                             </span>
                         ) : 'Enviar enlace de recuperación'}
                     </button>

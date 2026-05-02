@@ -201,6 +201,7 @@ export default function AdminOrderDetailPage() {
                                             <img
                                                 src={getPhotoUrl(item.product_photo)}
                                                 alt={item.product_name}
+                                                fetchpriority="high"
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 onError={(e) => {
                                                     e.target.onerror = null;

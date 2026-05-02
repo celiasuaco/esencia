@@ -20,6 +20,7 @@ const UserCard = ({ client }) => {
                         <img
                             src={getPhotoUrl(client.photo)}
                             alt={client.full_name}
+                            fetchpriority="high"
                             className="absolute inset-0 w-full h-full object-cover z-10"
                             onError={(e) => e.target.style.display = 'none'}
                         />

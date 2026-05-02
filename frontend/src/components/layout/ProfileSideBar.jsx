@@ -58,6 +58,7 @@ const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
                         {photoUrl && (
                             <img
                                 src={photoUrl}
+                                fetchpriority="high"
                                 className="absolute inset-0 w-full h-full object-cover z-10"
                                 alt="Perfil"
                                 onError={(e) => { e.target.style.display = 'none'; }}

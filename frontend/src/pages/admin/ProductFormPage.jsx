@@ -118,7 +118,7 @@ export default function ProductFormPage() {
                                 aria-label="Subir imagen de producto"
                             >
                                 {imagePreview ? (
-                                    <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+                                    <img src={imagePreview} fetchpriority="high" className="w-full h-full object-cover" alt="Preview" />
                                 ) : (
                                     <div className="text-center">
                                         <Camera className="w-10 h-10 text-gray-300 mx-auto mb-2" />

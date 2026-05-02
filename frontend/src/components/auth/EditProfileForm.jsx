@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react'; //
 import { authService } from '../../services/authService';
-import { Camera, Save, X } from 'lucide-react';
+import Camera from 'lucide-react/dist/esm/icons/camera';
+import Save from 'lucide-react/dist/esm/icons/save';
+import X from 'lucide-react/dist/esm/icons/x';
 
 const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
-
     const API_BASE_URL = 'http://127.0.0.1:8000';
 
     const [fullName, setFullName] = useState(user.full_name);
@@ -13,9 +14,20 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef(null);
 
+    useEffect(() => {
+        return () => {
+            if (preview && preview.startsWith('blob:')) {
+                URL.revokeObjectURL(preview);
+            }
+        };
+    }, [preview]);
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            if (preview && preview.startsWith('blob:')) {
+                URL.revokeObjectURL(preview);
+            }
             setImage(file);
             setPreview(URL.createObjectURL(file));
         }
@@ -44,15 +56,12 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return null;
         if (photoPath.startsWith('http')) return photoPath;
-
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
         return `${API_BASE_URL}${normalizedPath}`;
     };
 
-
     return (
         <form onSubmit={handleSubmit} className="flex flex-col items-center pt-5 space-y-8">
-
             <button
                 type="button"
                 className="relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#5B7B63] focus:ring-offset-4 rounded-full border-none bg-transparent p-0"
@@ -63,6 +72,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
                     {preview || user.photo ? (
                         <img
                             src={preview || getPhotoUrl(user.photo)}
+                            fetchpriority="high"
                             className="w-full h-full object-cover"
                             alt="Vista previa de perfil"
                         />
@@ -79,7 +89,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
             <input
                 type="file"
                 ref={fileInputRef}
-                hidden
+                className="hidden"
                 onChange={handleImageChange}
                 accept="image/*"
             />
@@ -89,18 +99,20 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
                     <label className="text-sm font-medium text-[#6B7F72]">Nombre Completo</label>
                     <input
                         type="text"
-                        className="w-full p-3 bg-[#FDFBF9] border border-[#E8DDD1] rounded-xl focus:ring-2 focus:ring-[#5B7B63] outline-none"
+                        className="w-full p-3 bg-[#FDFBF9] border border-[#E8DDD1] rounded-xl focus:ring-2 focus:ring-[#5B7B63] outline-none transition-shadow"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
+                        required
                     />
                 </div>
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-[#6B7F72]">Email</label>
                     <input
                         type="email"
-                        className="w-full p-3 bg-[#FDFBF9] border border-[#E8DDD1] rounded-xl focus:ring-2 focus:ring-[#5B7B63] outline-none"
+                        className="w-full p-3 bg-[#FDFBF9] border border-[#E8DDD1] rounded-xl focus:ring-2 focus:ring-[#5B7B63] outline-none transition-shadow"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
                     />
                 </div>
             </div>

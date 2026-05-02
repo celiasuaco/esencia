@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
-import { Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import Lock from 'lucide-react/dist/esm/icons/lock';
+import Eye from 'lucide-react/dist/esm/icons/eye';
+import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 
 export default function ResetPasswordConfirm() {
     const { uid, token } = useParams();
@@ -12,6 +15,7 @@ export default function ResetPasswordConfirm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (loading) return;
         setLoading(true);
         try {
             await authService.confirmPasswordReset(uid, token, password);
@@ -25,7 +29,7 @@ export default function ResetPasswordConfirm() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] p-4">
-            <div className="register-card max-w-md w-full shadow-xl border border-[#E8E2D6]">
+            <div className="register-card max-w-md w-full shadow-xl border border-[#E8E2D6] animate-fade-in">
 
                 <div className="flex justify-center mb-6">
                     <div className="w-16 h-16 bg-[#FDFBF7] rounded-full flex items-center justify-center border border-[#E8E2D6]">
@@ -39,7 +43,7 @@ export default function ResetPasswordConfirm() {
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 text-left">
                         <label htmlFor="password" className="text-sm font-medium text-primary ml-1">
                             Nueva Contraseña
                         </label>
@@ -51,8 +55,10 @@ export default function ResetPasswordConfirm() {
                             />
                             <input
                                 id="password"
+                                name="password"
                                 type={showPassword ? "text" : "password"}
-                                className="input-field !pl-12 !pr-12 w-full focus:ring-2 focus:ring-primary/20 outline-none"
+                                autoComplete="new-password"
+                                className="input-field !pl-12 !pr-12 w-full focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                 placeholder="Escribe tu nueva contraseña"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -61,7 +67,8 @@ export default function ResetPasswordConfirm() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 text-[#A3937B] hover:text-primary transition-colors z-10"
+                                className="absolute right-4 text-[#A3937B] hover:text-primary transition-colors z-10 p-1"
+                                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
@@ -71,12 +78,12 @@ export default function ResetPasswordConfirm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="btn-primary w-full py-4 flex items-center justify-center gap-2 transform active:scale-[0.98] transition-all"
+                        className="btn-primary w-full py-4 flex items-center justify-center gap-2 transform active:scale-[0.98] transition-all disabled:opacity-70 shadow-md"
                     >
                         {loading ? (
                             <span className="flex items-center gap-2">
                                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                {' '}Actualizando...
+                                Actualizando...
                             </span>
                         ) : 'Restablecer contraseña'}
                     </button>
@@ -85,7 +92,7 @@ export default function ResetPasswordConfirm() {
                 <div className="mt-8 text-center">
                     <button
                         onClick={() => navigate('/login')}
-                        className="text-secondary text-sm hover:text-primary transition-colors"
+                        className="text-secondary text-sm hover:text-primary transition-colors font-medium"
                     >
                         Cancelar y volver al login
                     </button>

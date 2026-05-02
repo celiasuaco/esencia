@@ -133,6 +133,7 @@ export default function CartPage() {
                                         <img
                                             src={getPhotoUrl(item.product_details.photo)}
                                             alt={item.product_details.name}
+                                            fetchpriority="high"
                                             className="w-full h-full object-contain p-2"
                                         />
                                     </div>

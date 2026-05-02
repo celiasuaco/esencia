@@ -1,5 +1,6 @@
-import { Mail, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Mail from 'lucide-react/dist/esm/icons/mail';
+import MapPin from 'lucide-react/dist/esm/icons/map-pin';
 
 export default function Footer() {
     return (
@@ -14,21 +15,29 @@ export default function Footer() {
                         </p>
                     </div>
 
+                    {/* Sección Legal */}
                     <div>
                         <h4 className="mb-6 font-serif text-lg text-[#A86447]">Legal</h4>
                         <ul className="space-y-4 text-sm text-[#FDFBF9]/60">
-                            <li><Link to="/terminos" className="hover:text-[#A86447] transition-colors">Términos y Privacidad</Link></li>
+                            <li>
+                                <Link to="/terminos" className="hover:text-[#A86447] transition-colors focus:outline-none focus:ring-1 focus:ring-[#A86447] rounded px-1">
+                                    Términos y Privacidad
+                                </Link>
+                            </li>
                         </ul>
                     </div>
 
+                    {/* Sección Contacto */}
                     <div>
                         <h4 className="mb-6 font-serif text-lg text-[#A86447]">Contacto</h4>
                         <ul className="space-y-4 text-sm text-[#FDFBF9]/60">
                             <li className="flex items-center justify-center md:justify-start gap-3">
-                                <Mail size={16} className="text-[#A86447]" /> <span>info@esenciajoyeria.app</span>
+                                <Mail size={16} className="text-[#A86447]" aria-hidden="true" />
+                                <span>info@esenciajoyeria.app</span>
                             </li>
                             <li className="flex items-center justify-center md:justify-start gap-3">
-                                <MapPin size={16} className="text-[#A86447]" /> <span>España</span>
+                                <MapPin size={16} className="text-[#A86447]" aria-hidden="true" />
+                                <span>España</span>
                             </li>
                         </ul>
                     </div>

@@ -1,7 +1,13 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ExternalLink, LogOut, User, Package, Store, Users } from 'lucide-react';
 import { authService } from '../../services/authService';
 import AdminChatbot from '../chatbot/AdminChatbot';
+import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
+import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
+import LogOut from 'lucide-react/dist/esm/icons/log-out';
+import User from 'lucide-react/dist/esm/icons/user';
+import Package from 'lucide-react/dist/esm/icons/package';
+import Store from 'lucide-react/dist/esm/icons/store';
+import Users from 'lucide-react/dist/esm/icons/users';
 
 export default function AdminLayout() {
     const location = useLocation();
@@ -61,7 +67,7 @@ export default function AdminLayout() {
                     </Link>
                     <button
                         onClick={() => authService.logout()}
-                        className="flex items-center gap-3 text-xs text-red-400/70 hover:text-red-400 transition-colors w-full uppercase tracking-widest"
+                        className="flex items-center gap-3 text-xs text-red-400/70 hover:text-red-400 transition-colors w-full uppercase tracking-widest outline-none focus:ring-1 focus:ring-red-400/30 rounded"
                     >
                         <LogOut className="w-4 h-4" />
                         <span>Cerrar Sesión</span>
