@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Eye from 'lucide-react/dist/esm/icons/eye';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import Lock from 'lucide-react/dist/esm/icons/lock';
@@ -12,18 +12,23 @@ const LoginForm = ({ onSwitchForm }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const navigate = useNavigate();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (loading) return;
         setLoading(true);
+
         try {
             const data = await authService.login(email, password);
 
             if (data.user.role === 'ADMIN') {
-                window.location.href = '/dashboard';
+                navigate('/dashboard');
             } else {
-                window.location.href = '/profile';
+                navigate('/catalog');
             }
+
+            window.location.reload();
         } catch (err) {
             console.error("Login error:", err);
             setLoading(false);

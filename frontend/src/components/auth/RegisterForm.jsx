@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 import Eye from 'lucide-react/dist/esm/icons/eye';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import Lock from 'lucide-react/dist/esm/icons/lock';
@@ -10,6 +11,7 @@ const RegisterForm = ({ onSwitchForm }) => {
     const [formData, setFormData] = useState({ email: '', password: '', full_name: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -20,9 +22,19 @@ const RegisterForm = ({ onSwitchForm }) => {
         e.preventDefault();
         if (loading) return;
         setLoading(true);
+
         try {
-            await authService.register(formData);
-            onSwitchForm();
+            const data = await authService.register(formData);
+
+            if (data && data.access) {
+                localStorage.setItem('accessToken', data.access);
+                localStorage.setItem('refreshToken', data.refresh);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                navigate('/catalog');
+            } else {
+                onSwitchForm();
+            }
         } catch (err) {
             console.error("Registration error:", err);
         } finally {
@@ -48,7 +60,7 @@ const RegisterForm = ({ onSwitchForm }) => {
                             type="text"
                             autoComplete="name"
                             className="input-field !pl-12 w-full focus:ring-2 focus:ring-primary/20 outline-none"
-                            placeholder="Ej. Celia Suárez"
+                            placeholder="Ej. Pepe Pérez"
                             value={formData.full_name}
                             onChange={handleChange}
                             required

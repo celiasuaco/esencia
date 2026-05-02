@@ -29,7 +29,7 @@ logger = logging.getLogger("authentication")
 
 
 class RegisterView(views.APIView):
-    """Registro de nuevos clientes en la plataforma."""
+    """Registro de nuevos clientes con inicio de sesión automático."""
 
     def post(self, request):
         logger.debug(f"Petición POST recibida en RegisterView. Datos: {request.data}")
@@ -42,12 +42,26 @@ class RegisterView(views.APIView):
             )
 
         try:
-            create_user(**serializer.validated_data)
+            user = create_user(**serializer.validated_data)
+
+            refresh = RefreshToken.for_user(user)
+
             return response.Response(
-                {"message": "Usuario creado exitosamente"},
+                {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "user": {
+                        "email": user.email,
+                        "full_name": user.full_name,
+                        "role": user.role,
+                        "photo": user.photo.url if user.photo else None,
+                    },
+                    "message": "Usuario creado exitosamente",
+                },
                 status=status.HTTP_201_CREATED,
             )
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error en RegisterView: {str(e)}")
             return response.Response(
                 {"error": "No se pudo procesar el registro"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
