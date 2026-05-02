@@ -5,6 +5,7 @@ import Eye from 'lucide-react/dist/esm/icons/eye';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import Lock from 'lucide-react/dist/esm/icons/lock';
 import Mail from 'lucide-react/dist/esm/icons/mail';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 
 const LoginForm = ({ onSwitchForm }) => {
     const [email, setEmail] = useState('');
@@ -12,11 +13,15 @@ const LoginForm = ({ onSwitchForm }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const [error, setError] = useState(null);
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (loading) return;
+
+        setError(null);
         setLoading(true);
 
         try {
@@ -31,6 +36,7 @@ const LoginForm = ({ onSwitchForm }) => {
             window.location.reload();
         } catch (err) {
             console.error("Login error:", err);
+            setError(err.response?.data?.error || "Credenciales incorrectas. Inténtalo de nuevo.");
             setLoading(false);
         }
     };
@@ -40,6 +46,13 @@ const LoginForm = ({ onSwitchForm }) => {
             <h2 className="text-3xl font-serif text-primary text-center mb-2">Bienvenido</h2>
             <p className="text-secondary text-center mb-8">Ingresa a tu cuenta exclusiva</p>
 
+            {error && (
+                <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 flex items-center gap-3 animate-shake">
+                    <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
+                    <p className="text-sm text-red-700 font-medium">{error}</p>
+                </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="flex flex-col gap-1.5 text-left">
                     <label htmlFor="email" className="text-sm font-medium text-primary ml-1">
@@ -47,7 +60,7 @@ const LoginForm = ({ onSwitchForm }) => {
                     </label>
                     <div className="relative flex items-center group">
                         <Mail
-                            className="absolute left-4 text-[#A3937B] group-focus-within:text-primary transition-colors z-10"
+                            className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B] group-focus-within:text-primary'}`}
                             size={18}
                         />
                         <input
@@ -55,10 +68,13 @@ const LoginForm = ({ onSwitchForm }) => {
                             type="email"
                             name="email"
                             autoComplete="username"
-                            className="input-field !pl-12 w-full focus:ring-2 focus:ring-primary/20 outline-none"
+                            className={`input-field !pl-12 w-full outline-none transition-all ${error ? 'border-red-500 focus:ring-red-100' : 'focus:ring-primary/20'}`}
                             placeholder="tu@email.com"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                if (error) setError(null);
+                            }}
                             required
                         />
                     </div>
@@ -70,7 +86,7 @@ const LoginForm = ({ onSwitchForm }) => {
                     </label>
                     <div className="relative flex items-center group">
                         <Lock
-                            className="absolute left-4 text-[#A3937B] group-focus-within:text-primary transition-colors z-10"
+                            className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B] group-focus-within:text-primary'}`}
                             size={18}
                         />
                         <input
@@ -78,10 +94,13 @@ const LoginForm = ({ onSwitchForm }) => {
                             name="password"
                             type={showPassword ? "text" : "password"}
                             autoComplete="current-password"
-                            className="input-field !pl-12 !pr-12 w-full focus:ring-2 focus:ring-primary/20 outline-none"
+                            className={`input-field !pl-12 !pr-12 w-full outline-none transition-all ${error ? 'border-red-500 focus:ring-red-100' : 'focus:ring-primary/20'}`}
                             placeholder="••••••••"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                if (error) setError(null);
+                            }}
                             required
                         />
                         <button
