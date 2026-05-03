@@ -42,7 +42,7 @@ const LoginForm = ({ onSwitchForm }) => {
             setLoading(true);
             const data = await authService.login(formData.email, formData.password);
 
-            window.dispatchEvent(new Event('authChange'));
+            globalThis.dispatchEvent(new Event('authChange'));
 
             if (data.user.role === 'ADMIN') {
                 navigate('/dashboard');

@@ -51,7 +51,7 @@ const RegisterForm = ({ onSwitchForm }) => {
                 localStorage.setItem('accessToken', data.access);
                 localStorage.setItem('refreshToken', data.refresh);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                window.dispatchEvent(new Event('authChange'));
+                globalThis.dispatchEvent(new Event('authChange'));
                 navigate('/catalog');
             } else {
                 onSwitchForm();

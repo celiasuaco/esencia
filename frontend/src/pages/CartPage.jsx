@@ -20,7 +20,7 @@ export default function CartPage() {
             const { url } = await checkoutService.createPaymentSession({ address_data: addressData });
 
             if (url) {
-                window.location.href = url;
+                globalThis.location.href = url;
             } else {
                 throw new Error("No se recibió la URL de pago");
             }

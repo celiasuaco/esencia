@@ -50,7 +50,7 @@ export default function ProfilePage() {
     const photoUrl = getPhotoUrl(user.photo);
 
     const handleDeleteAccount = async () => {
-        const confirmed = window.confirm(
+        const confirmed = globalThis.confirm(
             "¿Está seguro de que desea ejercer su derecho al olvido? " +
             "Sus datos personales serán anonimizados y no podrá volver a acceder a esta cuenta. " +
             "Esta acción es irreversible."
@@ -61,7 +61,7 @@ export default function ProfilePage() {
             try {
                 await authService.deleteAccount();
                 navigate('/');
-                window.location.reload();
+                globalThis.location.reload();
             } catch (error) {
                 alert(error);
                 setDeleting(false);

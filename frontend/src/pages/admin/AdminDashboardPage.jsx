@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
     if (!stats) return (
         <div className="p-10 text-center">
             <p className="text-red-500 mb-4">Error de conexión con el servidor de datos.</p>
-            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-[#324339] text-white rounded-full text-sm">
+            <button onClick={() => globalThis.location.reload()} className="px-4 py-2 bg-[#324339] text-white rounded-full text-sm">
                 Reintentar
             </button>
         </div>
