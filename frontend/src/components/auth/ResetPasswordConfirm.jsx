@@ -5,6 +5,7 @@ import Lock from 'lucide-react/dist/esm/icons/lock';
 import Eye from 'lucide-react/dist/esm/icons/eye';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 
 export default function ResetPasswordConfirm() {
     const { uid, token } = useParams();
@@ -12,16 +13,21 @@ export default function ResetPasswordConfirm() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (loading) return;
+
+        setError(null);
         setLoading(true);
+
         try {
             await authService.confirmPasswordReset(uid, token, password);
             navigate('/login');
         } catch (err) {
             console.error("Error resetting password:", err);
+            setError(err || "Hubo un problema al restablecer tu contraseña. Es posible que el enlace haya expirado.");
         } finally {
             setLoading(false);
         }
@@ -33,7 +39,7 @@ export default function ResetPasswordConfirm() {
 
                 <div className="flex justify-center mb-6">
                     <div className="w-16 h-16 bg-[#FDFBF7] rounded-full flex items-center justify-center border border-[#E8E2D6]">
-                        <ShieldCheck className="text-primary w-8 h-8" />
+                        <ShieldCheck className={`w-8 h-8 ${error ? 'text-red-500' : 'text-primary'}`} />
                     </div>
                 </div>
 
@@ -41,6 +47,13 @@ export default function ResetPasswordConfirm() {
                 <p className="text-secondary text-center mb-10 text-sm leading-relaxed">
                     Estás a un paso de recuperar tu cuenta. <br /> Elige tu nueva clave de acceso.
                 </p>
+
+                {error && (
+                    <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 flex items-center gap-3 animate-shake">
+                        <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
+                        <p className="text-sm text-red-700 font-medium">{error}</p>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex flex-col gap-2 text-left">
@@ -50,7 +63,7 @@ export default function ResetPasswordConfirm() {
 
                         <div className="relative flex items-center group">
                             <Lock
-                                className="absolute left-4 text-[#A3937B] group-focus-within:text-primary transition-colors z-10"
+                                className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B] group-focus-within:text-primary'}`}
                                 size={18}
                             />
                             <input
@@ -58,10 +71,16 @@ export default function ResetPasswordConfirm() {
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 autoComplete="new-password"
-                                className="input-field !pl-12 !pr-12 w-full focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                className={`input-field !pl-12 !pr-12 w-full focus:ring-2 outline-none transition-all ${error
+                                    ? 'border-red-500 focus:ring-red-100'
+                                    : 'focus:ring-primary/20'
+                                    }`}
                                 placeholder="Escribe tu nueva contraseña"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    if (error) setError(null);
+                                }}
                                 required
                             />
                             <button
@@ -91,6 +110,7 @@ export default function ResetPasswordConfirm() {
 
                 <div className="mt-8 text-center">
                     <button
+                        type="button"
                         onClick={() => navigate('/login')}
                         className="text-secondary text-sm hover:text-primary transition-colors font-medium"
                     >

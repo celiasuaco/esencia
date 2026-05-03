@@ -4,20 +4,24 @@ import { Link } from 'react-router-dom';
 import Mail from 'lucide-react/dist/esm/icons/mail';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 
-export default function ForgotPassword() {
+export default function ForgotPassword({ onSwitchForm }) {
     const [email, setEmail] = useState('');
     const [sent, setSent] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         setLoading(true);
         try {
             await authService.sendPasswordResetEmail(email);
             setSent(true);
         } catch (err) {
             console.error("Error sending password reset email:", err);
+            setError(err || "No pudimos procesar tu solicitud. Verifica el formato del email.");
         } finally {
             setLoading(false);
         }
@@ -34,9 +38,12 @@ export default function ForgotPassword() {
                     <p className="text-secondary mb-8 leading-relaxed">
                         Si el correo <strong className="text-primary">{email}</strong> está registrado, recibirás un enlace para restablecer tu contraseña en unos minutos.
                     </p>
-                    <Link to="/login" className="btn-primary inline-block w-full py-3 text-center transition-all hover:opacity-90">
+                    <button
+                        onClick={onSwitchForm}
+                        className="btn-primary inline-block w-full py-3 text-center transition-all hover:opacity-90"
+                    >
                         Volver al inicio de sesión
-                    </Link>
+                    </button>
                 </div>
             </div>
         );
@@ -45,15 +52,25 @@ export default function ForgotPassword() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] p-4">
             <div className="register-card max-w-md w-full shadow-xl border border-[#E8E2D6]">
-                <Link to="/login" className="inline-flex items-center gap-2 text-secondary mb-8 hover:text-primary transition-colors text-sm font-medium group">
+                <button
+                    onClick={onSwitchForm}
+                    className="inline-flex items-center gap-2 text-secondary mb-8 hover:text-primary transition-colors text-sm font-medium group"
+                >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Volver al login
-                </Link>
+                </button>
 
                 <h2 className="text-4xl font-serif text-primary text-center mb-3">Recuperar acceso</h2>
                 <p className="text-secondary text-center mb-10 text-sm leading-relaxed">
                     Introduce tu email y te enviaremos las <br /> instrucciones de recuperación.
                 </p>
+
+                {error && (
+                    <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 flex items-center gap-3 animate-shake">
+                        <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
+                        <p className="text-sm text-red-700 font-medium">{error}</p>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex flex-col gap-2 text-left">
@@ -63,7 +80,7 @@ export default function ForgotPassword() {
 
                         <div className="relative flex items-center">
                             <Mail
-                                className="absolute left-4 text-[#A3937B] pointer-events-none z-10"
+                                className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B]'}`}
                                 size={20}
                             />
                             <input
@@ -72,10 +89,16 @@ export default function ForgotPassword() {
                                 name="email"
                                 autoComplete="email"
                                 required
-                                className="input-field !pl-12 w-full focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                className={`input-field !pl-12 w-full focus:ring-2 outline-none transition-all ${error
+                                    ? 'border-red-500 focus:ring-red-100'
+                                    : 'focus:ring-primary/20'
+                                    }`}
                                 placeholder="tu@email.com"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (error) setError(null);
+                                }}
                             />
                         </div>
                     </div>
@@ -97,9 +120,13 @@ export default function ForgotPassword() {
                 <div className="mt-10 pt-6 border-t border-[#FDFBF7] text-center">
                     <p className="text-secondary text-sm">
                         ¿Recordaste tu contraseña?{' '}
-                        <Link to="/login" className="text-primary font-bold hover:underline">
+                        <button
+                            type="button"
+                            onClick={onSwitchForm}
+                            className="text-primary font-bold hover:underline"
+                        >
                             Inicia sesión
-                        </Link>
+                        </button>
                     </p>
                 </div>
             </div>

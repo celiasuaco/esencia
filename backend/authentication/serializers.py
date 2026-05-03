@@ -10,7 +10,12 @@ class RegisterSerializer(serializers.ModelSerializer):
     """Valida los datos de registro, aplicando reglas de complejidad a la contraseña y unicidad de email."""
 
     password = serializers.CharField(
-        write_only=True, min_length=8, style={"input_type": "password"}
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"},
+        error_messages={
+            "min_length": "La contraseña debe tener al menos 8 caracteres."
+        },
     )
 
     class Meta:

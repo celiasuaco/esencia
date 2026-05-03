@@ -6,21 +6,25 @@ import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import Lock from 'lucide-react/dist/esm/icons/lock';
 import Mail from 'lucide-react/dist/esm/icons/mail';
 import User from 'lucide-react/dist/esm/icons/user';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 
 const RegisterForm = ({ onSwitchForm }) => {
     const [formData, setFormData] = useState({ email: '', password: '', full_name: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        if (error) setError(null);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (loading) return;
+        setError(null);
         setLoading(true);
 
         try {
@@ -30,13 +34,14 @@ const RegisterForm = ({ onSwitchForm }) => {
                 localStorage.setItem('accessToken', data.access);
                 localStorage.setItem('refreshToken', data.refresh);
                 localStorage.setItem('user', JSON.stringify(data.user));
-
+                window.dispatchEvent(new Event('authChange'));
                 navigate('/catalog');
             } else {
                 onSwitchForm();
             }
         } catch (err) {
             console.error("Registration error:", err);
+            setError(err || "Error al crear la cuenta. Por favor, verifica los datos.");
         } finally {
             setLoading(false);
         }
@@ -47,19 +52,29 @@ const RegisterForm = ({ onSwitchForm }) => {
             <h2 className="text-3xl font-serif text-primary text-center mb-2">Crear Cuenta</h2>
             <p className="text-secondary text-center mb-8">Únete a nuestra comunidad exclusiva</p>
 
+            {error && (
+                <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 flex items-center gap-3 animate-shake">
+                    <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
+                    <p className="text-sm text-red-700 font-medium">{error}</p>
+                </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex flex-col gap-1.5 text-left">
                     <label htmlFor="full_name" className="text-sm font-medium text-primary ml-1">
                         Nombre Completo
                     </label>
                     <div className="relative flex items-center group">
-                        <User className="absolute left-4 text-[#A3937B] group-focus-within:text-primary transition-colors z-10" size={18} />
+                        <User
+                            className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B] group-focus-within:text-primary'}`}
+                            size={18}
+                        />
                         <input
                             id="full_name"
                             name="full_name"
                             type="text"
                             autoComplete="name"
-                            className="input-field !pl-12 w-full focus:ring-2 focus:ring-primary/20 outline-none"
+                            className={`input-field !pl-12 w-full outline-none transition-all ${error ? 'border-red-500 focus:ring-red-100' : 'focus:ring-primary/20'}`}
                             placeholder="Ej. Pepe Pérez"
                             value={formData.full_name}
                             onChange={handleChange}
@@ -73,13 +88,16 @@ const RegisterForm = ({ onSwitchForm }) => {
                         Email
                     </label>
                     <div className="relative flex items-center group">
-                        <Mail className="absolute left-4 text-[#A3937B] group-focus-within:text-primary transition-colors z-10" size={18} />
+                        <Mail
+                            className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B] group-focus-within:text-primary'}`}
+                            size={18}
+                        />
                         <input
                             id="email_reg"
                             name="email"
                             type="email"
                             autoComplete="email"
-                            className="input-field !pl-12 w-full focus:ring-2 focus:ring-primary/20 outline-none"
+                            className={`input-field !pl-12 w-full outline-none transition-all ${error ? 'border-red-500 focus:ring-red-100' : 'focus:ring-primary/20'}`}
                             placeholder="tu@email.com"
                             value={formData.email}
                             onChange={handleChange}
@@ -93,13 +111,16 @@ const RegisterForm = ({ onSwitchForm }) => {
                         Contraseña
                     </label>
                     <div className="relative flex items-center group">
-                        <Lock className="absolute left-4 text-[#A3937B] group-focus-within:text-primary transition-colors z-10" size={18} />
+                        <Lock
+                            className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B] group-focus-within:text-primary'}`}
+                            size={18}
+                        />
                         <input
                             id="password_reg"
                             name="password"
                             type={showPassword ? "text" : "password"}
                             autoComplete="new-password"
-                            className="input-field !pl-12 !pr-12 w-full focus:ring-2 focus:ring-primary/20 outline-none"
+                            className={`input-field !pl-12 !pr-12 w-full outline-none transition-all ${error ? 'border-red-500 focus:ring-red-100' : 'focus:ring-primary/20'}`}
                             placeholder="••••••••"
                             value={formData.password}
                             onChange={handleChange}
