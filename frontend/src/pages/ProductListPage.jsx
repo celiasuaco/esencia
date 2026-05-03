@@ -82,15 +82,14 @@ export default function ProductListPage() {
                 <div className="max-w-4xl mx-auto text-center relative z-10 space-y-6">
                     <div className="flex items-center justify-center gap-4 mb-2">
                         <span className="h-[1px] w-10 bg-[#A86447]/40"></span>
-                        <span className="text-[#A86447] tracking-[0.4em] uppercase text-[10px] font-bold">Atelier de Lujo</span>
+                        <span className="text-[#A86447] tracking-[0.25em] uppercase text-[10px] font-medium">Colección</span>
                         <span className="h-[1px] w-10 bg-[#A86447]/40"></span>
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-serif text-[#324339] italic leading-tight text-center">
-                        Nuestras <span className="text-[#A86447]">Joyas</span>
+
+                    <h1 className="text-5xl md:text-7xl font-serif text-[#324339] leading-tight text-center tracking-tight">
+                        Nuestras <span className="text-[#A86447] font-medium">Joyas</span>
                     </h1>
-                    <p className="text-[#324339]/60 max-w-lg mx-auto text-sm leading-relaxed tracking-wide font-light italic text-center">
-                        Piezas forjadas a mano donde el <span className="text-[#324339] font-semibold not-italic">oro</span> y la <span className="text-[#324339] font-semibold not-italic">esencia</span> se encuentran.
-                    </p>
+
                     <div className="flex items-center justify-center gap-3 pt-4">
                         <div className="h-2 w-2 rounded-full bg-[#A86447]"></div>
                         <div className="h-[1px] w-32 bg-gradient-to-r from-transparent via-[#324339]/20 to-transparent"></div>
@@ -195,7 +194,7 @@ export default function ProductListPage() {
 
             <div className="mt-40 flex flex-col items-center gap-6 opacity-30 pb-20">
                 <div className="h-20 w-[1px] bg-gradient-to-b from-[#A86447] to-transparent"></div>
-                <span className="font-serif italic text-4xl text-[#324339]">E</span>
+                <span className="font-serif italic text-4xl text-[#324339]">Esencia</span>
             </div>
         </div>
     );
