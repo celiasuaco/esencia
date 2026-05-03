@@ -34,13 +34,24 @@ const PageLoader = () => (
 );
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(authService.getCurrentUser());
 
   useEffect(() => {
-    setUser(authService.getCurrentUser());
+    const handleAuthUpdate = () => {
+      setUser(authService.getCurrentUser());
+    };
+
+    globalThis.addEventListener('authChange', handleAuthUpdate);
+    globalThis.addEventListener('storage', handleAuthUpdate);
+
+    return () => {
+      globalThis.removeEventListener('authChange', handleAuthUpdate);
+      globalThis.removeEventListener('storage', handleAuthUpdate);
+    };
   }, []);
 
   const isAdmin = user && user.role === 'ADMIN';
+  const isAuthenticated = !!user;
 
   return (
     <BrowserRouter>
@@ -59,11 +70,19 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
 
-          {/* GRUPO 1: CLIENTES / PÚBLICO (Con Navbar superior) */}
+          {/* CLIENTES / PÚBLICO */}
           <Route element={<Navbar />}>
             <Route path="/" element={<ShowcasePage />} />
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/register" element={<AuthPage />} />
+
+            <Route
+              path="/login"
+              element={!isAuthenticated ? <AuthPage /> : <Navigate to={isAdmin ? "/dashboard" : "/catalog"} replace />}
+            />
+            <Route
+              path="/register"
+              element={!isAuthenticated ? <AuthPage /> : <Navigate to="/catalog" replace />}
+            />
+
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:uid/:token" element={<ResetPasswordConfirm />} />
             <Route path="/catalog" element={<ProductListPage />} />
@@ -72,18 +91,24 @@ function App() {
             <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
             <Route path="/terminos" element={<Terms />} />
 
-            {/* Perfil de Cliente protegido */}
+            {/* Perfil de Cliente logueado */}
             <Route
               path="/profile"
-              element={user && !isAdmin ? <ProfilePage /> : <Navigate to="/login" />}
+              element={isAuthenticated && !isAdmin ? <ProfilePage /> : <Navigate to="/login" replace />}
             />
-            <Route path="/orders" element={user && !isAdmin ? <MyOrdersPage /> : <Navigate to="/login" />} />
-            <Route path="/orders/:id" element={user && !isAdmin ? <AdminOrderDetailPage /> : <Navigate to="/login" />} />
+            <Route
+              path="/orders"
+              element={isAuthenticated && !isAdmin ? <MyOrdersPage /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/orders/:id"
+              element={isAuthenticated && !isAdmin ? <AdminOrderDetailPage /> : <Navigate to="/login" replace />}
+            />
           </Route>
 
-          {/* GRUPO 2: ADMINISTRADORES */}
+          {/* ADMINISTRADORES */}
           <Route
-            element={isAdmin ? <AdminLayout /> : <Navigate to="/login" />}
+            element={isAdmin ? <AdminLayout /> : <Navigate to="/login" replace />}
           >
             <Route path="/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/profile" element={<ProfilePage />} />
@@ -96,7 +121,7 @@ function App() {
           </Route>
 
           {/* Redirección de seguridad */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

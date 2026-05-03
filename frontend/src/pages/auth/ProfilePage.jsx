@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User, LogOut, Edit, Mail, Package, Loader2, Trash2 } from 'lucide-react';
 import { authService } from '../../services/authService';
 import EditProfileForm from '../../components/auth/EditProfileForm';
@@ -21,23 +21,41 @@ export default function ProfilePage() {
         return `${baseUrl}${normalizedPath}`;
     };
 
-    const fetchUserData = async () => {
-        setLoading(true);
+    const fetchUserData = useCallback(async (isSilent = false) => {
+        if (!isSilent) setLoading(true);
         try {
             const freshUser = await authService.getProfile();
             setUser(freshUser);
         } catch (error) {
             console.error("Error cargando perfil:", error);
             const localUser = authService.getCurrentUser();
-            if (localUser) setUser(localUser);
+            if (localUser) {
+                setUser(localUser);
+            } else {
+                navigate('/login');
+            }
         } finally {
-            setLoading(false);
+            if (!isSilent) setLoading(false);
         }
-    };
+    }, [navigate]);
 
     useEffect(() => {
+        const handleGlobalAuthChange = () => {
+            const currentUser = authService.getCurrentUser();
+            if (!currentUser) {
+                navigate('/login');
+            } else {
+                setUser(currentUser);
+            }
+        };
+
+        globalThis.addEventListener('authChange', handleGlobalAuthChange);
         fetchUserData();
-    }, []);
+
+        return () => {
+            globalThis.removeEventListener('authChange', handleGlobalAuthChange);
+        };
+    }, [fetchUserData, navigate]);
 
     if (loading) return (
         <div className="h-screen flex items-center justify-center bg-[#FDFBF9]">
@@ -59,7 +77,6 @@ export default function ProfilePage() {
             try {
                 await authService.deleteAccount();
                 navigate('/');
-                globalThis.location.reload();
             } catch (error) {
                 alert(error);
                 setDeleting(false);
@@ -81,15 +98,15 @@ export default function ProfilePage() {
                         <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-8 border border-[#5B7B63]/10">
 
                             <div className="text-center mb-6 md:mb-8">
-                                <div className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-[#C77C5D] to-[#A86447] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-2xl md:text-4xl text-white font-serif overflow-hidden relative border-4 border-white">
+                                <div className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-[#C77C5D] to-[#A86447] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-2xl md:text-4xl text-white font-serif overflow-hidden relative border-4 border-white transition-transform hover:scale-105">
                                     <span className="absolute z-0">{user.full_name?.charAt(0).toUpperCase()}</span>
                                     {user.photo && (
                                         <img
                                             src={photoUrl}
                                             alt="Perfil"
                                             fetchPriority="high"
-                                            className="absolute inset-0 w-full h-full object-cover z-10"
-                                            onError={(e) => e.target.style.display = 'none'}
+                                            className="absolute inset-0 w-full h-full object-cover z-10 animate-fade-in"
+                                            onError={(e) => { e.target.style.display = 'none'; }}
                                         />
                                     )}
                                 </div>
@@ -138,7 +155,7 @@ export default function ProfilePage() {
                                         onCancel={() => setIsEditing(false)}
                                         onUpdateSuccess={(msg) => {
                                             setSuccess(msg);
-                                            fetchUserData();
+                                            fetchUserData(true);
                                             setIsEditing(false);
                                         }}
                                     />
@@ -157,7 +174,7 @@ export default function ProfilePage() {
                                     </div>
 
                                     {success && (
-                                        <p className="mb-6 p-3 md:p-4 bg-green-50 text-green-700 rounded-xl text-center border border-green-100 text-sm">
+                                        <p className="mb-6 p-3 md:p-4 bg-green-50 text-green-700 rounded-xl text-center border border-green-100 text-sm animate-fade-in">
                                             {success}
                                         </p>
                                     )}

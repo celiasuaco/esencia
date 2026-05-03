@@ -1,4 +1,5 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import AdminChatbot from '../chatbot/AdminChatbot';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
@@ -11,6 +12,30 @@ import Users from 'lucide-react/dist/esm/icons/users';
 
 export default function AdminLayout() {
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const [isAdmin, setIsAdmin] = useState(
+        authService.isAuthenticated() && authService.getCurrentUser()?.role === 'ADMIN'
+    );
+
+    useEffect(() => {
+        const handleAuthChange = () => {
+            const user = authService.getCurrentUser();
+            const isAuthorized = authService.isAuthenticated() && user?.role === 'ADMIN';
+
+            setIsAdmin(isAuthorized);
+
+            if (!isAuthorized) {
+                navigate('/login', { replace: true });
+            }
+        };
+
+        globalThis.addEventListener('authChange', handleAuthChange);
+
+        return () => {
+            globalThis.removeEventListener('authChange', handleAuthChange);
+        };
+    }, [navigate]);
 
     const menuItems = [
         { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -18,6 +43,8 @@ export default function AdminLayout() {
         { path: '/admin/orders', icon: Package, label: 'Pedidos' },
         { path: '/admin/users', icon: Users, label: 'Clientes' },
     ];
+
+    if (!isAdmin) return null;
 
     return (
         <div className="flex min-h-screen bg-[#FDFBF9]">
