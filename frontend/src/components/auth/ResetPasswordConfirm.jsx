@@ -70,7 +70,7 @@ export default function ResetPasswordConfirm() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex flex-col gap-2 text-left">
-                        <label htmlFor="password" className="text-sm font-medium text-primary ml-1">
+                        <label htmlFor="reset-password-input" className="text-sm font-medium text-primary ml-1">
                             Nueva Contraseña
                         </label>
 
@@ -80,7 +80,7 @@ export default function ResetPasswordConfirm() {
                                 size={18}
                             />
                             <input
-                                id="password"
+                                id="reset-password-input"
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 autoComplete="new-password"
@@ -99,6 +99,7 @@ export default function ResetPasswordConfirm() {
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-4 text-[#A3937B] hover:text-primary transition-colors z-10 p-1"
+                                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
@@ -118,11 +119,13 @@ export default function ResetPasswordConfirm() {
                         className="btn-primary w-full py-4 flex items-center justify-center gap-2 transform active:scale-[0.98] transition-all disabled:opacity-70 shadow-md"
                     >
                         {loading ? (
-                            <span className="flex items-center gap-2">
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                Actualizando...
-                            </span>
-                        ) : 'Restablecer contraseña'}
+                            <div className="flex items-center gap-2">
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Actualizando...</span>
+                            </div>
+                        ) : (
+                            'Restablecer contraseña'
+                        )}
                     </button>
                 </form>
 

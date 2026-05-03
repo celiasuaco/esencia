@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { authService } from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
 import Eye from 'lucide-react/dist/esm/icons/eye';
@@ -46,7 +47,7 @@ const RegisterForm = ({ onSwitchForm }) => {
             setLoading(true);
             const data = await authService.register(formData);
 
-            if (data && data.access) {
+            if (data?.access) {
                 localStorage.setItem('accessToken', data.access);
                 localStorage.setItem('refreshToken', data.refresh);
                 localStorage.setItem('user', JSON.stringify(data.user));
@@ -79,7 +80,7 @@ const RegisterForm = ({ onSwitchForm }) => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex flex-col gap-1.5">
-                    <label htmlFor="full_name" className="text-sm font-medium text-primary ml-1">
+                    <label htmlFor="register-full-name" className="text-sm font-medium text-primary ml-1">
                         Nombre Completo
                     </label>
                     <div className="relative flex items-center group">
@@ -88,7 +89,7 @@ const RegisterForm = ({ onSwitchForm }) => {
                             size={18}
                         />
                         <input
-                            id="full_name"
+                            id="register-full-name"
                             name="full_name"
                             type="text"
                             autoComplete="name"
@@ -107,7 +108,7 @@ const RegisterForm = ({ onSwitchForm }) => {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label htmlFor="email_reg" className="text-sm font-medium text-primary ml-1">
+                    <label htmlFor="register-email" className="text-sm font-medium text-primary ml-1">
                         Email
                     </label>
                     <div className="relative flex items-center group">
@@ -116,7 +117,7 @@ const RegisterForm = ({ onSwitchForm }) => {
                             size={18}
                         />
                         <input
-                            id="email_reg"
+                            id="register-email"
                             name="email"
                             type="text"
                             autoComplete="email"
@@ -135,7 +136,7 @@ const RegisterForm = ({ onSwitchForm }) => {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label htmlFor="password_reg" className="text-sm font-medium text-primary ml-1">
+                    <label htmlFor="register-password" className="text-sm font-medium text-primary ml-1">
                         Contraseña
                     </label>
                     <div className="relative flex items-center group">
@@ -144,7 +145,7 @@ const RegisterForm = ({ onSwitchForm }) => {
                             size={18}
                         />
                         <input
-                            id="password_reg"
+                            id="register-password"
                             name="password"
                             type={showPassword ? "text" : "password"}
                             autoComplete="new-password"
@@ -175,22 +176,30 @@ const RegisterForm = ({ onSwitchForm }) => {
                     disabled={loading}
                 >
                     {loading ? (
-                        <>
-                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                            Procesando...
-                        </>
+                        <div className="flex items-center gap-2">
+                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Procesando...</span>
+                        </div>
                     ) : 'Registrarse'}
                 </button>
             </form>
 
             <p className="mt-8 text-center text-secondary text-sm">
                 ¿Ya tienes cuenta?{' '}
-                <button onClick={onSwitchForm} className="text-primary font-bold hover:underline transition-all">
+                <button
+                    type="button"
+                    onClick={onSwitchForm}
+                    className="text-primary font-bold hover:underline transition-all"
+                >
                     Inicia sesión
                 </button>
             </p>
         </div>
     );
+};
+
+RegisterForm.propTypes = {
+    onSwitchForm: PropTypes.func.isRequired
 };
 
 export default RegisterForm;

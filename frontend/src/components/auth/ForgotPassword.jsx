@@ -128,11 +128,13 @@ export default function ForgotPassword({ onSwitchForm }) {
                         className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98] transition-all"
                     >
                         {loading ? (
-                            <span className="flex items-center gap-2">
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                Enviando...
-                            </span>
-                        ) : 'Enviar enlace de recuperación'}
+                            <div className="flex items-center gap-2">
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Enviando...</span>
+                            </div>
+                        ) : (
+                            'Enviar enlace de recuperación'
+                        )}
                     </button>
                 </form>
 

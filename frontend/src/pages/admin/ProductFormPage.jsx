@@ -138,7 +138,7 @@ export default function ProductFormPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
                         <div className="space-y-4">
-                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            <label htmlFor="photo-upload" className="text-xs font-bold text-gray-400 uppercase tracking-widest block">
                                 Imagen Principal
                             </label>
                             <button
@@ -159,6 +159,7 @@ export default function ProductFormPage() {
                                 </div>
                             </button>
                             <input
+                                id="photo-upload"
                                 ref={fileInputRef}
                                 type="file"
                                 className="hidden"
@@ -170,8 +171,9 @@ export default function ProductFormPage() {
                         <div className="lg:col-span-2 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-[#A3937B] uppercase">Nombre de la pieza</label>
+                                    <label htmlFor="product-name" className="text-xs font-bold text-[#A3937B] uppercase">Nombre de la pieza</label>
                                     <input
+                                        id="product-name"
                                         name="name"
                                         type="text"
                                         className={`w-full p-3 bg-gray-50 border rounded-xl outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-gray-100 focus:bg-white focus:ring-1 focus:ring-[#A86447]'}`}
@@ -182,8 +184,9 @@ export default function ProductFormPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-[#A3937B] uppercase">Categoría</label>
+                                    <label htmlFor="product-category" className="text-xs font-bold text-[#A3937B] uppercase">Categoría</label>
                                     <select
+                                        id="product-category"
                                         name="category"
                                         className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-1 focus:ring-[#A86447] cursor-pointer"
                                         value={formData.category}
@@ -197,8 +200,9 @@ export default function ProductFormPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-[#A3937B] uppercase">Precio (€)</label>
+                                    <label htmlFor="product-price" className="text-xs font-bold text-[#A3937B] uppercase">Precio (€)</label>
                                     <input
+                                        id="product-price"
                                         name="price"
                                         type="number"
                                         step="0.01"
@@ -210,8 +214,9 @@ export default function ProductFormPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-[#A3937B] uppercase">Stock</label>
+                                    <label htmlFor="product-stock" className="text-xs font-bold text-[#A3937B] uppercase">Stock</label>
                                     <input
+                                        id="product-stock"
                                         name="stock"
                                         type="number"
                                         className={`w-full p-3 bg-gray-50 border rounded-xl outline-none transition-all ${errors.stock ? 'border-red-500 bg-red-50' : 'border-gray-100 focus:ring-1 focus:ring-[#A86447]'}`}
@@ -223,8 +228,9 @@ export default function ProductFormPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-[#A3937B] uppercase">Material</label>
+                                <label htmlFor="product-material" className="text-xs font-bold text-[#A3937B] uppercase">Material</label>
                                 <input
+                                    id="product-material"
                                     name="material"
                                     type="text"
                                     className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-1 focus:ring-[#A86447]"
@@ -234,8 +240,9 @@ export default function ProductFormPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-[#A3937B] uppercase">Descripción detallada</label>
+                                <label htmlFor="product-description" className="text-xs font-bold text-[#A3937B] uppercase">Descripción detallada</label>
                                 <textarea
+                                    id="product-description"
                                     name="description"
                                     className={`w-full p-3 bg-gray-50 border rounded-xl h-32 outline-none resize-none transition-all ${errors.description ? 'border-red-500 bg-red-50' : 'border-gray-100 focus:ring-1 focus:ring-[#A86447]'}`}
                                     value={formData.description}
