@@ -2,6 +2,8 @@ from django.db import models
 
 
 class Product(models.Model):
+    """Modelo para representar un producto en la tienda de joyas."""
+
     class Category(models.TextChoices):
         ANILLO = "ANILLO", "Anillo"
         COLLAR = "COLLAR", "Collar"
@@ -19,9 +21,7 @@ class Product(models.Model):
         blank=True,
         default="products/default_product.png",
     )
-    is_active = models.BooleanField(
-        default=True
-    )  # Los productos nuevos se activan por defecto
+    is_active = models.BooleanField(default=True)
     material = models.CharField(max_length=50, default="Oro 18k")
 
     def __str__(self):

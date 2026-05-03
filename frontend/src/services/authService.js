@@ -1,6 +1,6 @@
 import api from './api';
 
-// Función auxiliar para extraer el mensaje de error de Django REST Framework
+// Función auxiliar para extraer el mensaje de error
 const getErrorMessage = (error) => {
   if (typeof error === 'string') return error;
   
@@ -11,6 +11,20 @@ const getErrorMessage = (error) => {
   }
   
   return "Ocurrió un error inesperado";
+};
+
+const setSession = (data) => {
+  localStorage.setItem('access', data.access);
+  localStorage.setItem('refresh', data.refresh);
+  localStorage.setItem('user', JSON.stringify(data.user));
+  globalThis.dispatchEvent(new Event('authChange'));
+};
+
+const clearSession = () => {
+  localStorage.removeItem('user');
+  localStorage.removeItem('access');
+  localStorage.removeItem('refresh');
+  globalThis.dispatchEvent(new Event('authChange')); // Notifica a los protectores de ruta
 };
 
 export const authService = {
@@ -30,9 +44,7 @@ export const authService = {
       const response = await api.post('/auth/login/', { email, password });
       
       if (response.data.access) {
-        localStorage.setItem('access', response.data.access);
-        localStorage.setItem('refresh', response.data.refresh);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        setSession(response.data);
         return response.data; 
       }
     } catch (error) {
@@ -43,14 +55,6 @@ export const authService = {
   // Cierre de sesión
   logout: async () => {
     const refreshToken = localStorage.getItem('refresh');
-    
-    // 1. Limpiamos local primero para una respuesta instantánea en la UI
-    const clearLocal = () => {
-      localStorage.removeItem('user');
-      localStorage.removeItem('access');
-      localStorage.removeItem('refresh');
-      window.location.replace('/login');
-    };
 
     try {
       if (refreshToken) {
@@ -59,7 +63,8 @@ export const authService = {
     } catch (error) {
       console.warn("No se pudo invalidar el token en el servidor:", error);
     } finally {
-      clearLocal();
+      clearSession();
+      globalThis.location.replace('/');
     }
   },
 
@@ -103,15 +108,15 @@ export const authService = {
     }
   },
 
-  // --- HELPERS DE UTILIDAD ---
-  
+  // Actualizar los datos del usuario
   updateLocalUser: (newUserData) => {
     const currentUser = authService.getCurrentUser() || {};
-    // Hacemos un merge para no perder campos que el backend quizás no envió en el patch
     const updatedUser = { ...currentUser, ...newUserData };
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    globalThis.dispatchEvent(new Event('authChange'));
   },
 
+  // Obtener datos del usuario
   getCurrentUser: () => {
     try {
       const user = localStorage.getItem('user');
@@ -119,6 +124,46 @@ export const authService = {
     } catch (e) {
       localStorage.removeItem('user');
       return null;
+    }
+  },
+
+  // Sincronizar perfil con el servidor para obtener datos actualizados
+  getProfile: async () => {
+    try {
+      const response = await api.get('/auth/profile/');
+      
+      if (response.data) {
+        authService.updateLocalUser(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      throw getErrorMessage(error.response?.data) || "Error al obtener perfil";
+    }
+  },
+
+  // Derecho al olvido: Anonimización y cierre de cuenta
+  deleteAccount: async () => {
+    try {
+      const response = await api.post('/auth/delete-account/');
+      
+      if (response.data) {
+        clearSession();
+        globalThis.location.replace('/');
+      }
+      
+      return response.data;
+    } catch (error) {
+      throw getErrorMessage(error.response?.data) || "No se pudo procesar la eliminación de la cuenta";
+    }
+  },
+
+  // Obtener estadísticas de clientes para administración
+  getUsersStats: async () => {
+    try {
+      const response = await api.get('/auth/admin/users/');
+      return response.data;
+    } catch (error) {
+      throw getErrorMessage(error.response?.data) || "Error al obtener estadísticas de clientes";
     }
   },
 

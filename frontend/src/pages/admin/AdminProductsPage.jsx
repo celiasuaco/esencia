@@ -34,12 +34,11 @@ export default function AdminProductsPage() {
             setProducts(data);
             setFilteredProducts(data);
         } catch (err) {
-            toast.error("Error al cargar el inventario", { description: err });
+            console.error(err);
         }
     };
 
     const handleDelete = (id) => {
-        // Sustituimos window.confirm por un toast con acción (más profesional)
         toast.warning("¿Desactivar este producto?", {
             description: "El producto dejará de ser visible para los clientes.",
             action: {
@@ -47,9 +46,9 @@ export default function AdminProductsPage() {
                 onClick: async () => {
                     try {
                         await productService.delete(id);
-                        toast.success("Producto actualizado");
                         loadProducts();
                     } catch (err) {
+                        console.error(err);
                         toast.error("No se pudo desactivar el producto");
                     }
                 },
@@ -57,7 +56,6 @@ export default function AdminProductsPage() {
         });
     };
 
-    // SOLUCIÓN SONARQUBE: Extraemos el ternario anidado de los botones de filtro
     const getStatusLabel = (status) => {
         if (status === 'ALL') return 'Todos';
         if (status === 'ACTIVE') return 'Activos';
@@ -66,7 +64,6 @@ export default function AdminProductsPage() {
 
     return (
         <div className="p-4 lg:p-8 max-w-[1600px] mx-auto">
-            {/* HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div className="mb-10">
                     <h1 className="text-5xl font-serif text-[#2C3632] mb-2">Gestión de Productos</h1>
@@ -80,10 +77,8 @@ export default function AdminProductsPage() {
                 </button>
             </div>
 
-            {/* BARRA DE FILTROS */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row gap-4 items-center">
 
-                {/* Buscador */}
                 <div className="relative w-full md:w-2/5">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3937B]" size={18} />
                     <input
@@ -95,7 +90,6 @@ export default function AdminProductsPage() {
                     />
                 </div>
 
-                {/* Filtro de Estado */}
                 <div className="flex bg-[#FDFBF7] p-1 rounded-xl border border-gray-200 w-full md:w-auto">
                     {['ALL', 'ACTIVE', 'INACTIVE'].map((status) => (
                         <button
@@ -111,7 +105,6 @@ export default function AdminProductsPage() {
                     ))}
                 </div>
 
-                {/* Filtro de Categoría */}
                 <div className="relative w-full md:w-auto md:flex-1">
                     <label htmlFor="category-filter" className="sr-only">Filtrar por categoría</label>
                     <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A3937B]" size={16} />
@@ -132,7 +125,6 @@ export default function AdminProductsPage() {
                     </div>
                 </div>
 
-                {/* Botón de reset */}
                 {(searchTerm || filterStatus !== 'ALL' || filterCategory !== 'ALL') && (
                     <button
                         onClick={() => { setSearchTerm(''); setFilterStatus('ALL'); setFilterCategory('ALL'); }}
@@ -147,7 +139,6 @@ export default function AdminProductsPage() {
                 Mostrando {filteredProducts.length} de {products.length} productos
             </p>
 
-            {/* GRID DE PRODUCTOS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map(p => (
                     <div key={p.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group">
@@ -155,9 +146,9 @@ export default function AdminProductsPage() {
                             <img
                                 src={p.photo}
                                 alt={p.name}
+                                fetchPriority="high"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
-                            {/* Badges de Stock */}
                             <div className="absolute top-3 left-3 flex flex-col gap-2">
                                 {p.stock < 10 && p.stock > 0 && (
                                     <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-[#B38B4D] text-white shadow-md border border-white/20 uppercase tracking-wider">
@@ -170,7 +161,6 @@ export default function AdminProductsPage() {
                                     </span>
                                 )}
                             </div>
-                            {/* Badge de Estado */}
                             <div className="absolute top-3 right-3">
                                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold shadow-md border border-white/20 uppercase tracking-widest ${p.is_active
                                     ? 'bg-[#4A5D4E] text-white'

@@ -1,10 +1,33 @@
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { authService } from '../../services/authService';
-import Footer from './Footer'; // 1. Importa el Footer
+import Footer from './Footer';
+import { ShoppingBag, User, Package } from 'lucide-react';
+
+const Chatbot = lazy(() => import("../chatbot/Chatbot"));
 
 const Navbar = () => {
-    const isAuthenticated = authService.isAuthenticated();
-    const user = authService.getCurrentUser();
+    const [authState, setAuthState] = useState({
+        isAuthenticated: authService.isAuthenticated(),
+        user: authService.getCurrentUser()
+    });
+
+    useEffect(() => {
+        const handleAuthUpdate = () => {
+            setAuthState({
+                isAuthenticated: authService.isAuthenticated(),
+                user: authService.getCurrentUser()
+            });
+        };
+        globalThis.addEventListener('authChange', handleAuthUpdate);
+        globalThis.addEventListener('storage', handleAuthUpdate);
+        return () => {
+            globalThis.removeEventListener('authChange', handleAuthUpdate);
+            globalThis.removeEventListener('storage', handleAuthUpdate);
+        };
+    }, []);
+
+    const { isAuthenticated, user } = authState;
 
     const getProfilePath = () => {
         if (!isAuthenticated) return "/register";
@@ -13,24 +36,55 @@ const Navbar = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen"> {/* 2. Contenedor flex */}
-            <nav className="flex justify-between items-center p-6 bg-white border-b border-[#E8E2D6] sticky top-0 z-50">
-                <Link to="/" className="text-2xl font-serif text-primary">Esencia</Link>
-                <div className="flex items-center gap-4">
-                    <Link to={getProfilePath()} className="p-2 rounded-full hover:bg-[#FDFBF7]">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={isAuthenticated ? "#5B7B63" : "#A3937B"} strokeWidth="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
+        <div className="flex flex-col min-h-screen bg-[#FDFBF9]">
+            <nav className="flex justify-between items-center px-10 py-4 bg-white border-b border-[#324339]/10 sticky top-0 z-50 shadow-sm">
+                <div className="flex-1 flex items-baseline gap-10">
+                    <Link to="/" className="text-2xl font-serif font-bold text-[#324339] tracking-tight hover:opacity-80 transition-opacity">
+                        Esencia
+                    </Link>
+                    <Link to="/catalog" className="font-serif text-[15px] text-[#324339]/70 hover:text-[#D48A66] transition-colors duration-500 italic tracking-wide">
+                        colección
+                    </Link>
+                </div>
+
+                <div className="flex-1 flex justify-end items-center gap-2">
+                    {isAuthenticated && (
+                        <Link to={user?.role === 'CLIENT' ? "/orders" : "/profile"} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
+                            <Package
+                                size={20}
+                                strokeWidth={1.5}
+                                className="text-[#324339] group-hover:text-[#D48A66] group-hover:scale-110 transition-all duration-300"
+                            />
+                        </Link>
+                    )}
+
+                    <Link to="/cart" className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
+                        <ShoppingBag
+                            size={20}
+                            strokeWidth={1.5}
+                            className="text-[#324339] group-hover:text-[#D48A66] group-hover:scale-110 transition-all duration-300"
+                        />
+                    </Link>
+
+                    <Link to={getProfilePath()} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
+                        <User
+                            size={22}
+                            strokeWidth={1.5}
+                            className={`${isAuthenticated ? "text-[#D48A66]" : "text-[#324339]"} group-hover:scale-110 transition-all duration-300`}
+                        />
                     </Link>
                 </div>
             </nav>
 
-            <main className="flex-grow"> {/* 3. El contenido crece para empujar el footer abajo */}
+            <main className="flex-grow">
                 <Outlet />
             </main>
 
-            <Footer /> {/* 4. El Footer aparece al final */}
+            <Suspense fallback={null}>
+                <Chatbot />
+            </Suspense>
+
+            <Footer />
         </div>
     );
 };

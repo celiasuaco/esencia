@@ -9,8 +9,6 @@ from rest_framework.test import APIClient
 from product.models import Product
 from product.services import ProductService
 
-# --- FIXTURES ---
-
 
 @pytest.fixture
 def api_client():
@@ -46,12 +44,12 @@ def sample_product(db):
     )
 
 
-# --- TESTS DE SERVICIO (Lógica de Negocio) ---
-
-
 @pytest.mark.django_db
 class TestProductService:
+    """Tests unitarios para la lógica de negocio de productos."""
+
     def test_create_product(self):
+        """Testea la creación de un producto usando el servicio."""
         data = {
             "name": "Collar Perlas",
             "description": "Hermoso collar",
@@ -64,45 +62,42 @@ class TestProductService:
         assert Product.objects.count() == 1
 
     def test_soft_delete(self, sample_product):
+        """Testea el borrado lógico de un producto usando el servicio."""
         ProductService.soft_delete(sample_product)
         sample_product.refresh_from_db()
         assert sample_product.is_active is False
 
     def test_get_all_products_filtering(self, sample_product):
-        # Creamos uno inactivo
+        """Testea la obtención de productos activos e inactivos usando el servicio."""
         Product.objects.create(
             name="Inactivo", is_active=False, price=Decimal("10.00"), category="ANILLO"
         )
 
-        # El cliente/público no debe ver el inactivo
         products = ProductService.get_all_products(include_inactive=False)
         assert products.count() == 1
 
-        # El admin debe ver todos (activos e inactivos)
         all_products = ProductService.get_all_products(include_inactive=True)
         assert all_products.count() == 2
 
 
-# --- TESTS DE API (Rutas y Permisos) ---
-
-
 @pytest.mark.django_db
 class TestProductAPI:
-    # El basename en el router es 'products', por lo tanto la ruta es 'products-list'
+    """Tests de integración para los endpoints de productos."""
+
     url_list = reverse("products-list")
 
     def test_public_can_list_active_products(self, api_client, sample_product):
-        # Creamos uno inactivo que no debería aparecer
+        """Testea que usuarios no autenticados solo vean productos activos."""
         Product.objects.create(
             name="Oculto", is_active=False, price=10, category="ANILLO"
         )
 
         response = api_client.get(self.url_list)
         assert response.status_code == status.HTTP_200_OK
-        # Solo debe devolver el activo
         assert len(response.data) == 1
 
     def test_admin_can_create_product(self, api_client, admin_user):
+        """Testea que un admin pueda crear un producto a través del API."""
         api_client.force_authenticate(user=admin_user)
         data = {
             "name": "Pulsera Plata",
@@ -117,12 +112,14 @@ class TestProductAPI:
         assert Product.objects.filter(name="Pulsera Plata").exists()
 
     def test_client_cannot_create_product(self, api_client, client_user):
+        """Testea que un cliente no pueda crear un producto a través del API."""
         api_client.force_authenticate(user=client_user)
         data = {"name": "Intento Fallido", "price": "100.00", "category": "ANILLO"}
         response = api_client.post(self.url_list, data)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_admin_can_update_product(self, api_client, admin_user, sample_product):
+        """Testea que un admin pueda actualizar un producto a través del API."""
         api_client.force_authenticate(user=admin_user)
         url_detail = reverse("products-detail", kwargs={"pk": sample_product.pk})
 
@@ -134,6 +131,7 @@ class TestProductAPI:
     def test_admin_can_soft_delete_via_api(
         self, api_client, admin_user, sample_product
     ):
+        """Testea que un admin pueda realizar un borrado lógico a través del API."""
         api_client.force_authenticate(user=admin_user)
         url_detail = reverse("products-detail", kwargs={"pk": sample_product.pk})
 

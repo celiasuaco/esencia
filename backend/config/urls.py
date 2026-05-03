@@ -16,12 +16,15 @@ Including another URLconf
 """
 
 from authentication import urls as authentication_urls
+from chatbot import urls as chatbot_urls
+from checkout import urls as checkout_urls
 from dashboard import urls as dashboard_urls
 from dashboard.views import ShowcaseView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from order import urls as order_urls
 from product import urls as product_urls
 
 urlpatterns = [
@@ -29,6 +32,9 @@ urlpatterns = [
     path("api/auth/", include(authentication_urls)),
     path("api/dashboard/", include(dashboard_urls)),
     path("api/products/", include(product_urls)),
+    path("api/cart/", include(checkout_urls)),
+    path("api/orders/", include(order_urls)),
+    path("api/chatbot/", include(chatbot_urls)),
     path("api/", ShowcaseView.as_view(), name="showcase-products"),
 ]
 
