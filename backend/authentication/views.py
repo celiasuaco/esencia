@@ -176,20 +176,29 @@ class UserProfileView(views.APIView):
 
 
 class PasswordResetRequestView(views.APIView):
-    """Inicia el proceso de recuperación de contraseña enviando un email con el token de seguridad."""
+    """Inicia el proceso de recuperación de contraseña. Informa si el usuario no existe."""
 
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data["email"]
             user = User.objects.filter(email=email).first()
+
             if user:
                 send_password_reset_email(user)
+                return response.Response(
+                    {
+                        "message": "Se ha enviado un enlace de recuperación a su correo electrónico."
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
+            logger.info(f"Solicitud de recuperación para correo no registrado: {email}")
             return response.Response(
                 {
-                    "message": "Si el correo está registrado, se ha enviado un enlace de recuperación."
+                    "error": "No existe ninguna cuenta vinculada a este correo electrónico. Invitamos a que te registres para disfrutar de Esencia.",
                 },
-                status=status.HTTP_200_OK,
+                status=status.HTTP_404_NOT_FOUND,
             )
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
