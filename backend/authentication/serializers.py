@@ -7,8 +7,15 @@ from .models import User
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """Valida los datos de registro, aplicando reglas de complejidad a la contraseña y unicidad de email."""
+
     password = serializers.CharField(
-        write_only=True, min_length=8, style={"input_type": "password"}
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"},
+        error_messages={
+            "min_length": "La contraseña debe tener al menos 8 caracteres."
+        },
     )
 
     class Meta:
@@ -21,12 +28,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate_password(self, value):
-        # Al menos un número
         if not re.search(r"\d", value):
             raise serializers.ValidationError(
                 "La contraseña debe contener al menos un número."
             )
-        # Al menos una mayúscula
         if not re.search(r"[A-Z]", value):
             raise serializers.ValidationError(
                 "La contraseña debe contener al menos una letra mayúscula."
@@ -35,6 +40,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
+    """Gestiona la validación de credenciales mediante el backend de autenticación de Django."""
+
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, style={"input_type": "password"})
 
@@ -61,6 +68,8 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Valida los campos para la edición del perfil de usuario."""
+
     photo = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -78,10 +87,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
+    """Valida el formato del email antes de iniciar el proceso de recuperación de cuenta."""
+
     email = serializers.EmailField()
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Valida los tokens de recuperación y la nueva contraseña antes de persistir el cambio."""
+
     uidb64 = serializers.CharField()
     token = serializers.CharField()
     new_password = serializers.CharField(write_only=True, min_length=8)
@@ -92,3 +105,25 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
                 "La contraseña debe contener un número y una mayúscula."
             )
         return value
+
+
+class UserAdminStatsSerializer(serializers.ModelSerializer):
+    """Expone datos detallados de clientes y sus métricas financieras para el uso administrativo."""
+
+    orders_count = serializers.IntegerField(read_only=True)
+    total_spent = serializers.DecimalField(
+        max_digits=12, decimal_places=2, read_only=True, default=0
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "full_name",
+            "date_joined",
+            "role",
+            "orders_count",
+            "total_spent",
+            "photo",
+        ]

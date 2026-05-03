@@ -2,5 +2,7 @@ from django.apps import AppConfig
 
 
 class CheckoutConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'checkout'
+    """Configuración de la aplicación encargada de la gestión del carrito y pasarela de pago."""
+
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "checkout"

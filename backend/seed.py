@@ -1,5 +1,6 @@
 import os
 import secrets
+from datetime import datetime
 from decimal import Decimal
 
 import django
@@ -14,9 +15,6 @@ from order.models import Order, OrderItem
 from product.models import Product
 
 fake = Faker(["es_ES"])  # Datos en español
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-django.setup()
 
 PASSWORD = "admin123"  # NOSONAR
 
@@ -46,12 +44,36 @@ def secure_sample(population, k):
     return result
 
 
+CIUDADES_ESPANOLAS = [
+    {"nombre": "Madrid", "lat": 40.4167, "lng": -3.7033},
+    {"nombre": "Barcelona", "lat": 41.3851, "lng": 2.1734},
+    {"nombre": "Valencia", "lat": 39.4699, "lng": -0.3763},
+    {"nombre": "Sevilla", "lat": 37.3891, "lng": -5.9845},
+    {"nombre": "Zaragoza", "lat": 41.6488, "lng": -0.8891},
+    {"nombre": "Málaga", "lat": 36.7213, "lng": -4.4214},
+    {"nombre": "Murcia", "lat": 37.9922, "lng": -1.1307},
+    {"nombre": "Palma", "lat": 39.5693, "lng": 2.6502},
+    {"nombre": "Bilbao", "lat": 43.2630, "lng": -2.9350},
+    {"nombre": "Alicante", "lat": 38.3452, "lng": -0.4810},
+    {"nombre": "Valladolid", "lat": 41.6523, "lng": -4.7245},
+    {"nombre": "Vigo", "lat": 42.2406, "lng": -8.7207},
+]
+
+
 # --- SEEDER PRINCIPAL ---
 def run_seeder():
     print("🚀 Iniciando Seeder Masivo para Esencia...")
 
+    # --- 0. LIMPIEZA DE BASE DE DATOS ---
+    print("🗑️ Limpiando tablas previas...")
+    OrderItem.objects.all().delete()
+    Order.objects.all().delete()
+    Product.objects.all().delete()
+    User.objects.filter(is_superuser=False).delete()
+    print("✅ Tablas limpias")
+
     # --- 1. CREAR ADMINISTRADOR ---
-    if not User.objects.filter(role="ADMIN").exists():
+    if not User.objects.filter(username="admin").exists():
         User.objects.create_superuser(
             username="admin",
             email="admin@esencia.com",
@@ -63,27 +85,20 @@ def run_seeder():
 
     # --- 2. CREAR CLIENTES ---
     clientes = []
-    for i in range(5):
+    for i in range(10):  # Aumentado a 10 clientes para más variedad
         email = f"cliente{i + 1}@test.com"
-        user, created = User.objects.get_or_create(
+        user = User.objects.create(
             email=email,
-            defaults={
-                "username": f"user_{i + 1}",
-                "full_name": fake.name(),
-                "role": "CLIENT",
-            },
+            username=f"user_{i + 1}",
+            full_name=fake.name(),
+            role="CLIENT",
         )
-        if created:
-            user.set_password("cliente123")
-            user.save()
+        user.set_password("cliente123")
+        user.save()
         clientes.append(user)
-    print(f"✅ {len(clientes)} Clientes creados/verificados")
+    print(f"✅ {len(clientes)} Clientes creados")
 
     # --- 3. CREAR PRODUCTOS ---
-    print("🗑️ Eliminando productos antiguos...")
-    OrderItem.objects.all().delete()  # Evitar errores de integridad si hay pedidos
-    Product.objects.all().delete()
-
     categorias = ["Anillo", "Collar", "Pendientes", "Pulsera"]
     materiales = [
         "Oro 18k",
@@ -92,7 +107,6 @@ def run_seeder():
         "Platino",
         "Acero Quirúrgico",
     ]
-
     fotos_por_tipo = {
         "Anillo": "products/seed_anillo.jpg",
         "Collar": "products/seed_collar.jpg",
@@ -101,19 +115,14 @@ def run_seeder():
     }
 
     productos = []
-
     print("Generando nuevos productos...")
     for i in range(30):
         tipo_joya = secure_choice(categorias)
         nombre = f"{tipo_joya} {fake.word().capitalize()} {secure_choice(['Eterno', 'Gala', 'Minimal', 'Luxury', 'Esencia'])}"
+        precio_val = secure_uniform(25.0, 150.0)
+        stock_val = secure_randint(10, 100)
 
-        precio_val = secure_uniform(25.0, 100.0)
-        stock_val = secure_randint(0, 50)
-
-        # Lógica de foto:
-        foto_path = None
-        if i % 5 != 0:
-            foto_path = fotos_por_tipo.get(tipo_joya)
+        foto_path = fotos_por_tipo.get(tipo_joya) if i % 5 != 0 else None
 
         prod = Product.objects.create(
             name=nombre,
@@ -126,22 +135,35 @@ def run_seeder():
             photo=foto_path,
         )
         productos.append(prod)
+    print(f"✅ {len(productos)} Productos creados")
 
-    print(f"✅ {len(productos)} Productos creados con fotos y materiales variados")
+    # --- 4. CREAR PEDIDOS (50 PEDIDOS PARA QUE EL MAPA SE VEA LLENO) ---
+    estados = [
+        "PAID",
+        "SHIPPED",
+        "DELIVERED",
+    ]
+    start_date = datetime(2025, 12, 1)
+    end_date = datetime(2026, 3, 31)
 
-    # --- 4. CREAR PEDIDOS ---
-    estados = ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELLED"]
+    print("Generando 50 pedidos con geolocalización en España...")
 
-    for _ in range(10):
+    for _ in range(50):
         cliente = secure_choice(clientes)
 
-        # Creamos el pedido (los campos amount se inicializan en 0 por defecto)
+        ciudad = secure_choice(CIUDADES_ESPANOLAS)
+        lat_random = float(ciudad["lat"]) + (secure_uniform(-0.05, 0.05))
+        lng_random = float(ciudad["lng"]) + (secure_uniform(-0.05, 0.05))
+
         pedido = Order.objects.create(
             user=cliente,
-            address=fake.address(),
+            address=f"{fake.street_address()}, {ciudad['nombre']}, España",
             status=secure_choice(estados),
+            is_paid=True,
+            latitude=Decimal(lat_random).quantize(Decimal("0.000000")),
+            longitude=Decimal(lng_random).quantize(Decimal("0.000000")),
             placed_at=fake.date_time_between(
-                start_date="-30d", end_date="now", tzinfo=None
+                start_date=start_date, end_date=end_date, tzinfo=None
             ),
         )
 
@@ -157,11 +179,10 @@ def run_seeder():
                 price_at_purchase=p.price,
             )
 
-        # --- CAMBIO CLAVE ---
         pedido.update_totals()
 
-    print("✅ 10 Pedidos creados y totales calculados en DB")
-    print("✨ Seeder finalizado. El Dashboard debería mostrar datos reales ahora.")
+    print("✅ 50 Pedidos creados con Lat/Lng en España")
+    print("✨ Seeder finalizado con éxito.")
 
 
 if __name__ == "__main__":

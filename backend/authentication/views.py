@@ -3,25 +3,34 @@ import logging
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
-from rest_framework import response, status, views
+from rest_framework import generics, response, status, views
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
+from .permissions import IsAdminRole
 from .serializers import (
     LoginSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
     RegisterSerializer,
+    UserAdminStatsSerializer,
     UserSerializer,
 )
-from .services import create_user, send_password_reset_email
+from .services import (
+    anonymize_user,
+    create_user,
+    get_users_with_order_stats,
+    send_password_reset_email,
+)
 
 logger = logging.getLogger("authentication")
 
 
 class RegisterView(views.APIView):
+    """Registro de nuevos clientes con inicio de sesión automático."""
+
     def post(self, request):
         logger.debug(f"Petición POST recibida en RegisterView. Datos: {request.data}")
 
@@ -33,13 +42,26 @@ class RegisterView(views.APIView):
             )
 
         try:
-            create_user(**serializer.validated_data)
+            user = create_user(**serializer.validated_data)
+
+            refresh = RefreshToken.for_user(user)
+
             return response.Response(
-                {"message": "Usuario creado exitosamente"},
+                {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "user": {
+                        "email": user.email,
+                        "full_name": user.full_name,
+                        "role": user.role,
+                        "photo": user.photo.url if user.photo else None,
+                    },
+                    "message": "Usuario creado exitosamente",
+                },
                 status=status.HTTP_201_CREATED,
             )
-        except Exception:
-            # El error ya se loguea en el service, aquí solo respondemos
+        except Exception as e:
+            logger.error(f"Error en RegisterView: {str(e)}")
             return response.Response(
                 {"error": "No se pudo procesar el registro"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -47,6 +69,8 @@ class RegisterView(views.APIView):
 
 
 class LoginView(views.APIView):
+    """Autentica al usuario y genera el par de tokens JWT (Access y Refresh)."""
+
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
@@ -83,11 +107,15 @@ class LoginView(views.APIView):
 
 
 class LogoutView(views.APIView):
+    """Invalida el Refresh Token del usuario para cerrar la sesión de forma segura."""
+
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             refresh_token = request.data.get("refresh")
             token = RefreshToken(refresh_token)
-            token.blacklist()  # Invalida el token en el backend
+            token.blacklist()
             logger.info("Logout exitoso. Token invalidado.")
             return response.Response(
                 {"message": "Sesión cerrada correctamente"}, status=status.HTTP_200_OK
@@ -100,7 +128,38 @@ class LogoutView(views.APIView):
             )
 
 
+class DeleteAccountView(views.APIView):
+    """
+    Endpoint para que el usuario ejerza su Derecho al Olvido.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        try:
+            anonymize_user(user)
+
+            logger.info(
+                f"El usuario {user.id} ha solicitado y completado su derecho al olvido."
+            )
+            return response.Response(
+                {
+                    "message": "Su cuenta y datos personales han sido eliminados de nuestro sistema correctamente."
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception:
+            return response.Response(
+                {"error": "No se pudo procesar la solicitud de eliminación."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 class UserProfileView(views.APIView):
+    """Endpoint para obtener o actualizar la información del perfil del usuario autenticado."""
+
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
@@ -117,23 +176,36 @@ class UserProfileView(views.APIView):
 
 
 class PasswordResetRequestView(views.APIView):
+    """Inicia el proceso de recuperación de contraseña. Informa si el usuario no existe."""
+
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data["email"]
             user = User.objects.filter(email=email).first()
+
             if user:
                 send_password_reset_email(user)
+                return response.Response(
+                    {
+                        "message": "Se ha enviado un enlace de recuperación a su correo electrónico."
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
+            logger.info(f"Solicitud de recuperación para correo no registrado: {email}")
             return response.Response(
                 {
-                    "message": "Si el correo está registrado, se ha enviado un enlace de recuperación."
+                    "error": "No existe ninguna cuenta vinculada a este correo electrónico. Invitamos a que te registres para disfrutar de Esencia.",
                 },
-                status=status.HTTP_200_OK,
+                status=status.HTTP_404_NOT_FOUND,
             )
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordResetConfirmView(views.APIView):
+    """Verifica el token y permite al usuario establecer una nueva contraseña de acceso."""
+
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
@@ -160,3 +232,13 @@ class PasswordResetConfirmView(views.APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminUserStatsListView(generics.ListAPIView):
+    """Vista para que los administradores analicen el comportamiento de compra de los clientes."""
+
+    permission_classes = [IsAdminRole]
+    serializer_class = UserAdminStatsSerializer
+
+    def get_queryset(self):
+        return get_users_with_order_stats()

@@ -3,6 +3,8 @@ from django.db import models
 
 
 class User(AbstractUser):
+    """Modelo de usuario personalizado que utiliza el email como identificador único."""
+
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Administrador"
         CLIENT = "CLIENT", "Cliente"
@@ -12,7 +14,6 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.CLIENT)
     photo = models.ImageField(upload_to="profile_pics/", null=True, blank=True)
 
-    # Configuramos el email como identificador principal
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 

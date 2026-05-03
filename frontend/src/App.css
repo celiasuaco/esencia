@@ -1,7 +1,7 @@
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
+@import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
+
 
 :root {
   --font-size: 16px;
@@ -226,4 +226,14 @@ html {
 
 .btn-primary {
   @apply w-full bg-primary text-primary-foreground py-3 rounded-lg hover:bg-verde-dark transition-colors font-medium mt-4;
+}
+
+.marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+    background-color: rgba(168, 100, 71, 0.2) !important;
+}
+.marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+    background-color: rgba(168, 100, 71, 0.85) !important;
+    color: white !important;
+    font-family: serif !important;
+    font-weight: bold;
 }

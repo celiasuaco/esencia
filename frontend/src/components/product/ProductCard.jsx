@@ -1,32 +1,111 @@
+import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { cartService } from '../../services/cartService';
+import { Eye } from 'lucide-react';
+import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
+
 export default function ProductCard({ product, badge }) {
+    const navigate = useNavigate();
+    const API_BASE_URL = 'http://localhost:8000';
+
+    const getPhotoUrl = (photoPath) => {
+        if (!photoPath) return "/default-product.png";
+        if (photoPath.startsWith('http')) return photoPath;
+        const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
+        return `${API_BASE_URL}${normalizedPath}`;
+    };
+
+    const handleAddToCart = async (e, productId) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        try {
+            await cartService.addToCart(productId, 1);
+            navigate('/cart');
+        } catch (error) {
+            console.error("Error al añadir al carrito:", error);
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            navigate(`/product/${product.id}`);
+        }
+    };
+
     return (
-        <div className="group cursor-pointer">
-            <div className="relative overflow-hidden rounded-2xl bg-[#F5F1ED] aspect-square flex flex-col items-center justify-center p-6 transition-all hover:shadow-xl">
+        <div
+            onClick={() => navigate(`/product/${product.id}`)}
+            onKeyDown={handleKeyDown}
+            className="group cursor-pointer w-full relative"
+            role="button"
+            tabIndex={0}
+            aria-label={`Ver detalles de ${product.name}`}
+        >
+            <div className="relative rounded-[2rem] border border-[#324339]/10 bg-white p-4 shadow-[0_15px_40px_rgba(50,67,57,0.05)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_30px_60px_rgba(50,67,57,0.12)] group-hover:border-[#A86447]/30">
+
                 {badge && (
-                    <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase text-[#C77C5D] z-10">
+                    <span className="absolute top-6 left-6 bg-[#A86447] text-white px-3 py-1 rounded-full text-[9px] font-bold tracking-[0.15em] uppercase z-20 shadow-lg shadow-[#A86447]/20">
                         {badge}
                     </span>
                 )}
 
-                {/* Icono temporal mientras no hay imágenes reales */}
-                <div className="text-[#A3937B] opacity-40 group-hover:scale-110 transition-transform duration-500">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                        <circle cx="12" cy="8" r="5" />
-                        <path d="M12 13v9" />
-                    </svg>
+                <div className="relative overflow-hidden rounded-[1.5rem] bg-[#FDFBF9] aspect-square flex items-center justify-center border border-[#324339]/5">
+                    <img
+                        src={getPhotoUrl(product.photo)}
+                        loading="lazy"
+                        alt={product.name}
+                        className="w-full h-full object-contain p-6 transition-transform duration-1000 group-hover:scale-110"
+                        onError={(e) => { e.target.src = "https://placehold.co/400x400?text=Joyas+Esencia"; }}
+                    />
+
+                    <div className="absolute inset-0 bg-[#324339]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 px-6">
+                        <button
+                            type="button"
+                            onClick={(e) => handleAddToCart(e, product.id)}
+                            className="w-full py-3 bg-[#A86447] text-white rounded-full text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center gap-2 hover:bg-white hover:text-[#A86447] transition-all transform active:scale-95 shadow-xl"
+                        >
+                            <ShoppingBag size={14} />
+                            Añadir a la bolsa
+                        </button>
+                        <div className="flex items-center gap-2 text-white/80 text-[9px] uppercase tracking-widest font-medium">
+                            <Eye size={12} />
+                            <span>Ver detalle</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform bg-white/80 backdrop-blur-md">
-                    <button className="w-full py-2 bg-[#324339] text-white rounded-xl text-xs uppercase tracking-widest font-medium hover:bg-[#C77C5D] transition-colors">
-                        Ver Detalle
-                    </button>
-                </div>
-            </div>
+                <div className="pt-6 pb-2 text-center">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                        <div className="h-[1px] w-6 bg-[#A86447]/30"></div>
+                        <div className="h-1 w-1 rounded-full bg-[#A86447]"></div>
+                        <div className="h-[1px] w-6 bg-[#A86447]/30"></div>
+                    </div>
 
-            <div className="mt-4 text-center">
-                <h3 className="text-[#2C3632] font-medium text-sm">{product.name}</h3>
-                <p className="text-[#C77C5D] font-serif mt-1">{product.price} €</p>
+                    <h3 className="text-[#324339] font-serif italic text-lg tracking-tight transition-colors duration-300 group-hover:text-[#A86447]">
+                        {product.name}
+                    </h3>
+
+                    <div className="mt-2">
+                        <p className="text-[#A86447] font-serif italic ">
+                            {Number(product.price).toFixed(2)} €
+                        </p>
+                    </div>
+                </div>
+
+                <div className="absolute -top-1 -right-1 w-6 h-6 border-t-2 border-r-2 border-[#A86447] opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-tr-xl"></div>
+                <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-2 border-l-2 border-[#A86447] opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-bl-xl"></div>
             </div>
         </div>
     );
 }
+
+ProductCard.propTypes = {
+    product: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        name: PropTypes.string.isRequired,
+        photo: PropTypes.string,
+        price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    }).isRequired,
+    badge: PropTypes.string,
+};

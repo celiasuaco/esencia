@@ -1,4 +1,28 @@
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Esencia | Alta Joyería</title>
+
+    <!-- Preconexiones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="http://127.0.0.1:8000" crossorigin>
+
+    <!-- Fuentes: Se añade crossorigin para mejorar la carga -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" crossorigin="anonymous">
+
+    <!-- Preloads de lógica -->
+    <link rel="modulepreload" href="/src/services/api.js">
+    <link rel="modulepreload" href="/src/services/authService.js">
+    
+    <!-- Preload de imagen crítica: Corregido a fetchPriority -->
+    <link rel="preload" href="/hero-esencia.webp" as="image" fetchPriority="high">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

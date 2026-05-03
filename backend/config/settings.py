@@ -20,13 +20,13 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 AUTH_USER_MODEL = "authentication.User"
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
     "SECRET_KEY_DJANGO", "opbi=6$6+%zfbbv(gysk#58ex7=7iod0bt)sylqp6@!n$dyq0q"
 )
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False") == "True"
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "checkout",
     "order",
     "dashboard",
+    "chatbot",
 ]
 
 MIDDLEWARE = [
@@ -64,11 +65,26 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 
 ROOT_URLCONF = "config.urls"
 
@@ -189,8 +205,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,  # Devuelve un nuevo refresh token al usar uno
     "BLACKLIST_AFTER_ROTATION": True,  # El token usado entra en lista negra
     "AUTH_HEADER_TYPES": ("Bearer",),
@@ -210,6 +226,12 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "Esencia <info@esenciajoyeria.app>"
 )
+
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
+SITE_URL = os.environ.get("SITE_URL", "http://localhost:8000")
+
 
 # URL del Frontend (Necesaria para construir el enlace de reset en el email)
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
