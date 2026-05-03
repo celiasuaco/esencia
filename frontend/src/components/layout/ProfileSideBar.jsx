@@ -9,8 +9,21 @@ const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
 
     const API_BASE_URL = 'http://127.0.0.1:8000';
 
+    const refreshFromStorage = () => {
+        const currentData = authService.getCurrentUser();
+        if (currentData) {
+            setUserData(currentData);
+        }
+    };
+
     useEffect(() => {
-        const refreshUserData = async () => {
+        const handleAuthUpdate = () => {
+            refreshFromStorage();
+        };
+
+        globalThis.addEventListener('authChange', handleAuthUpdate);
+
+        const fetchProfile = async () => {
             setFetching(true);
             try {
                 const freshData = await authService.getProfile();
@@ -21,7 +34,11 @@ const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
                 setFetching(false);
             }
         };
-        refreshUserData();
+        fetchProfile();
+
+        return () => {
+            globalThis.removeEventListener('authChange', handleAuthUpdate);
+        };
     }, []);
 
     useEffect(() => {
@@ -51,14 +68,15 @@ const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
                 )}
 
                 <div className="flex flex-col items-center">
-                    <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[#A86447] to-[#324339] flex items-center justify-center text-white text-2xl md:text-4xl font-serif shadow-xl overflow-hidden border-4 border-white mb-4">
+                    <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[#A86447] to-[#324339] flex items-center justify-center text-white text-2xl md:text-4xl font-serif shadow-xl overflow-hidden border-4 border-white mb-4 transition-all">
                         <span className="absolute z-0">{initial}</span>
                         {photoUrl && (
                             <img
                                 src={photoUrl}
                                 fetchPriority="high"
-                                className="absolute inset-0 w-full h-full object-cover z-10"
+                                className="absolute inset-0 w-full h-full object-cover z-10 animate-fade-in"
                                 alt="Perfil"
+                                key={photoUrl}
                                 onError={(e) => { e.target.style.display = 'none'; }}
                             />
                         )}

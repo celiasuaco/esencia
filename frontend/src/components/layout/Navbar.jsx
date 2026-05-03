@@ -1,11 +1,34 @@
+import { useState, useEffect } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import Footer from './Footer';
 import { ShoppingBag, User, Package } from 'lucide-react';
 
 const Navbar = () => {
-    const isAuthenticated = authService.isAuthenticated();
-    const user = authService.getCurrentUser();
+    const [authState, setAuthState] = useState({
+        isAuthenticated: authService.isAuthenticated(),
+        user: authService.getCurrentUser()
+    });
+
+    useEffect(() => {
+        const handleAuthUpdate = () => {
+            setAuthState({
+                isAuthenticated: authService.isAuthenticated(),
+                user: authService.getCurrentUser()
+            });
+        };
+
+        globalThis.addEventListener('authChange', handleAuthUpdate);
+
+        globalThis.addEventListener('storage', handleAuthUpdate);
+
+        return () => {
+            globalThis.removeEventListener('authChange', handleAuthUpdate);
+            globalThis.removeEventListener('storage', handleAuthUpdate);
+        };
+    }, []);
+
+    const { isAuthenticated, user } = authState;
 
     const getProfilePath = () => {
         if (!isAuthenticated) return "/register";

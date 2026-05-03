@@ -13,6 +13,20 @@ const getErrorMessage = (error) => {
   return "Ocurrió un error inesperado";
 };
 
+const setSession = (data) => {
+  localStorage.setItem('access', data.access);
+  localStorage.setItem('refresh', data.refresh);
+  localStorage.setItem('user', JSON.stringify(data.user));
+  globalThis.dispatchEvent(new Event('authChange'));
+};
+
+const clearSession = () => {
+  localStorage.removeItem('user');
+  localStorage.removeItem('access');
+  localStorage.removeItem('refresh');
+  globalThis.dispatchEvent(new Event('authChange')); // Notifica a los protectores de ruta
+};
+
 export const authService = {
   // Registro de usuario
   register: async (userData) => {
@@ -30,9 +44,7 @@ export const authService = {
       const response = await api.post('/auth/login/', { email, password });
       
       if (response.data.access) {
-        localStorage.setItem('access', response.data.access);
-        localStorage.setItem('refresh', response.data.refresh);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        setSession(response.data);
         return response.data; 
       }
     } catch (error) {
@@ -43,13 +55,6 @@ export const authService = {
   // Cierre de sesión
   logout: async () => {
     const refreshToken = localStorage.getItem('refresh');
-    
-    const clearLocal = () => {
-      localStorage.removeItem('user');
-      localStorage.removeItem('access');
-      localStorage.removeItem('refresh');
-      globalThis.location.replace('/login');
-    };
 
     try {
       if (refreshToken) {
@@ -58,7 +63,8 @@ export const authService = {
     } catch (error) {
       console.warn("No se pudo invalidar el token en el servidor:", error);
     } finally {
-      clearLocal();
+      clearSession();
+      globalThis.location.replace('/');
     }
   },
 
@@ -107,6 +113,7 @@ export const authService = {
     const currentUser = authService.getCurrentUser() || {};
     const updatedUser = { ...currentUser, ...newUserData };
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    globalThis.dispatchEvent(new Event('authChange'));
   },
 
   // Obtener datos del usuario
@@ -116,7 +123,7 @@ export const authService = {
       return user ? JSON.parse(user) : null;
     } catch (e) {
       localStorage.removeItem('user');
-      throw getErrorMessage(e.response?.data) || "Error al obtener datos del usuario";
+      return null;
     }
   },
 
@@ -139,9 +146,10 @@ export const authService = {
     try {
       const response = await api.post('/auth/delete-account/');
       
-      localStorage.removeItem('user');
-      localStorage.removeItem('access');
-      localStorage.removeItem('refresh');
+      if (response.data) {
+        clearSession();
+        globalThis.location.replace('/');
+      }
       
       return response.data;
     } catch (error) {

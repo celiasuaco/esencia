@@ -38,17 +38,18 @@ const LoginForm = ({ onSwitchForm }) => {
 
         try {
             await loginSchema.validate(formData, { abortEarly: false });
-
             setLoading(true);
+
             const data = await authService.login(formData.email, formData.password);
 
-            globalThis.dispatchEvent(new Event('authChange'));
+            setTimeout(() => {
+                if (data.user.role === 'ADMIN') {
+                    navigate('/dashboard', { replace: true });
+                } else {
+                    navigate('/catalog', { replace: true });
+                }
+            }, 0);
 
-            if (data.user.role === 'ADMIN') {
-                navigate('/dashboard');
-            } else {
-                navigate('/catalog');
-            }
         } catch (err) {
             if (err.name === 'ValidationError') {
                 const validationErrors = {};
@@ -57,10 +58,8 @@ const LoginForm = ({ onSwitchForm }) => {
                 });
                 setErrors(validationErrors);
             } else {
-                console.error("Login error:", err);
                 setErrors({
-                    email: ' ',
-                    password: 'Email o contraseña incorrectos'
+                    password: typeof err === 'string' ? err : 'Email o contraseña incorrectos'
                 });
             }
         } finally {

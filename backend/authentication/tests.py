@@ -230,12 +230,16 @@ class TestPasswordReset:
         assert len(mail.outbox) == 1
 
     def test_password_reset_request_non_existent_email(self, client):
-        """Verifica que la solicitud no envíe correos si el email no está registrado (por seguridad responde 200)."""
+        """
+        Verifica que si el email no está registrado, el sistema informe
+        explícitamente (404) para invitar al registro y no envíe correos.
+        """
         url = reverse("password_reset")
         data = {"email": "no-existe@test.com"}
         response = client.post(url, data, content_type="application/json")
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert "No existe ninguna cuenta" in response.data["error"]
         assert len(mail.outbox) == 0
 
     def test_password_reset_confirm_success(self, client):

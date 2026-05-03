@@ -5,13 +5,15 @@ import Mail from 'lucide-react/dist/esm/icons/mail';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
 import * as Yup from 'yup';
 
-export default function ForgotPassword({ onSwitchForm }) {
+export default function ForgotPassword({ onSwitchForm = () => { }, onSwitchToRegister = () => { } }) {
     const [email, setEmail] = useState('');
     const [sent, setSent] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [accountNotFound, setAccountNotFound] = useState(false);
 
     const forgotPasswordSchema = Yup.object().shape({
         email: Yup.string()
@@ -22,10 +24,10 @@ export default function ForgotPassword({ onSwitchForm }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrors({});
+        setAccountNotFound(false);
 
         try {
             await forgotPasswordSchema.validate({ email }, { abortEarly: false });
-
             setLoading(true);
             await authService.sendPasswordResetEmail(email);
             setSent(true);
@@ -36,9 +38,11 @@ export default function ForgotPassword({ onSwitchForm }) {
                     validationErrors[error.path] = error.message;
                 });
                 setErrors(validationErrors);
+            } else if (err.response?.status === 404) {
+                setAccountNotFound(true);
+                setErrors({ email: err });
             } else {
-                console.error("Error sending password reset email:", err);
-                setErrors({ email: err.response?.data?.error || "No pudimos procesar tu solicitud. Inténtalo más tarde." });
+                setErrors({ email: err || "Error de conexión." });
             }
         } finally {
             setLoading(false);
@@ -54,13 +58,9 @@ export default function ForgotPassword({ onSwitchForm }) {
                     </div>
                     <h2 className="text-3xl font-serif text-primary mb-4">¡Correo enviado!</h2>
                     <p className="text-secondary mb-8 leading-relaxed">
-                        Si el correo <strong className="text-primary">{email}</strong> está registrado, recibirás un enlace para restablecer tu contraseña en unos minutos.
+                        Se ha enviado un enlace de recuperación a <strong className="text-primary">{email}</strong>.
                     </p>
-                    <button
-                        type="button"
-                        onClick={onSwitchForm}
-                        className="btn-primary inline-block w-full py-3 text-center transition-all hover:opacity-90"
-                    >
+                    <button type="button" onClick={onSwitchForm} className="btn-primary w-full py-3">
                         Volver al inicio de sesión
                     </button>
                 </div>
@@ -71,90 +71,68 @@ export default function ForgotPassword({ onSwitchForm }) {
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] p-4">
             <div className="register-card max-w-md w-full shadow-xl border border-[#E8E2D6]">
-                <button
-                    type="button"
-                    onClick={onSwitchForm}
-                    className="inline-flex items-center gap-2 text-secondary mb-8 hover:text-primary transition-colors text-sm font-medium group"
-                >
-                    <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                    Volver al login
+                <button type="button" onClick={onSwitchForm} className="inline-flex items-center gap-2 text-secondary mb-8 hover:text-primary transition-colors text-sm font-medium">
+                    <ArrowLeft size={16} /> Volver al login
                 </button>
 
                 <h2 className="text-4xl font-serif text-primary text-center mb-3">Recuperar acceso</h2>
-                <p className="text-secondary text-center mb-10 text-sm leading-relaxed">
-                    Introduce tu email y te enviaremos las <br /> instrucciones de recuperación.
-                </p>
+                <p className="text-secondary text-center mb-10 text-sm">Introduce tu email para enviarte instrucciones.</p>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="flex flex-col gap-2 text-left">
-                        <label htmlFor="forgot-password-email" className="text-sm font-medium text-primary ml-1">
-                            Email
-                        </label>
-
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-primary ml-1">Email</label>
                         <div className="relative flex items-center">
-                            <Mail
-                                className={`absolute left-4 transition-colors z-10 ${errors.email ? 'text-red-400' : 'text-[#A3937B]'}`}
-                                size={20}
-                            />
+                            <Mail className={`absolute left-4 z-10 ${errors.email ? 'text-red-400' : 'text-[#A3937B]'}`} size={20} />
                             <input
-                                id="forgot-password-email"
                                 type="text"
-                                name="email"
-                                autoComplete="email"
-                                className={`input-field !pl-12 w-full focus:ring-2 outline-none transition-all ${errors.email
-                                    ? 'border-red-500 focus:ring-red-100 bg-red-50/30'
-                                    : 'focus:ring-primary/20 border-gray-200'
-                                    }`}
+                                className={`input-field !pl-12 w-full transition-all ${errors.email ? 'border-red-500 bg-red-50/30' : 'border-gray-200'}`}
                                 placeholder="tu@email.com"
                                 value={email}
                                 onChange={(e) => {
                                     setEmail(e.target.value);
-                                    if (Object.keys(errors).length > 0) setErrors({});
+                                    setErrors({});
+                                    setAccountNotFound(false);
                                 }}
                             />
                         </div>
 
-                        {errors.email && (
-                            <div className="flex items-center gap-1.5 mt-1 ml-1 text-red-600 animate-fade-in">
-                                <AlertCircle size={14} className="flex-shrink-0" />
-                                <p className="text-[11px] font-semibold tracking-tight">{errors.email}</p>
+                        {errors.email && !accountNotFound && (
+                            <div className="flex items-center gap-1.5 mt-1 text-red-600 animate-fade-in">
+                                <AlertCircle size={14} />
+                                <p className="text-[11px] font-semibold">{errors.email}</p>
+                            </div>
+                        )}
+
+                        {accountNotFound && (
+                            <div className="mt-3 p-4 bg-orange-50 border border-orange-100 rounded-xl animate-fade-in">
+                                <div className="flex items-start gap-3">
+                                    <AlertCircle size={16} className="text-orange-600 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-orange-900 text-xs font-bold mb-1">{errors.email}</p>
+                                        <p className="text-orange-800/80 text-[11px] mb-3">Invitamos a que te registres para disfrutar de Esencia.</p>
+                                        <button
+                                            type="button"
+                                            onClick={onSwitchToRegister}
+                                            className="flex items-center gap-2 text-orange-700 font-bold text-[11px] hover:text-orange-900"
+                                        >
+                                            <UserPlus size={14} /> Crear una cuenta nueva
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="btn-primary w-full py-4 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.98] transition-all"
-                    >
-                        {loading ? (
-                            <div className="flex items-center gap-2">
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                <span>Enviando...</span>
-                            </div>
-                        ) : (
-                            'Enviar enlace de recuperación'
-                        )}
+                    <button type="submit" disabled={loading} className="btn-primary w-full py-4">
+                        {loading ? 'Verificando...' : 'Enviar enlace de recuperación'}
                     </button>
                 </form>
-
-                <div className="mt-10 pt-6 border-t border-[#FDFBF7] text-center">
-                    <p className="text-secondary text-sm">
-                        ¿Recordaste tu contraseña?{' '}
-                        <button
-                            type="button"
-                            onClick={onSwitchForm}
-                            className="text-primary font-bold hover:underline"
-                        >
-                            Inicia sesión
-                        </button>
-                    </p>
-                </div>
             </div>
         </div>
     );
 }
 
 ForgotPassword.propTypes = {
-    onSwitchForm: PropTypes.func.isRequired
+    onSwitchForm: PropTypes.func.isRequired,
+    onSwitchToRegister: PropTypes.func.isRequired
 };
