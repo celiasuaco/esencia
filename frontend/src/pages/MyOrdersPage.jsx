@@ -46,7 +46,7 @@ export default function MyOrdersPage() {
             {orders.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-[2rem] border border-[#A86447]/10 shadow-sm">
                     <Package className="w-12 h-12 text-[#A86447]/30 mx-auto mb-4" />
-                    <p className="font-serif italic text-[#324339]/45 text-lg">AÃºn no has realizado ningÃºn pedido.</p>
+                    <p className="font-serif italic text-[#324339]/45 text-lg">Aún no has realizado ningún pedido.</p>
                 </div>
             ) : (
                 <div className="bg-white rounded-[2rem] border-t-4 border-t-[#A86447] border-x border-b border-[#324339]/10 shadow-sm overflow-hidden">

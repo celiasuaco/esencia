@@ -25,13 +25,17 @@ const ShowcasePage = () => {
     return (
         <div className="min-h-screen bg-[#FDFBF7]">
             <section className="relative h-[85vh] bg-[#2C3632] flex items-center justify-center text-center px-4 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1531995811006-35cb42e1a022?q=80&w=2070')] bg-cover bg-center opacity-30 grayscale"></div>
+                <img
+                    src="/showcase.webp"
+                    alt="Esencia Alta Joyería"
+                    fetchPriority="high"
+                    loading="eager"
+                    className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale"
+                />
+
                 <div className="relative z-10">
-                    <span className="text-[#D1BFA7] tracking-[0.5em] uppercase text-xs mb-6 block italic">Alta Joyería Artesanal</span>
+                    <span className="text-[#D1BFA7] tracking-[0.5em] uppercase text-xs mb-6 block italic">Joyería Artesanal</span>
                     <h1 className="text-8xl md:text-9xl font-serif text-white mb-10 italic leading-tight">Esencia</h1>
-                    <button className="px-12 py-4 border border-white text-white rounded-full hover:bg-white hover:text-[#2C3632] transition-all duration-700 tracking-[0.2em] text-xs uppercase font-semibold">
-                        Descubrir mi Esencia
-                    </button>
                 </div>
             </section>
 

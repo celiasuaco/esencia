@@ -20,7 +20,7 @@ export default function CartPage() {
             const { url } = await checkoutService.createPaymentSession({ address_data: addressData });
 
             if (url) {
-                window.location.href = url;
+                globalThis.location.href = url;
             } else {
                 throw new Error("No se recibió la URL de pago");
             }
@@ -133,6 +133,7 @@ export default function CartPage() {
                                         <img
                                             src={getPhotoUrl(item.product_details.photo)}
                                             alt={item.product_details.name}
+                                            fetchPriority="high"
                                             className="w-full h-full object-contain p-2"
                                         />
                                     </div>

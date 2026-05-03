@@ -48,7 +48,7 @@ export const authService = {
       localStorage.removeItem('user');
       localStorage.removeItem('access');
       localStorage.removeItem('refresh');
-      window.location.replace('/login');
+      globalThis.location.replace('/login');
     };
 
     try {

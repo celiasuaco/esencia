@@ -297,6 +297,7 @@ class TestPasswordReset:
         assert "new_password" in response.data
 
 
+@pytest.mark.django_db
 class UserStatsAdminTest(TestCase):
     """Pruebas de permisos administrativos para la visualización de estadísticas de clientes."""
 
@@ -329,3 +330,28 @@ class UserStatsAdminTest(TestCase):
         self.client.force_authenticate(user=self.client_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+@pytest.mark.django_db
+class AnonymizeUserTest(TestCase):
+    """Pruebas para la función de anonimización de usuarios eliminados."""
+
+    @pytest.mark.django_db
+    def test_anonymize_user_service(db):
+        """Verifica que los datos sensibles desaparezcan tras la anonimización."""
+        from .services import anonymize_user
+
+        user = User.objects.create_user(
+            username="celia@test.com",
+            email="celia@test.com",
+            full_name="Celia Suárez",
+            password=GOOD_PASSWORD,
+        )
+
+        anonymize_user(user)
+        user.refresh_from_db()
+
+        assert user.email != "celia@test.com"
+        assert "deleted_" in user.email
+        assert user.full_name == "Usuario Eliminado"
+        assert user.is_active is False

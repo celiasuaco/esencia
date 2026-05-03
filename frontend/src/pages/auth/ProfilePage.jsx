@@ -50,10 +50,8 @@ export default function ProfilePage() {
     const photoUrl = getPhotoUrl(user.photo);
 
     const handleDeleteAccount = async () => {
-        const confirmed = window.confirm(
-            "¿Está seguro de que desea ejercer su derecho al olvido? " +
-            "Sus datos personales serán anonimizados y no podrá volver a acceder a esta cuenta. " +
-            "Esta acción es irreversible."
+        const confirmed = globalThis.confirm(
+            "¿Está seguro de que desea ejercer su derecho al olvido? Esta acción es irreversible."
         );
 
         if (confirmed) {
@@ -61,7 +59,7 @@ export default function ProfilePage() {
             try {
                 await authService.deleteAccount();
                 navigate('/');
-                window.location.reload();
+                globalThis.location.reload();
             } catch (error) {
                 alert(error);
                 setDeleting(false);
@@ -70,61 +68,71 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen pt-0 bg-[#FDFBF9]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <h1 className="text-5xl font-serif text-[#2C3632] mb-12">Mi Cuenta</h1>
+        <div className="min-h-screen bg-[#FDFBF9]">
+            <div className="max-w-7xl mx-auto px-4 py-6 sm:py-12 md:px-6 lg:px-8">
 
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <h1 className="text-3xl md:text-5xl font-serif text-[#2C3632] mb-8 md:mb-12">
+                    Mi Cuenta
+                </h1>
+
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8">
+
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-3xl shadow-xl p-8 border border-[#5B7B63]/10">
-                            <div className="text-center mb-8">
-                                <div className="w-28 h-28 bg-gradient-to-br from-[#C77C5D] to-[#A86447] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-4xl text-white font-serif overflow-hidden relative border-4 border-white">
+                        <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-8 border border-[#5B7B63]/10">
+
+                            <div className="text-center mb-6 md:mb-8">
+                                <div className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-[#C77C5D] to-[#A86447] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg text-2xl md:text-4xl text-white font-serif overflow-hidden relative border-4 border-white">
                                     <span className="absolute z-0">{user.full_name?.charAt(0).toUpperCase()}</span>
                                     {user.photo && (
                                         <img
                                             src={photoUrl}
                                             alt="Perfil"
+                                            fetchPriority="high"
                                             className="absolute inset-0 w-full h-full object-cover z-10"
                                             onError={(e) => e.target.style.display = 'none'}
                                         />
                                     )}
                                 </div>
-                                <h2 className="text-xl font-serif text-[#2C3632]">{user.full_name}</h2>
-                                <p className="text-xs text-[#6B7F72] mt-1 uppercase tracking-widest opacity-60">{user.role}</p>
+                                <h2 className="text-lg md:text-xl font-serif text-[#2C3632] truncate px-2">{user.full_name}</h2>
+                                <p className="text-[10px] md:text-xs text-[#6B7F72] mt-1 uppercase tracking-widest opacity-60">{user.role}</p>
                             </div>
 
-                            <nav className="space-y-2">
+                            <nav className="flex flex-col gap-2">
                                 <button
                                     onClick={() => { setActiveTab('data'); setIsEditing(false); }}
-                                    className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl transition-all ${activeTab === 'data' ? 'bg-[#324339] text-white shadow-lg' : 'text-[#6B7F72] hover:bg-[#F5F1ED]'}`}
+                                    className={`w-full flex items-center justify-start gap-3 px-4 py-3 md:px-5 md:py-4 rounded-xl md:rounded-2xl transition-all ${activeTab === 'data' ? 'bg-[#324339] text-white shadow-md' : 'text-[#6B7F72] hover:bg-[#F5F1ED]'}`}
                                 >
-                                    <User className="w-5 h-5" />
-                                    <span className="font-medium">Mis Datos</span>
+                                    <User className="w-4 h-4 md:w-5 md:h-5" />
+                                    <span className="font-medium text-sm md:text-base">Mis Datos</span>
                                 </button>
 
                                 {user.role === 'CLIENT' && (
                                     <button
                                         onClick={() => navigate('/orders')}
-                                        className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-[#6B7F72] hover:bg-[#F5F1ED] transition-all"
+                                        className="w-full flex items-center justify-start gap-3 px-4 py-3 md:px-5 md:py-4 rounded-xl md:rounded-2xl text-[#6B7F72] hover:bg-[#F5F1ED] transition-all"
                                     >
-                                        <Package className="w-5 h-5" />
-                                        <span className="font-medium">Mis Pedidos</span>
+                                        <Package className="w-4 h-4 md:w-5 md:h-5" />
+                                        <span className="font-medium text-sm md:text-base">Mis Pedidos</span>
                                     </button>
                                 )}
 
-                                <button onClick={() => authService.logout()} className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-red-500 hover:bg-red-50 transition-all mt-6 pt-6 border-t border-gray-100">
-                                    <LogOut className="w-5 h-5" />
-                                    <span className="font-medium">Cerrar Sesión</span>
+                                <button
+                                    onClick={() => authService.logout()}
+                                    className="w-full flex items-center justify-start gap-3 px-4 py-3 md:px-5 md:py-4 rounded-xl md:rounded-2xl text-red-500 hover:bg-red-50 transition-all mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-100"
+                                >
+                                    <LogOut className="w-4 h-4 md:w-5 md:h-5" />
+                                    <span className="font-medium text-sm md:text-base">Cerrar Sesión</span>
                                 </button>
                             </nav>
                         </div>
                     </div>
 
                     <div className="lg:col-span-3">
-                        <div className="bg-white rounded-3xl shadow-xl p-10 border border-[#5B7B63]/10 h-full min-h-[400px]">
+                        <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-10 border border-[#5B7B63]/10 h-full">
+
                             {isEditing ? (
-                                <div>
-                                    <h2 className="text-2xl font-serif text-[#2C3632] mb-8">Editar Perfil</h2>
+                                <div className="animate-fade-in">
+                                    <h2 className="text-xl md:text-2xl font-serif text-[#2C3632] mb-6 md:mb-8">Editar Perfil</h2>
                                     <EditProfileForm
                                         user={user}
                                         onCancel={() => setIsEditing(false)}
@@ -136,51 +144,64 @@ export default function ProfilePage() {
                                     />
                                 </div>
                             ) : (
-                                <div>
-                                    <div className="flex items-center justify-between mb-10 pb-6 border-b border-[#E8DDD1]">
-                                        <h2 className="text-2xl font-serif text-[#2C3632]">Datos Personales</h2>
+                                <div className="animate-fade-in">
+                                    <div className="flex items-center justify-between mb-6 md:mb-10 pb-4 md:pb-6 border-b border-[#E8DDD1]">
+                                        <h2 className="text-xl md:text-2xl font-serif text-[#2C3632]">Datos Personales</h2>
                                         <button
                                             onClick={() => setIsEditing(true)}
-                                            className="flex items-center gap-2 text-[#C77C5D] hover:text-[#A86447] transition-colors font-medium"
+                                            className="flex items-center gap-1 md:gap-2 text-[#C77C5D] hover:text-[#A86447] transition-colors font-medium text-sm md:text-base"
                                         >
                                             <Edit className="w-4 h-4" />
                                             <span>Editar</span>
                                         </button>
                                     </div>
-                                    {success && <p className="mb-6 p-4 bg-green-50 text-green-700 rounded-2xl text-center border border-green-100">{success}</p>}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-8 py-10">
-                                        <div className="space-y-2">
-                                            <label className="flex items-center gap-2 text-sm text-[#6B7F72] font-medium"><User size={16} /> Nombre completo</label>
-                                            <p className="text-[#2C3632] text-xl font-serif border-b-2 border-[#F5F1ED] pb-1">{user.full_name}</p>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="flex items-center gap-2 text-sm text-[#6B7F72] font-medium"><Mail size={16} /> Correo Electrónico</label>
-                                            <p className="text-[#2C3632] text-xl font-serif border-b-2 border-[#F5F1ED] pb-1">{user.email}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                            {!isEditing && (
-                                <div className="mt-12 pt-8 border-t border-red-50">
-                                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-red-50/30 p-6 rounded-2xl border border-red-100/50">
-                                        <div>
-                                            <h3 className="text-red-900 font-serif text-lg">Zona de Privacidad</h3>
-                                            <p className="text-red-700/60 text-sm">
-                                                Solicite la anonimización de sus datos personales conforme al RGPD.
+
+                                    {success && (
+                                        <p className="mb-6 p-3 md:p-4 bg-green-50 text-green-700 rounded-xl text-center border border-green-100 text-sm">
+                                            {success}
+                                        </p>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 py-4 md:py-6">
+                                        <div className="space-y-1">
+                                            <label className="flex items-center gap-2 text-xs text-[#6B7F72] font-medium uppercase tracking-wider">
+                                                <User size={14} /> Nombre completo
+                                            </label>
+                                            <p className="text-[#2C3632] text-lg md:text-xl font-serif border-b border-[#F5F1ED] pb-2">
+                                                {user.full_name}
                                             </p>
                                         </div>
-                                        <button
-                                            onClick={handleDeleteAccount}
-                                            disabled={deleting}
-                                            className="flex items-center gap-2 px-6 py-3 bg-white border border-red-200 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all duration-300 text-sm font-medium shadow-sm"
-                                        >
-                                            {deleting ? (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <Trash2 className="w-4 h-4" />
-                                            )}
-                                            <span>Derecho al olvido</span>
-                                        </button>
+                                        <div className="space-y-1">
+                                            <label className="flex items-center gap-2 text-xs text-[#6B7F72] font-medium uppercase tracking-wider">
+                                                <Mail size={14} /> Correo Electrónico
+                                            </label>
+                                            <p className="text-[#2C3632] text-lg md:text-xl font-serif border-b border-[#F5F1ED] pb-2 break-all">
+                                                {user.email}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-10 md:mt-16 pt-8 border-t border-red-50">
+                                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-red-50/40 p-4 md:p-6 rounded-2xl border border-red-100">
+                                            <div className="text-center sm:text-left">
+                                                <h3 className="text-red-900 font-serif text-base md:text-lg">Zona de Privacidad</h3>
+                                                <p className="text-red-700/70 text-xs md:text-sm mt-1">
+                                                    Anonimización de datos personales (RGPD).
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={handleDeleteAccount}
+                                                disabled={deleting}
+                                                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-white border border-red-200 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all duration-300 text-sm font-medium shadow-sm active:scale-95"
+                                            >
+                                                {deleting ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="w-4 h-4" />
+                                                )}
+                                                <span>Derecho al olvido</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}

@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { cartService } from '../../services/cartService';
-import { ShoppingBag, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
+import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
 
 export default function ProductCard({ product, badge }) {
     const navigate = useNavigate();
@@ -52,6 +53,7 @@ export default function ProductCard({ product, badge }) {
                 <div className="relative overflow-hidden rounded-[1.5rem] bg-[#FDFBF9] aspect-square flex items-center justify-center border border-[#324339]/5">
                     <img
                         src={getPhotoUrl(product.photo)}
+                        loading="lazy"
                         alt={product.name}
                         className="w-full h-full object-contain p-6 transition-transform duration-1000 group-hover:scale-110"
                         onError={(e) => { e.target.src = "https://placehold.co/400x400?text=Joyas+Esencia"; }}

@@ -83,6 +83,7 @@ export default function ProductDetailPage() {
                             <img
                                 src={getPhotoUrl(product.photo)}
                                 alt={product.name}
+                                fetchPriority="high"
                                 className="w-full h-full object-contain transition-transform duration-1000 hover:scale-110"
                                 onError={(e) => { e.target.src = "https://placehold.co/400x400?text=Joyas+Esencia"; }}
                             />
