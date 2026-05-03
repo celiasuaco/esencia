@@ -84,7 +84,7 @@ export default function ProfilePage() {
                                         <img
                                             src={photoUrl}
                                             alt="Perfil"
-                                            fetchpriority="high"
+                                            fetchPriority="high"
                                             className="absolute inset-0 w-full h-full object-cover z-10"
                                             onError={(e) => e.target.style.display = 'none'}
                                         />

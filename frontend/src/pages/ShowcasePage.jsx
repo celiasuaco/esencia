@@ -28,7 +28,7 @@ const ShowcasePage = () => {
                 <img
                     src="/showcase.webp"
                     alt="Esencia Alta Joyería"
-                    fetchpriority="high"
+                    fetchPriority="high"
                     loading="eager"
                     className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale"
                 />

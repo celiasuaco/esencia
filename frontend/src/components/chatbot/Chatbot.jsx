@@ -27,7 +27,7 @@ const ChatProductCard = ({ product }) => {
                     src={imageUrl}
                     alt={product.name}
                     crossOrigin="anonymous"
-                    fetchpriority="high"
+                    fetchPriority="high"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Joyas'; }}
                 />
