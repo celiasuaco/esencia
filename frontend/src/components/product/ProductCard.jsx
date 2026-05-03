@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import { cartService } from '../../services/cartService';
 import { Eye } from 'lucide-react';
 import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
+import API_BASE_URL from '../../services/api';
+
 
 export default function ProductCard({ product, badge }) {
     const navigate = useNavigate();
-    const API_BASE_URL = 'http://localhost:8000';
 
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return "/default-product.png";

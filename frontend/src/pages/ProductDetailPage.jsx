@@ -3,14 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { cartService } from '../services/cartService';
 import { ArrowLeft, ShoppingBag, ShieldCheck, Sparkles } from 'lucide-react';
+import API_BASE_URL from '../../services/api';
+
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
-
-    const API_BASE_URL = 'http://localhost:8000';
 
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return "/default-product.png";

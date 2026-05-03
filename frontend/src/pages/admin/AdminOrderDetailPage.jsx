@@ -14,6 +14,7 @@ import {
     ShieldCheck,
     AlertCircle,
 } from 'lucide-react';
+import API_BASE_URL from '../../services/api';
 
 export default function AdminOrderDetailPage() {
     const { id } = useParams();
@@ -34,7 +35,6 @@ export default function AdminOrderDetailPage() {
         'CANCELLED': 'Anulado'
     };
 
-    const API_BASE_URL = 'http://localhost:8000';
 
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return "/default-product.png";

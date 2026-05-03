@@ -5,6 +5,7 @@ import { checkoutService } from '../services/checkoutService';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { authService } from '../services/authService';
 import AddressModal from '../components/order/AddressModal';
+import API_BASE_URL from '../../services/api';
 
 export default function CartPage() {
     const isAuthenticated = authService.isAuthenticated();
@@ -37,8 +38,6 @@ export default function CartPage() {
 
         setIsModalOpen(true);
     };
-
-    const API_BASE_URL = 'http://localhost:8000';
 
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return "/default-product.png";
