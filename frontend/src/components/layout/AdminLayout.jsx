@@ -21,13 +21,19 @@ export default function AdminLayout() {
 
     return (
         <div className="flex min-h-screen bg-[#FDFBF9]">
-            <aside className="w-64 bg-[#324339] text-[#FDFBF9] flex flex-col fixed h-full shadow-2xl">
-                <div className="p-8">
-                    <h2 className="text-3xl font-serif font-bold italic tracking-wider mb-1 text-[#A86447]">Esencia</h2>
-                    <p className="text-[10px] text-[#FDFBF9]/50 uppercase tracking-[0.2em] font-bold">Admin Panel</p>
+            <aside className="w-20 lg:w-64 bg-[#324339] text-[#FDFBF9] flex flex-col fixed h-full shadow-2xl transition-all duration-300 z-50">
+
+                <div className="p-4 lg:p-8 text-center lg:text-left h-24 flex flex-col justify-center">
+                    <h2 className="text-2xl lg:text-3xl font-serif font-bold italic tracking-wider text-[#A86447] transition-all duration-300">
+                        <span className="lg:hidden">E.</span>
+                        <span className="hidden lg:inline">Esencia</span>
+                    </h2>
+                    <p className="hidden lg:block text-[10px] text-[#FDFBF9]/50 uppercase tracking-[0.2em] font-bold animate-fade-in">
+                        Admin Panel
+                    </p>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-2 mt-4">
+                <nav className="flex-1 px-3 lg:px-4 space-y-2 mt-4">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = location.pathname === item.path;
@@ -35,51 +41,53 @@ export default function AdminLayout() {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 ${isActive
+                                className={`flex items-center justify-center lg:justify-start gap-4 px-3 py-4 lg:px-4 rounded-2xl transition-all duration-300 ${isActive
                                     ? 'bg-[#A86447] text-white shadow-lg shadow-[#A86447]/20'
                                     : 'text-[#FDFBF9]/60 hover:bg-white/5 hover:text-white'
                                     }`}
+                                title={item.label}
                             >
-                                <Icon className="w-5 h-5" />
-                                <span className="font-medium text-sm tracking-wide">{item.label}</span>
+                                <Icon className="w-6 h-6 lg:w-5 lg:h-5" />
+                                <span className="hidden lg:block font-medium text-sm tracking-wide">{item.label}</span>
                             </Link>
                         );
                     })}
                 </nav>
 
-                <div className="px-4 mb-4">
+                <div className="px-3 lg:px-4 mb-4">
                     <Link
                         to="/admin/profile"
-                        className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 ${location.pathname === '/admin/profile'
+                        className={`flex items-center justify-center lg:justify-start gap-4 px-3 py-4 lg:px-4 rounded-2xl transition-all duration-300 ${location.pathname === '/admin/profile'
                             ? 'bg-[#A86447] text-white shadow-lg'
                             : 'text-[#FDFBF9]/60 hover:bg-white/5 hover:text-white'
                             }`}
+                        title="Mi Perfil"
                     >
-                        <User className="w-5 h-5" />
-                        <span className="font-medium text-sm">Mi Perfil</span>
+                        <User className="w-6 h-6 lg:w-5 lg:h-5" />
+                        <span className="hidden lg:block font-medium text-sm">Mi Perfil</span>
                     </Link>
                 </div>
 
-                <div className="p-6 border-t border-white/5 space-y-4">
-                    <Link to="/" className="flex items-center gap-3 text-xs text-[#FDFBF9]/40 hover:text-[#A86447] transition-colors uppercase tracking-widest">
-                        <ExternalLink className="w-4 h-4" />
-                        <span>Ver tienda</span>
+                <div className="p-4 lg:p-6 border-t border-white/5 space-y-6 lg:space-y-4">
+                    <Link to="/" className="flex items-center justify-center lg:justify-start gap-3 text-xs text-[#FDFBF9]/40 hover:text-[#A86447] transition-colors" title="Ver tienda">
+                        <ExternalLink className="w-5 h-5 lg:w-4 lg:h-4" />
+                        <span className="hidden lg:block uppercase tracking-widest">Ver tienda</span>
                     </Link>
                     <button
                         onClick={() => authService.logout()}
-                        className="flex items-center gap-3 text-xs text-red-400/70 hover:text-red-400 transition-colors w-full uppercase tracking-widest outline-none focus:ring-1 focus:ring-red-400/30 rounded"
+                        className="flex items-center justify-center lg:justify-start gap-3 text-xs text-red-400/70 hover:text-red-400 transition-colors w-full outline-none"
+                        title="Cerrar Sesión"
                     >
-                        <LogOut className="w-4 h-4" />
-                        <span>Cerrar Sesión</span>
+                        <LogOut className="w-5 h-5 lg:w-4 lg:h-4" />
+                        <span className="hidden lg:block uppercase tracking-widest">Cerrar Sesión</span>
                     </button>
                 </div>
             </aside>
 
-            <main className="flex-1 ml-64 p-12 bg-[#FDFBF9]">
+            <main className="flex-1 ml-20 lg:ml-64 p-6 lg:p-12 bg-[#FDFBF9] transition-all duration-300">
                 <div className="max-w-7xl mx-auto">
                     <Outlet />
                 </div>
-
                 <AdminChatbot />
             </main>
         </div>
