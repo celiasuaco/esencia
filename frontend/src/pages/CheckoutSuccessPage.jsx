@@ -17,7 +17,7 @@ export default function CheckoutSuccessPage() {
                 return;
             }
 
-            console.log("🔍 Iniciando confirmación para sesión:", sessionId);
+            console.log("Iniciando confirmación para sesión:", sessionId);
 
             try {
                 await checkoutService.confirmPayment(sessionId);
