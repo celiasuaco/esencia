@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { authService } from '../../services/authService';
 import Camera from 'lucide-react/dist/esm/icons/camera';
 import Save from 'lucide-react/dist/esm/icons/save';
@@ -10,8 +11,8 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
     const API_BASE_URL = 'http://127.0.0.1:8000';
 
     const [formData, setFormData] = useState({
-        full_name: user.full_name || '',
-        email: user.email || ''
+        full_name: user?.full_name || '',
+        email: user?.email || ''
     });
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
@@ -30,7 +31,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
 
     useEffect(() => {
         return () => {
-            if (preview && preview.startsWith('blob:')) {
+            if (preview?.startsWith('blob:')) {
                 URL.revokeObjectURL(preview);
             }
         };
@@ -45,7 +46,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (preview && preview.startsWith('blob:')) {
+            if (preview?.startsWith('blob:')) {
                 URL.revokeObjectURL(preview);
             }
             setImage(file);
@@ -74,7 +75,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
                 const transformedErrors = {};
                 err.inner.forEach(e => { transformedErrors[e.path] = e.message; });
                 setErrors(transformedErrors);
-            } else if (err.response && err.response.data) {
+            } else if (err.response?.data) {
                 setErrors(err.response.data);
             }
             console.error("Error updating profile:", err);
@@ -100,15 +101,15 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
                     aria-label="Cambiar foto de perfil"
                 >
                     <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#F5F1ED] shadow-inner bg-gray-100 flex items-center justify-center">
-                        {preview || user.photo ? (
+                        {preview || user?.photo ? (
                             <img
-                                src={preview || getPhotoUrl(user.photo)}
+                                src={preview || getPhotoUrl(user?.photo)}
                                 className="w-full h-full object-cover"
                                 alt="Vista previa de perfil"
                             />
                         ) : (
                             <span className="text-4xl font-serif text-[#A3937B]">
-                                {formData.full_name.charAt(0)}
+                                {formData.full_name?.charAt(0) || ''}
                             </span>
                         )}
                     </div>
@@ -120,6 +121,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
             </div>
 
             <input
+                id="profile-photo-input"
                 type="file"
                 ref={fileInputRef}
                 className="hidden"
@@ -129,8 +131,11 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
 
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-[#6B7F72] ml-1">Nombre Completo</label>
+                    <label htmlFor="full_name" className="text-sm font-medium text-[#6B7F72] ml-1">
+                        Nombre Completo
+                    </label>
                     <input
+                        id="full_name"
                         name="full_name"
                         type="text"
                         className={`w-full p-3 bg-[#FDFBF9] border rounded-xl outline-none transition-all ${errors.full_name ? 'border-red-500 ring-1 ring-red-500' : 'border-[#E8DDD1] focus:ring-2 focus:ring-[#5B7B63]'
@@ -147,8 +152,11 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-[#6B7F72] ml-1">Email</label>
+                    <label htmlFor="email" className="text-sm font-medium text-[#6B7F72] ml-1">
+                        Email
+                    </label>
                     <input
+                        id="email"
                         name="email"
                         type="email"
                         className={`w-full p-3 bg-[#FDFBF9] border rounded-xl outline-none transition-all ${errors.email ? 'border-red-500 ring-1 ring-red-500' : 'border-[#E8DDD1] focus:ring-2 focus:ring-[#5B7B63]'
@@ -185,6 +193,16 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
             </div>
         </form>
     );
+};
+
+EditProfileForm.propTypes = {
+    user: PropTypes.shape({
+        full_name: PropTypes.string,
+        email: PropTypes.string,
+        photo: PropTypes.string
+    }).isRequired,
+    onCancel: PropTypes.func.isRequired,
+    onUpdateSuccess: PropTypes.func.isRequired
 };
 
 export default EditProfileForm;

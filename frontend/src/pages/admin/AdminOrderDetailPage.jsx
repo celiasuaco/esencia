@@ -87,7 +87,7 @@ export default function AdminOrderDetailPage() {
                 <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                     <div className="space-y-4">
                         <button
-                            onClick={() => navigate(-1)} // Regresa a la página anterior (funciona para ambos roles)
+                            onClick={() => navigate(-1)}
                             className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] font-bold text-[#324339]/40 hover:text-[#A86447] transition-all group"
                         >
                             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />

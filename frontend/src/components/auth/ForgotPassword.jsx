@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { authService } from '../../services/authService';
 import Mail from 'lucide-react/dist/esm/icons/mail';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
@@ -10,7 +11,6 @@ export default function ForgotPassword({ onSwitchForm }) {
     const [email, setEmail] = useState('');
     const [sent, setSent] = useState(false);
     const [loading, setLoading] = useState(false);
-
     const [errors, setErrors] = useState({});
 
     const forgotPasswordSchema = Yup.object().shape({
@@ -57,6 +57,7 @@ export default function ForgotPassword({ onSwitchForm }) {
                         Si el correo <strong className="text-primary">{email}</strong> está registrado, recibirás un enlace para restablecer tu contraseña en unos minutos.
                     </p>
                     <button
+                        type="button"
                         onClick={onSwitchForm}
                         className="btn-primary inline-block w-full py-3 text-center transition-all hover:opacity-90"
                     >
@@ -71,6 +72,7 @@ export default function ForgotPassword({ onSwitchForm }) {
         <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] p-4">
             <div className="register-card max-w-md w-full shadow-xl border border-[#E8E2D6]">
                 <button
+                    type="button"
                     onClick={onSwitchForm}
                     className="inline-flex items-center gap-2 text-secondary mb-8 hover:text-primary transition-colors text-sm font-medium group"
                 >
@@ -85,7 +87,7 @@ export default function ForgotPassword({ onSwitchForm }) {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex flex-col gap-2 text-left">
-                        <label htmlFor="email" className="text-sm font-medium text-primary ml-1">
+                        <label htmlFor="forgot-password-email" className="text-sm font-medium text-primary ml-1">
                             Email
                         </label>
 
@@ -95,7 +97,7 @@ export default function ForgotPassword({ onSwitchForm }) {
                                 size={20}
                             />
                             <input
-                                id="email"
+                                id="forgot-password-email"
                                 type="text"
                                 name="email"
                                 autoComplete="email"
@@ -107,7 +109,7 @@ export default function ForgotPassword({ onSwitchForm }) {
                                 value={email}
                                 onChange={(e) => {
                                     setEmail(e.target.value);
-                                    if (errors.email) setErrors({});
+                                    if (Object.keys(errors).length > 0) setErrors({});
                                 }}
                             />
                         </div>
@@ -150,3 +152,7 @@ export default function ForgotPassword({ onSwitchForm }) {
         </div>
     );
 }
+
+ForgotPassword.propTypes = {
+    onSwitchForm: PropTypes.func.isRequired
+};

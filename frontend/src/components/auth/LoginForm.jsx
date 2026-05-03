@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { authService } from '../../services/authService';
 import { Link, useNavigate } from 'react-router-dom';
 import Eye from 'lucide-react/dist/esm/icons/eye';
@@ -74,7 +75,7 @@ const LoginForm = ({ onSwitchForm }) => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="flex flex-col gap-1.5">
-                    <label htmlFor="email" className="text-sm font-medium text-primary ml-1">
+                    <label htmlFor="login-email" className="text-sm font-medium text-primary ml-1">
                         Email
                     </label>
                     <div className="relative flex items-center group">
@@ -83,7 +84,7 @@ const LoginForm = ({ onSwitchForm }) => {
                             size={18}
                         />
                         <input
-                            id="email"
+                            id="login-email"
                             name="email"
                             type="text"
                             autoComplete="username"
@@ -105,7 +106,7 @@ const LoginForm = ({ onSwitchForm }) => {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label htmlFor="password" className="text-sm font-medium text-primary ml-1">
+                    <label htmlFor="login-password" className="text-sm font-medium text-primary ml-1">
                         Contraseña
                     </label>
                     <div className="relative flex items-center group">
@@ -114,7 +115,7 @@ const LoginForm = ({ onSwitchForm }) => {
                             size={18}
                         />
                         <input
-                            id="password"
+                            id="login-password"
                             name="password"
                             type={showPassword ? "text" : "password"}
                             autoComplete="current-password"
@@ -148,10 +149,10 @@ const LoginForm = ({ onSwitchForm }) => {
                     disabled={loading}
                 >
                     {loading ? (
-                        <>
-                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                            Entrando...
-                        </>
+                        <div className="flex items-center gap-2">
+                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Entrando...</span>
+                        </div>
                     ) : 'Entrar'}
                 </button>
             </form>
@@ -169,6 +170,7 @@ const LoginForm = ({ onSwitchForm }) => {
                 <p className="text-secondary text-sm">
                     ¿No tienes cuenta?{' '}
                     <button
+                        type="button"
                         onClick={onSwitchForm}
                         className="text-primary font-bold hover:underline transition-all"
                     >
@@ -178,6 +180,10 @@ const LoginForm = ({ onSwitchForm }) => {
             </div>
         </div>
     );
+};
+
+LoginForm.propTypes = {
+    onSwitchForm: PropTypes.func.isRequired
 };
 
 export default LoginForm;
