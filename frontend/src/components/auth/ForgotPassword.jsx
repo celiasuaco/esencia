@@ -1,27 +1,45 @@
 import { useState } from 'react';
 import { authService } from '../../services/authService';
-import { Link } from 'react-router-dom';
 import Mail from 'lucide-react/dist/esm/icons/mail';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import * as Yup from 'yup';
 
 export default function ForgotPassword({ onSwitchForm }) {
     const [email, setEmail] = useState('');
     const [sent, setSent] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+
+    const [errors, setErrors] = useState({});
+
+    const forgotPasswordSchema = Yup.object().shape({
+        email: Yup.string()
+            .email('Introduce un email válido')
+            .required('El email es obligatorio')
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
-        setLoading(true);
+        setErrors({});
+
         try {
+            await forgotPasswordSchema.validate({ email }, { abortEarly: false });
+
+            setLoading(true);
             await authService.sendPasswordResetEmail(email);
             setSent(true);
         } catch (err) {
-            console.error("Error sending password reset email:", err);
-            setError(err || "No pudimos procesar tu solicitud. Verifica el formato del email.");
+            if (err.name === 'ValidationError') {
+                const validationErrors = {};
+                err.inner.forEach(error => {
+                    validationErrors[error.path] = error.message;
+                });
+                setErrors(validationErrors);
+            } else {
+                console.error("Error sending password reset email:", err);
+                setErrors({ email: err.response?.data?.error || "No pudimos procesar tu solicitud. Inténtalo más tarde." });
+            }
         } finally {
             setLoading(false);
         }
@@ -65,13 +83,6 @@ export default function ForgotPassword({ onSwitchForm }) {
                     Introduce tu email y te enviaremos las <br /> instrucciones de recuperación.
                 </p>
 
-                {error && (
-                    <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 flex items-center gap-3 animate-shake">
-                        <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
-                        <p className="text-sm text-red-700 font-medium">{error}</p>
-                    </div>
-                )}
-
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex flex-col gap-2 text-left">
                         <label htmlFor="email" className="text-sm font-medium text-primary ml-1">
@@ -80,27 +91,33 @@ export default function ForgotPassword({ onSwitchForm }) {
 
                         <div className="relative flex items-center">
                             <Mail
-                                className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B]'}`}
+                                className={`absolute left-4 transition-colors z-10 ${errors.email ? 'text-red-400' : 'text-[#A3937B]'}`}
                                 size={20}
                             />
                             <input
                                 id="email"
-                                type="email"
+                                type="text"
                                 name="email"
                                 autoComplete="email"
-                                required
-                                className={`input-field !pl-12 w-full focus:ring-2 outline-none transition-all ${error
-                                    ? 'border-red-500 focus:ring-red-100'
-                                    : 'focus:ring-primary/20'
+                                className={`input-field !pl-12 w-full focus:ring-2 outline-none transition-all ${errors.email
+                                    ? 'border-red-500 focus:ring-red-100 bg-red-50/30'
+                                    : 'focus:ring-primary/20 border-gray-200'
                                     }`}
                                 placeholder="tu@email.com"
                                 value={email}
                                 onChange={(e) => {
                                     setEmail(e.target.value);
-                                    if (error) setError(null);
+                                    if (errors.email) setErrors({});
                                 }}
                             />
                         </div>
+
+                        {errors.email && (
+                            <div className="flex items-center gap-1.5 mt-1 ml-1 text-red-600 animate-fade-in">
+                                <AlertCircle size={14} className="flex-shrink-0" />
+                                <p className="text-[11px] font-semibold tracking-tight">{errors.email}</p>
+                            </div>
+                        )}
                     </div>
 
                     <button

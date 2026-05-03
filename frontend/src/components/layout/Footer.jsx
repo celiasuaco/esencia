@@ -15,7 +15,6 @@ export default function Footer() {
                         </p>
                     </div>
 
-                    {/* Sección Legal */}
                     <div>
                         <h4 className="mb-6 font-serif text-lg text-[#A86447]">Legal</h4>
                         <ul className="space-y-4 text-sm text-[#FDFBF9]/60">
@@ -27,7 +26,6 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Sección Contacto */}
                     <div>
                         <h4 className="mb-6 font-serif text-lg text-[#A86447]">Contacto</h4>
                         <ul className="space-y-4 text-sm text-[#FDFBF9]/60">

@@ -6,6 +6,7 @@ import Eye from 'lucide-react/dist/esm/icons/eye';
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import * as Yup from 'yup';
 
 export default function ResetPasswordConfirm() {
     const { uid, token } = useParams();
@@ -13,21 +14,40 @@ export default function ResetPasswordConfirm() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState(null);
+
+    const [errors, setErrors] = useState({});
+
+    const resetPasswordSchema = Yup.object().shape({
+        password: Yup.string()
+            .required('La contraseña es obligatoria')
+            .min(8, 'La contraseña debe tener al menos 8 caracteres')
+            .matches(/[A-Z]/, 'Debe contener al menos una letra mayúscula')
+            .matches(/\d/, 'Debe contener al menos un número')
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (loading) return;
 
-        setError(null);
-        setLoading(true);
+        setErrors({});
 
         try {
+            await resetPasswordSchema.validate({ password }, { abortEarly: false });
+
+            setLoading(true);
             await authService.confirmPasswordReset(uid, token, password);
             navigate('/login');
         } catch (err) {
-            console.error("Error resetting password:", err);
-            setError(err || "Hubo un problema al restablecer tu contraseña. Es posible que el enlace haya expirado.");
+            if (err.name === 'ValidationError') {
+                const validationErrors = {};
+                err.inner.forEach(error => {
+                    validationErrors[error.path] = error.message;
+                });
+                setErrors(validationErrors);
+            } else {
+                console.error("Error resetting password:", err);
+                setErrors({ password: "El enlace ha expirado o no es válido." });
+            }
         } finally {
             setLoading(false);
         }
@@ -39,7 +59,7 @@ export default function ResetPasswordConfirm() {
 
                 <div className="flex justify-center mb-6">
                     <div className="w-16 h-16 bg-[#FDFBF7] rounded-full flex items-center justify-center border border-[#E8E2D6]">
-                        <ShieldCheck className={`w-8 h-8 ${error ? 'text-red-500' : 'text-primary'}`} />
+                        <ShieldCheck className={`w-8 h-8 ${errors.password ? 'text-red-500' : 'text-primary'}`} />
                     </div>
                 </div>
 
@@ -47,13 +67,6 @@ export default function ResetPasswordConfirm() {
                 <p className="text-secondary text-center mb-10 text-sm leading-relaxed">
                     Estás a un paso de recuperar tu cuenta. <br /> Elige tu nueva clave de acceso.
                 </p>
-
-                {error && (
-                    <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 flex items-center gap-3 animate-shake">
-                        <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
-                        <p className="text-sm text-red-700 font-medium">{error}</p>
-                    </div>
-                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex flex-col gap-2 text-left">
@@ -63,7 +76,7 @@ export default function ResetPasswordConfirm() {
 
                         <div className="relative flex items-center group">
                             <Lock
-                                className={`absolute left-4 transition-colors z-10 ${error ? 'text-red-400' : 'text-[#A3937B] group-focus-within:text-primary'}`}
+                                className={`absolute left-4 transition-colors z-10 ${errors.password ? 'text-red-400' : 'text-[#A3937B] group-focus-within:text-primary'}`}
                                 size={18}
                             />
                             <input
@@ -71,27 +84,32 @@ export default function ResetPasswordConfirm() {
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 autoComplete="new-password"
-                                className={`input-field !pl-12 !pr-12 w-full focus:ring-2 outline-none transition-all ${error
-                                    ? 'border-red-500 focus:ring-red-100'
-                                    : 'focus:ring-primary/20'
+                                className={`input-field !pl-12 !pr-12 w-full focus:ring-2 outline-none transition-all ${errors.password
+                                    ? 'border-red-500 focus:ring-red-100 bg-red-50/30'
+                                    : 'focus:ring-primary/20 border-gray-200'
                                     }`}
                                 placeholder="Escribe tu nueva contraseña"
                                 value={password}
                                 onChange={(e) => {
                                     setPassword(e.target.value);
-                                    if (error) setError(null);
+                                    if (errors.password) setErrors({});
                                 }}
-                                required
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-4 text-[#A3937B] hover:text-primary transition-colors z-10 p-1"
-                                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
+
+                        {errors.password && (
+                            <div className="flex items-center gap-1.5 mt-1 ml-1 text-red-600 animate-fade-in">
+                                <AlertCircle size={14} className="flex-shrink-0" />
+                                <p className="text-[11px] font-semibold tracking-tight">{errors.password}</p>
+                            </div>
+                        )}
                     </div>
 
                     <button
