@@ -26,7 +26,8 @@ export default function AdminChatbot() {
     }, [messages, isLoading]);
 
     const handleSendMessage = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+
         if (!input.trim() || isLoading) return;
 
         const userMsg = input;
@@ -36,18 +37,25 @@ export default function AdminChatbot() {
 
         try {
             const data = await chatbotService.askAdmin(userMsg);
+
             setMessages(prev => [...prev, {
                 id: `${Date.now()}-bot`,
                 text: data.response || "Análisis completado sin datos resultantes.",
                 isBot: true
             }]);
         } catch (error) {
+            const isQuotaError = error.message?.includes('429') || (error.response && error.response.status === 429);
+
             setMessages(prev => [...prev, {
                 id: `${Date.now()}-error`,
-                text: "Error en la conexión con el motor analítico.",
-                isBot: true
+                text: isQuotaError
+                    ? "⚠️ **Motor de IA saturado.** Se ha excedido la cuota gratuita de Gemini. Por favor, espera un minuto antes de realizar otra consulta estratégica."
+                    : "❌ Error en la conexión con el motor analítico. Verifica el estado del servidor backend.",
+                isBot: true,
+                isError: true
             }]);
-            console.error("Error al obtener respuesta del chatbot:", error);
+
+            console.error("Chatbot Admin Error:", error);
         } finally {
             setIsLoading(false);
         }
@@ -78,7 +86,7 @@ export default function AdminChatbot() {
                         {messages.map((msg) => (
                             <div key={msg.id} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
                                 <div className={`max-w-[90%] p-3 px-4 rounded-[1.5rem] text-[12px] shadow-sm overflow-hidden ${msg.isBot
-                                    ? 'bg-white text-[#1e293b] border border-slate-200'
+                                    ? msg.isError ? 'bg-red-50 text-red-900 border border-red-100' : 'bg-white text-[#1e293b] border border-slate-200'
                                     : 'bg-[#0f172a] text-white'
                                     }`}>
                                     <div className="markdown-container text-left prose prose-sm max-w-none">
@@ -117,7 +125,9 @@ export default function AdminChatbot() {
 
             <div className={`w-full flex ${isOpen ? 'justify-end' : 'justify-start'}`}>
                 <button
-                    onClick={() => setIsOpen(!isOpen)}
+                    onClick={() => {
+                        setIsOpen(!isOpen);
+                    }}
                     className="w-14 h-14 bg-[#0f172a] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-105 transition-all active:scale-95 border border-slate-700"
                 >
                     {isOpen ? <X size={24} /> : <BarChart3 size={24} />}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { chatbotService } from '../../services/chatbotService';
 import { productService } from '../../services/productService';
@@ -48,19 +48,26 @@ export default function Chatbot() {
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [hasLoadedData, setHasLoadedData] = useState(false);
     const scrollRef = useRef(null);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const data = await productService.getAll();
-                setAllProducts(data);
-            } catch (err) {
-                console.error("Error cargando catálogo para chatbot", err);
-            }
-        };
-        fetchProducts();
-    }, []);
+    const loadChatbotData = useCallback(async () => {
+        if (hasLoadedData) return;
+        try {
+            const data = await productService.getAll();
+            setAllProducts(data);
+            setHasLoadedData(true);
+        } catch (err) {
+            console.error("Error cargando catálogo para chatbot", err);
+        }
+    }, [hasLoadedData]);
+
+    const toggleChat = () => {
+        if (!isOpen) {
+            loadChatbotData();
+        }
+        setIsOpen(!isOpen);
+    };
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -92,13 +99,9 @@ export default function Chatbot() {
 
             if (parts.length > 1) {
                 const names = parts[1].split(",").map(n => n.trim().toLowerCase());
-                console.log("Nombres detectados por la IA:", names);
-                console.log("Catálogo disponible:", allProducts);
-
                 recommended = allProducts.filter(p =>
                     names.some(name => p.name.toLowerCase().includes(name))
                 );
-                console.log("Productos encontrados para mostrar:", recommended);
             }
 
             setMessages(prev => [...prev, {
@@ -108,8 +111,16 @@ export default function Chatbot() {
             }]);
 
         } catch (error) {
+            const isQuotaError = error.message?.includes('429') || error.response?.status === 429;
+
+            setMessages(prev => [...prev, {
+                text: isQuotaError
+                    ? "Lo siento, en este momento estoy atendiendo a muchos clientes. Por favor, vuelve a consultarme en un minuto. ✨"
+                    : "Error de conexión con el servidor. Inténtalo de nuevo más tarde.",
+                isBot: true,
+                isError: true
+            }]);
             console.error("Error en el servicio de chatbot:", error);
-            setMessages(prev => [...prev, { text: "Error de conexión con el servidor.", isBot: true }]);
         } finally {
             setIsLoading(false);
         }
@@ -138,10 +149,10 @@ export default function Chatbot() {
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
                                 <div className={`max-w-[90%] p-3 px-4 rounded-[1.5rem] text-[12px] shadow-sm overflow-hidden ${msg.isBot
-                                    ? 'bg-white text-[#324339] border border-[#324339]/5'
+                                    ? msg.isError ? 'bg-orange-50 text-orange-900 border border-orange-100' : 'bg-white text-[#324339] border border-[#324339]/5'
                                     : 'bg-[#A86447] text-white'
                                     }`}>
-                                    <div className="markdown-container text-left">
+                                    <div className="markdown-container text-left prose prose-sm max-w-none">
                                         <ReactMarkdown>
                                             {msg.text || ""}
                                         </ReactMarkdown>
@@ -175,7 +186,11 @@ export default function Chatbot() {
                             placeholder="Tu consulta..."
                             className="flex-grow bg-[#FDFBF9] border-none rounded-full px-4 py-2 text-[13px] focus:ring-1 focus:ring-[#A86447] outline-none"
                         />
-                        <button type="submit" className="bg-[#324339] text-white p-2.5 rounded-full hover:bg-[#A86447] transition-all shrink-0">
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="bg-[#324339] text-white p-2.5 rounded-full hover:bg-[#A86447] transition-all shrink-0 disabled:opacity-50"
+                        >
                             <Send size={14} />
                         </button>
                     </form>
@@ -184,7 +199,7 @@ export default function Chatbot() {
 
             <div className={`w-full flex ${isOpen ? 'justify-end' : 'justify-start'}`}>
                 <button
-                    onClick={() => setIsOpen(!isOpen)}
+                    onClick={toggleChat}
                     className="w-14 h-14 bg-[#324339] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-105 transition-all active:scale-95"
                     aria-label={isOpen ? "Cerrar asistente" : "Abrir asistente"}
                 >

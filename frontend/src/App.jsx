@@ -3,8 +3,10 @@ import { lazy, Suspense, useState, useEffect } from "react";
 import { authService } from "./services/authService";
 import { Toaster } from 'sonner';
 
-import Navbar from "./components/layout/Navbar";
 import ScrollToTop from "./components/utils/ScrollToTop";
+
+const Navbar = lazy(() => import("./components/layout/Navbar"));
+const AdminLayout = lazy(() => import("./components/layout/AdminLayout"));
 
 const ShowcasePage = lazy(() => import("./pages/ShowcasePage"));
 const AuthPage = lazy(() => import("./pages/auth/AuthPage"));
@@ -17,15 +19,12 @@ const MyOrdersPage = lazy(() => import("./pages/MyOrdersPage"));
 const CheckoutSuccessPage = lazy(() => import("./pages/CheckoutSuccessPage"));
 const ProfilePage = lazy(() => import("./pages/auth/ProfilePage"));
 const Terms = lazy(() => import("./pages/legal/Terms"));
-
-const AdminLayout = lazy(() => import("./components/layout/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboardPage"));
 const AdminProductsPage = lazy(() => import("./pages/admin/AdminProductsPage"));
 const ProductFormPage = lazy(() => import("./pages/admin/ProductFormPage"));
 const AdminOrdersPage = lazy(() => import("./pages/admin/AdminOrdersPage"));
 const AdminOrderDetailPage = lazy(() => import("./pages/admin/AdminOrderDetailPage"));
 const AdminUserListPage = lazy(() => import("./pages/admin/AdminUserListPage"));
-const Chatbot = lazy(() => import("./components/chatbot/Chatbot"));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] font-serif italic text-2xl text-[#2C3632]">
@@ -40,40 +39,27 @@ function App() {
     const handleAuthUpdate = () => {
       setUser(authService.getCurrentUser());
     };
-
     globalThis.addEventListener('authChange', handleAuthUpdate);
     globalThis.addEventListener('storage', handleAuthUpdate);
-
     return () => {
       globalThis.removeEventListener('authChange', handleAuthUpdate);
       globalThis.removeEventListener('storage', handleAuthUpdate);
     };
   }, []);
 
-  const isAdmin = user && user.role === 'ADMIN';
+  const isAdmin = user?.role === 'ADMIN';
   const isAuthenticated = !!user;
 
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Toaster
-        position="top-right"
-        richColors
-        expand={true}
-        closeButton
-        theme="light"
-      />
-      <Suspense fallback={null}>
-        <Chatbot />
-      </Suspense>
+      <Toaster position="top-right" richColors expand closeButton theme="light" />
 
       <Suspense fallback={<PageLoader />}>
         <Routes>
-
           {/* CLIENTES / PÚBLICO */}
           <Route element={<Navbar />}>
             <Route path="/" element={<ShowcasePage />} />
-
             <Route
               path="/login"
               element={!isAuthenticated ? <AuthPage /> : <Navigate to={isAdmin ? "/dashboard" : "/catalog"} replace />}
@@ -82,7 +68,6 @@ function App() {
               path="/register"
               element={!isAuthenticated ? <AuthPage /> : <Navigate to="/catalog" replace />}
             />
-
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:uid/:token" element={<ResetPasswordConfirm />} />
             <Route path="/catalog" element={<ProductListPage />} />
@@ -91,7 +76,6 @@ function App() {
             <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
             <Route path="/terminos" element={<Terms />} />
 
-            {/* Perfil de Cliente logueado */}
             <Route
               path="/profile"
               element={isAuthenticated && !isAdmin ? <ProfilePage /> : <Navigate to="/login" replace />}
@@ -106,10 +90,8 @@ function App() {
             />
           </Route>
 
-          {/* ADMINISTRADORES */}
-          <Route
-            element={isAdmin ? <AdminLayout /> : <Navigate to="/login" replace />}
-          >
+          {/* ADMINISTRADORES*/}
+          <Route element={isAdmin ? <AdminLayout /> : <Navigate to="/login" replace />}>
             <Route path="/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/profile" element={<ProfilePage />} />
             <Route path="/admin/products" element={<AdminProductsPage />} />
@@ -120,7 +102,6 @@ function App() {
             <Route path="/admin/users" element={<AdminUserListPage />} />
           </Route>
 
-          {/* Redirección de seguridad */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

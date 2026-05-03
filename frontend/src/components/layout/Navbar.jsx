@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import Footer from './Footer';
 import { ShoppingBag, User, Package } from 'lucide-react';
+
+const Chatbot = lazy(() => import("../chatbot/Chatbot"));
 
 const Navbar = () => {
     const [authState, setAuthState] = useState({
@@ -17,11 +19,8 @@ const Navbar = () => {
                 user: authService.getCurrentUser()
             });
         };
-
         globalThis.addEventListener('authChange', handleAuthUpdate);
-
         globalThis.addEventListener('storage', handleAuthUpdate);
-
         return () => {
             globalThis.removeEventListener('authChange', handleAuthUpdate);
             globalThis.removeEventListener('storage', handleAuthUpdate);
@@ -39,12 +38,10 @@ const Navbar = () => {
     return (
         <div className="flex flex-col min-h-screen bg-[#FDFBF9]">
             <nav className="flex justify-between items-center px-10 py-4 bg-white border-b border-[#324339]/10 sticky top-0 z-50 shadow-sm">
-
                 <div className="flex-1 flex items-baseline gap-10">
                     <Link to="/" className="text-2xl font-serif font-bold text-[#324339] tracking-tight hover:opacity-80 transition-opacity">
                         Esencia
                     </Link>
-
                     <Link to="/catalog" className="font-serif text-[15px] text-[#324339]/70 hover:text-[#D48A66] transition-colors duration-500 italic tracking-wide">
                         colección
                     </Link>
@@ -73,8 +70,7 @@ const Navbar = () => {
                         <User
                             size={22}
                             strokeWidth={1.5}
-                            className={`${isAuthenticated ? "text-[#D48A66]" : "text-[#324339]"
-                                } group-hover:scale-110 transition-all duration-300`}
+                            className={`${isAuthenticated ? "text-[#D48A66]" : "text-[#324339]"} group-hover:scale-110 transition-all duration-300`}
                         />
                     </Link>
                 </div>
@@ -83,6 +79,10 @@ const Navbar = () => {
             <main className="flex-grow">
                 <Outlet />
             </main>
+
+            <Suspense fallback={null}>
+                <Chatbot />
+            </Suspense>
 
             <Footer />
         </div>
