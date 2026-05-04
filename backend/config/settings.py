@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
+    "storages",
     "authentication",
     "product",
     "checkout",
@@ -217,8 +218,17 @@ SIMPLE_JWT = {
 }
 
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+AZURE_STORAGE_CONNECTION_STRING = os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
+if AZURE_STORAGE_CONNECTION_STRING:
+    DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+
+    AZURE_ACCOUNT_NAME = "esenciastoragefiles"
+    AZURE_CONTAINER = "media"
+
+    MEDIA_URL = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/"
+else:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

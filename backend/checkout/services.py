@@ -231,7 +231,7 @@ class StripeService:
 
     @staticmethod
     def create_checkout_session(user, cart, address_data):
-        """Crea una sesión de pago en Stripe con los detalles del carrito y la dirección de envío, y devuelve la URL para redirigir al usuario."""
+        """Crea una sesión de pago en Stripe redirigiendo al frontend tras el éxito."""
         try:
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
@@ -248,8 +248,8 @@ class StripeService:
                     }
                 ],
                 mode="payment",
-                success_url=f"{settings.SITE_URL}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
-                cancel_url=f"{settings.SITE_URL}/checkout/cancel",
+                success_url=f"{settings.FRONTEND_URL}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
+                cancel_url=f"{settings.FRONTEND_URL}/cart",
                 metadata={
                     "user_id": user.id,
                     "address": address_data.get("address"),
