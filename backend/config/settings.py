@@ -31,7 +31,12 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = [os.environ.get("AZURE_WEBAPP_NAME", "*"), "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = [
+    os.environ.get("AZURE_WEBAPP_NAME", "*"),
+    "esencia-backend-fnctb8h5d5e2hvg4.francecentral-01.azurewebsites.net",
+    "127.0.0.1",
+    "localhost",
+]
 
 
 # Application definition
@@ -81,7 +86,7 @@ CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173"
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(
     ","
 )
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = os.environ.get("CORS_ALLOW_CREDENTIALS", "False") == "True"
 
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
