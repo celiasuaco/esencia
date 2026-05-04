@@ -23,7 +23,7 @@ export default function AddressModal({ isOpen, onClose, onConfirm }) {
             setLoading(true);
             setError(null);
             try {
-                const params = new URLSearchParams({ q: text, limit: '5', lang: 'es' });
+                const params = new URLSearchParams({ q: text, limit: '5', lang: 'en' });
                 const resp = await fetch(`https://photon.komoot.io/api/?${params.toString()}`);
                 if (!resp.ok) throw new Error("Error en la red");
                 const data = await resp.json();
