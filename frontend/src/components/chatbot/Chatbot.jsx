@@ -5,11 +5,11 @@ import { productService } from '../../services/productService';
 import ReactMarkdown from 'react-markdown';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import API_BASE_URL from '../../services/api';
+import api from '../../services/api';
 
 const ChatProductCard = ({ product }) => {
     const navigate = useNavigate();
-    const imageUrl = product.photo?.startsWith('http') ? product.photo : `${API_BASE_URL}${product.photo}`;
+    const imageUrl = product.photo?.startsWith('http') ? product.photo : `${api}${product.photo}`;
 
     const handleClick = (e) => {
         e.stopPropagation();

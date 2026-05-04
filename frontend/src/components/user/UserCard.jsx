@@ -1,12 +1,11 @@
 import { Calendar, ShoppingBag, TrendingUp } from 'lucide-react';
 import PropTypes from 'prop-types';
+import api from '../../services/api';
 
 const UserCard = ({ client }) => {
-    const API_BASE_URL = 'http://127.0.0.1:8000';
-
     const getPhotoUrl = (path) => {
         if (!path) return null;
-        return path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+        return path.startsWith('http') ? path : `${api}${path}`;
     };
 
     const initial = client.full_name ? client.full_name.charAt(0).toUpperCase() : '?';

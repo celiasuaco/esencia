@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { cartService } from '../../services/cartService';
 import { Eye } from 'lucide-react';
 import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
-import API_BASE_URL from '../../services/api';
+import api from '../../services/api';
 
 
 export default function ProductCard({ product, badge }) {
@@ -13,7 +13,7 @@ export default function ProductCard({ product, badge }) {
         if (!photoPath) return "/default-product.png";
         if (photoPath.startsWith('http')) return photoPath;
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
-        return `${API_BASE_URL}${normalizedPath}`;
+        return `${api}${normalizedPath}`;
     };
 
     const handleAddToCart = async (e, productId) => {

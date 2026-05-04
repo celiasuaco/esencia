@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { cartService } from '../services/cartService';
 import { ArrowLeft, ShoppingBag, ShieldCheck, Sparkles } from 'lucide-react';
-import API_BASE_URL from '../services/api';
+import api from '../services/api';
 
 
 export default function ProductDetailPage() {
@@ -16,7 +16,7 @@ export default function ProductDetailPage() {
         if (!photoPath) return "/default-product.png";
         if (photoPath.startsWith('http')) return photoPath;
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
-        return `${API_BASE_URL}${normalizedPath}`;
+        return `${api}${normalizedPath}`;
     };
 
     useEffect(() => {

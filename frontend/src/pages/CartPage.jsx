@@ -5,7 +5,7 @@ import { checkoutService } from '../services/checkoutService';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { authService } from '../services/authService';
 import AddressModal from '../components/order/AddressModal';
-import API_BASE_URL from '../services/api';
+import api from '../services/api';
 
 export default function CartPage() {
     const isAuthenticated = authService.isAuthenticated();
@@ -43,7 +43,7 @@ export default function CartPage() {
         if (!photoPath) return "/default-product.png";
         if (photoPath.startsWith('http')) return photoPath;
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
-        return `${API_BASE_URL}${normalizedPath}`;
+        return `${api}${normalizedPath}`;
     };
 
     const loadCart = async () => {

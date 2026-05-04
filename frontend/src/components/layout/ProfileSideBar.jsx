@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { authService } from '../../services/authService';
 import { User, LogOut, Package, Loader2 } from 'lucide-react';
 import PropTypes from 'prop-types';
+import api from '../../services/api';
 
 const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
     const [userData, setUserData] = useState(initialUser);
     const [fetching, setFetching] = useState(false);
-
-    const API_BASE_URL = 'http://127.0.0.1:8000';
 
     const refreshFromStorage = () => {
         const currentData = authService.getCurrentUser();
@@ -52,7 +51,7 @@ const ProfileSidebar = ({ user: initialUser, activeTab, onTabChange }) => {
         if (!photoPath) return null;
         if (photoPath.startsWith('http')) return photoPath;
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
-        return `${API_BASE_URL}${normalizedPath}`;
+        return `${api}${normalizedPath}`;
     };
 
     const photoUrl = getPhotoUrl(userData?.photo);

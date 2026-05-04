@@ -14,7 +14,7 @@ import {
     ShieldCheck,
     AlertCircle,
 } from 'lucide-react';
-import API_BASE_URL from '../../services/api';
+import api from '../../services/api';
 
 export default function AdminOrderDetailPage() {
     const { id } = useParams();
@@ -39,7 +39,7 @@ export default function AdminOrderDetailPage() {
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return "/default-product.png";
         if (photoPath.startsWith('http')) return photoPath;
-        return `${API_BASE_URL}${photoPath}`;
+        return `${api}${photoPath}`;
     };
 
     useEffect(() => { fetchOrder(); }, [id]);
