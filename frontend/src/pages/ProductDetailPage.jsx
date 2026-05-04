@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { cartService } from '../services/cartService';
 import { ArrowLeft, ShoppingBag, ShieldCheck, Sparkles } from 'lucide-react';
-import API_BASE_URL from '../../services/api';
+import API_BASE_URL from '../services/api';
 
 
 export default function ProductDetailPage() {
