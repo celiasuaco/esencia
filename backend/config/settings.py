@@ -81,14 +81,12 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-raw_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
 CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in raw_origins.split(",") if origin.strip()
+    "https://esencia-frontend.azurewebsites.net",
 ]
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(
-    ","
-)
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://esencia-frontend.azurewebsites.net",
+]
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 
