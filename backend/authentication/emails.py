@@ -25,14 +25,18 @@ def send_custom_email(subject, to_email, template_name, context):
 
 
 def send_welcome_email(user):
-    """Envía el correo de bienvenida tras un registro exitoso."""
+    """Envía el correo de bienvenida tras un registro exitoso utilizando la función base."""
 
-    context = {"full_name": user.full_name or user.email}
+    context = {
+        "full_name": user.full_name,
+        "catalog_url": f"{settings.FRONTEND_URL}/catalog",
+    }
+
     send_custom_email(
-        "¡Bienvenida a Esencia Joyería!",
-        user.email,
-        "welcome.html",
-        context,
+        subject="¡Bienvenida a Esencia Joyería!",
+        to_email=user.email,
+        template_name="welcome.html",
+        context=context,
     )
 
 
