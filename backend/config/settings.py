@@ -152,7 +152,14 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -216,19 +223,6 @@ SIMPLE_JWT = {
 }
 
 
-AZURE_STORAGE_CONNECTION_STRING = os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
-if AZURE_STORAGE_CONNECTION_STRING:
-    DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
-
-    AZURE_ACCOUNT_NAME = "esenciastoragefiles"
-    AZURE_CONTAINER = "media"
-
-    MEDIA_URL = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/"
-else:
-    MEDIA_URL = "/media/"
-    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
@@ -253,3 +247,16 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
+
+
+AZURE_ACCOUNT_KEY = os.environ.get("AZURE_STORAGE_KEY")
+AZURE_ACCOUNT_NAME = "esenciastoragefiles"
+AZURE_CONTAINER = "media"
+
+if not DEBUG and AZURE_ACCOUNT_KEY:
+    DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+    MEDIA_URL = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/"
+else:
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
