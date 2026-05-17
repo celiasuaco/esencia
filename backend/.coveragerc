@@ -4,9 +4,7 @@ omit =
     manage.py
     seed.py
     config/*
-    */migrations/*
+    migrations/*
 
 [report]
 # Muestra solo lo relevante en la terminal
-show_missing = True
-skip_covered = True

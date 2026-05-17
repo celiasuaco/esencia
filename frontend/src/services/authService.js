@@ -14,17 +14,17 @@ const getErrorMessage = (error) => {
 };
 
 const setSession = (data) => {
-  localStorage.setItem('access', data.access);
-  localStorage.setItem('refresh', data.refresh);
+  localStorage.setItem('accessToken', data.access);
+  localStorage.setItem('refreshToken', data.refresh);
   localStorage.setItem('user', JSON.stringify(data.user));
   globalThis.dispatchEvent(new Event('authChange'));
 };
 
 const clearSession = () => {
   localStorage.removeItem('user');
-  localStorage.removeItem('access');
-  localStorage.removeItem('refresh');
-  globalThis.dispatchEvent(new Event('authChange')); // Notifica a los protectores de ruta
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  globalThis.dispatchEvent(new Event('authChange'));
 };
 
 export const authService = {
@@ -54,7 +54,7 @@ export const authService = {
 
   // Cierre de sesión
   logout: async () => {
-    const refreshToken = localStorage.getItem('refresh');
+    const refreshToken = localStorage.getItem('refreshToken');
 
     try {
       if (refreshToken) {
@@ -122,7 +122,7 @@ export const authService = {
       const user = localStorage.getItem('user');
       return user ? JSON.parse(user) : null;
     } catch (e) {
-      localStorage.removeItem('user');
+      clearSession();
       return null;
     }
   },
@@ -167,7 +167,7 @@ export const authService = {
     }
   },
 
-  getAccessToken: () => localStorage.getItem('access'),
+  getAccessToken: () => localStorage.getItem('accessToken'),
   
-  isAuthenticated: () => !!localStorage.getItem('access'),
+  isAuthenticated: () => !!localStorage.getItem('accessToken'),
 };
