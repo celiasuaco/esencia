@@ -72,26 +72,30 @@ function App() {
             <Route path="/reset-password/:uid/:token" element={<ResetPasswordConfirm />} />
             <Route path="/catalog" element={<ProductListPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
-            <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
             <Route path="/terminos" element={<Terms />} />
 
             <Route
+              path="/cart"
+              element={!isAdmin ? <CartPage /> : <Navigate to="/dashboard" replace />}
+            />
+
+            <Route
               path="/profile"
-              element={isAuthenticated && !isAdmin ? <ProfilePage /> : <Navigate to="/login" replace />}
+              element={isAuthenticated && !isAdmin ? <ProfilePage /> : <Navigate to="/" replace />}
             />
             <Route
               path="/orders"
-              element={isAuthenticated && !isAdmin ? <MyOrdersPage /> : <Navigate to="/login" replace />}
+              element={isAuthenticated && !isAdmin ? <MyOrdersPage /> : <Navigate to="/" replace />}
             />
             <Route
               path="/orders/:id"
-              element={isAuthenticated && !isAdmin ? <AdminOrderDetailPage /> : <Navigate to="/login" replace />}
+              element={isAuthenticated && !isAdmin ? <AdminOrderDetailPage /> : <Navigate to="/" replace />}
             />
           </Route>
 
           {/* ADMINISTRADORES*/}
-          <Route element={isAdmin ? <AdminLayout /> : <Navigate to="/login" replace />}>
+          <Route element={isAdmin ? <AdminLayout /> : <Navigate to="/" replace />}>
             <Route path="/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/profile" element={<ProfilePage />} />
             <Route path="/admin/products" element={<AdminProductsPage />} />

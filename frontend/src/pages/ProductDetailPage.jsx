@@ -2,15 +2,20 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { cartService } from '../services/cartService';
-import { ArrowLeft, ShoppingBag, ShieldCheck, Sparkles } from 'lucide-react';
+import { authService } from '../services/authService';
+import { ArrowLeft, ShoppingBag, ShieldCheck, Sparkles, Eye } from 'lucide-react';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [adding, setAdding] = useState(false);
 
     const API_BASE_URL = 'http://localhost:8000';
+
+    const user = authService.getCurrentUser();
+    const isAdmin = user?.role === 'ADMIN';
 
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return "/default-product.png";
@@ -36,11 +41,14 @@ export default function ProductDetailPage() {
 
     const handleAddToCart = async (e) => {
         if (e) e.stopPropagation();
-        navigate('/cart');
+
+        setAdding(true);
         try {
             await cartService.addToCart(product.id, 1);
+            navigate('/cart');
         } catch (err) {
             console.error("Error al añadir al carrito:", err);
+            setAdding(false);
         }
     };
 
@@ -79,7 +87,6 @@ export default function ProductDetailPage() {
                         )}
 
                         <div className="relative aspect-square flex justify-center items-center p-8 border border-[#324339] rounded-[2rem] bg-white shadow-sm transition-all duration-500 hover:shadow-xl hover:border-[#A86447]">
-
                             <img
                                 src={getPhotoUrl(product.photo)}
                                 alt={product.name}
@@ -130,13 +137,21 @@ export default function ProductDetailPage() {
                         </div>
 
                         <div className="pt-4">
-                            <button
-                                onClick={handleAddToCart}
-                                className="w-full py-5 bg-[#324339] text-white rounded-full flex items-center justify-center gap-3 hover:bg-[#A86447] transition-all duration-700 font-bold uppercase text-[11px] tracking-[0.25em] shadow-xl shadow-[#324339]/10 group active:scale-95"
-                            >
-                                <ShoppingBag size={18} className="group-hover:-translate-y-1 transition-transform" />
-                                Añadir a la bolsa
-                            </button>
+                            {!isAdmin ? (
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={adding}
+                                    className="w-full py-5 bg-[#324339] text-white rounded-full flex items-center justify-center gap-3 hover:bg-[#A86447] transition-all duration-700 font-bold uppercase text-[11px] tracking-[0.25em] shadow-xl shadow-[#324339]/10 group active:scale-95 disabled:opacity-50"
+                                >
+                                    <ShoppingBag size={18} className="group-hover:-translate-y-1 transition-transform" />
+                                    {adding ? "Añadiendo..." : "Añadir a la bolsa"}
+                                </button>
+                            ) : (
+                                <div className="w-full py-4 bg-[#324339]/5 border border-[#324339]/10 text-[#324339] rounded-full flex items-center justify-center gap-3 font-bold uppercase text-[10px] tracking-[0.25em]">
+                                    <Eye size={16} />
+                                    Modo Vista previa de Administrador
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

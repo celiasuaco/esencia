@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
-import AdminChatbot from '../chatbot/AdminChatbot';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
 import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
 import LogOut from 'lucide-react/dist/esm/icons/log-out';
@@ -115,7 +114,6 @@ export default function AdminLayout() {
                 <div className="max-w-7xl mx-auto">
                     <Outlet />
                 </div>
-                <AdminChatbot />
             </main>
         </div>
     );
