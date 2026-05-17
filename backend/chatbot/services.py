@@ -1,11 +1,7 @@
 import logging
-from datetime import datetime
 
 from django.conf import settings
-from django.db.models import Count, Sum
-from django.db.models.functions import ExtractMonth
 from google import genai
-from order.models import Order
 from product.models import Product
 
 logger = logging.getLogger(__name__)
@@ -62,69 +58,3 @@ class ChatbotService:
         except Exception as e:
             logger.error(f"Error Chatbot Cliente: {str(e)}")
             return "Nuestra esencia está en mantenimiento. ¿Podrías consultarnos de nuevo en unos instantes?"
-
-
-class AdminChatbotService:
-    """
-    Servicio de Análisis para Administradores.
-    Gestiona estadísticas y predicciones de ventas.
-    """
-
-    def __init__(self):
-        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        self.model_id = "gemini-pro-latest"
-
-    def _get_admin_context(self):
-        """Extrae datos reales de la DB para el análisis del administrador."""
-        now = datetime.now()
-
-        sales_data = (
-            Order.objects.filter(is_paid=True, placed_at__year=now.year)
-            .annotate(month=ExtractMonth("placed_at"))
-            .values("month")
-            .annotate(revenue=Sum("total_amount"), orders_count=Count("id"))
-            .order_by("month")
-        )
-
-        sales_report = "INFORME DE VENTAS POR MES (AÑO ACTUAL):\n"
-        for s in sales_data:
-            sales_report += (
-                f"- Mes {s['month']}: {s['revenue']}€ ({s['orders_count']} pedidos).\n"
-            )
-
-        inventory = Product.objects.all()
-        stock_report = "\nINVENTARIO Y VENTAS POR PRODUCTO:\n"
-        for p in inventory:
-            total_vendas = p.orderitem_set.count()
-            stock_report += (
-                f"- {p.name}: {p.stock} uds en stock (Vendido {total_vendas} veces).\n"
-            )
-
-        return f"{sales_report}{stock_report}"
-
-    def get_admin_response(self, user_message, admin_user):
-        """Genera respuestas analíticas y predictivas para el administrador."""
-        if not admin_user.is_staff:
-            return "Acceso restringido únicamente a personal autorizado."
-
-        data_context = self._get_admin_context()
-
-        system_instruction = (
-            "Eres el Analista Estratégico de 'Esencia'. Tienes acceso a los datos de ventas y stock. "
-            "Tus funciones son:\n"
-            "1. Responder dudas sobre ventas mensuales, ingresos y stock.\n"
-            "2. REALIZAR PREDICCIONES: Basándote en el volumen de ventas pasado y el stock actual, "
-            "indica qué productos se venderán más próximamente o cuáles necesitan reposición urgente.\n"
-            "3. Formatea los datos con tablas Markdown si son muchos valores."
-        )
-
-        prompt = f"{system_instruction}\n\nDATOS DEL SISTEMA:\n{data_context}\n\nCONSULTA ADMIN: {user_message}"
-
-        try:
-            response = self.client.models.generate_content(
-                model=self.model_id, contents=prompt
-            )
-            return response.text
-        except Exception as e:
-            logger.error(f"Error en AdminChatbotService: {str(e)}")
-            return "Error al procesar el análisis de datos. Por favor, inténtalo más tarde."

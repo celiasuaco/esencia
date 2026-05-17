@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from order.models import Order
 from product.models import Product
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -14,16 +13,6 @@ User = get_user_model()
 @pytest.fixture
 def api_client():
     return APIClient()
-
-
-@pytest.fixture
-def admin_user(db):
-    return User.objects.create_superuser(
-        username="admin@esencia.com",
-        email="admin@esencia.com",
-        password="password123",
-        is_staff=True,
-    )
 
 
 @pytest.fixture
@@ -55,27 +44,6 @@ def test_chatbot_service_get_response(mock_genai_client, db):
     assert mock_instance.models.generate_content.called
 
 
-@patch("google.genai.Client")
-def test_admin_chatbot_service_context(mock_genai_client, admin_user, db):
-    """Prueba que el servicio de admin genera el contexto de ventas correctamente."""
-    mock_instance = MagicMock()
-    mock_genai_client.return_value = mock_instance
-    mock_instance.models.generate_content.return_value = MagicMock(
-        text="Análisis Admin"
-    )
-
-    from .services import AdminChatbotService
-
-    Order.objects.create(user=admin_user, total_amount=250.00, is_paid=True)
-
-    service = AdminChatbotService()
-    response = service.get_admin_response("Dame un resumen de ventas", admin_user)
-
-    assert response == "Análisis Admin"
-    args, kwargs = mock_instance.models.generate_content.call_args
-    assert "250.0" in kwargs["contents"]
-
-
 @pytest.mark.django_db
 @patch("chatbot.services.ChatbotService.get_response")
 def test_chatbot_view_success(mock_get_response, api_client):
@@ -99,30 +67,3 @@ def test_chatbot_view_missing_message(api_client):
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert "error" in response.data
-
-
-@pytest.mark.django_db
-@patch("chatbot.services.AdminChatbotService.get_admin_response")
-def test_admin_chatbot_view_auth(mock_admin_response, api_client, admin_user):
-    """Prueba que un admin autenticado puede acceder a su chatbot."""
-    mock_admin_response.return_value = "Datos estratégicos"
-    api_client.force_authenticate(user=admin_user)
-
-    url = reverse("chatbot-admin-ask")
-    data = {"message": "Previsión de ventas"}
-
-    response = api_client.post(url, data, format="json")
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.data["response"] == "Datos estratégicos"
-
-
-@pytest.mark.django_db
-def test_admin_chatbot_view_forbidden(api_client, regular_user):
-    """Prueba que un usuario normal no puede acceder al chatbot de admin."""
-    api_client.force_authenticate(user=regular_user)
-
-    url = reverse("chatbot-admin-ask")
-    response = api_client.post(url, {"message": "hack"}, format="json")
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
