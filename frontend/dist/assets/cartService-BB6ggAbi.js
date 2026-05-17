@@ -1,0 +1,1 @@
+import{a}from"./index-DQKO3mGd.js";const n={getCart:async()=>(await a.get("/cart/")).data,addToCart:async(t,e=1)=>(await a.post("/cart/add/",{product_id:t,quantity:e})).data,updateQuantity:async(t,e)=>(await a.patch(`/cart/item/${t}/`,{quantity:e})).data,removeItem:async t=>{await a.delete(`/cart/item/${t}/`)}};export{n as c};

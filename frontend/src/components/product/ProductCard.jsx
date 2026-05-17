@@ -4,10 +4,11 @@ import { cartService } from '../../services/cartService';
 import { authService } from '../../services/authService'; // IMPORTANTE: Importamos el servicio de autenticación
 import { Eye } from 'lucide-react';
 import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
+import api from '../../services/api';
+
 
 export default function ProductCard({ product, badge }) {
     const navigate = useNavigate();
-    const API_BASE_URL = 'http://localhost:8000';
 
     const user = authService.getCurrentUser();
     const isAdmin = user?.role === 'ADMIN';
@@ -16,7 +17,7 @@ export default function ProductCard({ product, badge }) {
         if (!photoPath) return "/default-product.png";
         if (photoPath.startsWith('http')) return photoPath;
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
-        return `${API_BASE_URL}${normalizedPath}`;
+        return `${api}${normalizedPath}`;
     };
 
     const handleAddToCart = async (e, productId) => {

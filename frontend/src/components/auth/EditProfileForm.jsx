@@ -6,9 +6,9 @@ import Save from 'lucide-react/dist/esm/icons/save';
 import X from 'lucide-react/dist/esm/icons/x';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import * as Yup from 'yup';
+import api from '../../services/api';
 
 const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
-    const API_BASE_URL = 'http://127.0.0.1:8000';
 
     const [formData, setFormData] = useState({
         full_name: user?.full_name || '',
@@ -88,7 +88,7 @@ const EditProfileForm = ({ user, onCancel, onUpdateSuccess }) => {
         if (!photoPath) return null;
         if (photoPath.startsWith('http')) return photoPath;
         const normalizedPath = photoPath.startsWith('/') ? photoPath : `/${photoPath}`;
-        return `${API_BASE_URL}${normalizedPath}`;
+        return `${api}${normalizedPath}`;
     };
 
     return (

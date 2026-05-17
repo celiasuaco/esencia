@@ -1,0 +1,36 @@
+name: Deploy Frontend to Azure
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub Action
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies and Build
+        run: |
+          cd frontend
+          npm install
+          VITE_API_URL=https://esencia-backend-fnctb8h5d5e2hvg4.francecentral-01.azurewebsites.net npm run build
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'esencia-frontend'
+          package: ./frontend/dist
+          
