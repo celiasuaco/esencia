@@ -167,7 +167,8 @@ class CartService:
         """Guarda la estructura del carrito en la sesión del usuario no autenticado, recalculando los totales."""
         CartService._recalculate_session_cart(cart)
         request.session["anon_cart"] = cart
-        request.session.modified = True
+        if hasattr(request.session, "modified"):
+            request.session.modified = True
         return cart
 
     @staticmethod
@@ -223,7 +224,8 @@ class CartService:
                     cart_item.save()
 
             del request.session["anon_cart"]
-            request.session.modified = True
+            if hasattr(request.session, "modified"):
+                request.session.modified = True
 
 
 class StripeService:
