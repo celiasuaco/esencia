@@ -2,7 +2,6 @@
 
 ![Django](https://img.shields.io/badge/Django-5.0-092e20?style=for-the-badge&logo=django&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.0-336791?style=for-the-badge&logo=postgresql&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=for-the-badge&logo=openai&logoColor=white)
 ![Stripe](https://img.shields.io/badge/Stripe-Payments-635bff?style=for-the-badge&logo=stripe&logoColor=white)
 
 ---
@@ -12,10 +11,9 @@
 2. [¿Qué es Esencia?](#-qué-es-esencia)
 3. [Características Principales](#-características-principales)
 4. [Stack Tecnológico](#-stack-tecnológico)
-5. [Arquitectura del Sistema](#-arquitectura-del-sistema)
-6. [Metodología de Desarrollo](#-metodología-de-desarrollo)
-7. [Contribución](#-contribución)
-8. [Licencia](#-licencia)
+5. [Metodología de Desarrollo](#-metodología-de-desarrollo)
+6. [Contribución](#-contribución)
+7. [Licencia](#-licencia)
 
 ---
 
@@ -38,13 +36,13 @@ Este proyecto nace para resolver ese desafío, fusionando la robustez de un back
 ## ✨ Características Principales
 
 ### 🛒 Experiencia de Usuario (B2C)
-* **Asistente Virtual con IA:** Chatbot integrado con OpenAI que ofrece recomendaciones basadas en materiales, precios o la ocasión especial que el usuario describa.
-* **Búsqueda Avanzada:** Filtrado dinámico por atributos técnicos (quilates, pureza, material) y ordenación inteligente.
+* **Asistente Virtual con IA:** Chatbot integrado que ofrece recomendaciones basadas en materiales, precios o la ocasión especial que el usuario describa.
+* **Búsqueda Avanzada:** Filtrado dinámico por atributos técnicos y ordenación.
 * **Checkout de Alta Seguridad:** Integración nativa con Stripe para pagos cifrados y cumplimiento de normativas financieras.
 * **Seguimiento en Tiempo Real:** Dashboard para que el cliente consulte el historial y el estado logístico de sus piezas.
 
 ### 🛠️ Gestión Administrativa (Backoffice)
-* **Panel de Control Inteligente:** Gestión CRUD de inventario con alertas automáticas de stock crítico.
+* **Panel de Control:** Gestión CRUD de inventario con alertas automáticas de stock crítico.
 * **Analítica de Negocio:** Visualización de ingresos, tendencias de ventas y mapas de calor para identificar zonas de alta demanda.
 * **Logística Automatizada:** Gestión de estados de envío con un solo clic.
 
@@ -59,24 +57,15 @@ Este proyecto nace para resolver ese desafío, fusionando la robustez de un back
 
 ### Base de Datos & Caché
 * **PostgreSQL**: Motor relacional para garantizar la integridad de las transacciones y clientes.
-* **Redis**: Gestión de colas de tareas y caché de alta velocidad.
 
 ### Inteligencia Artificial & APIs
-* **OpenAI API (GPT-4o)**: Cerebro detrás del asistente virtual y la generación de contenido.
+* **Gemini**: Cerebro detrás del asistente virtual y la generación de contenido.
 * **Stripe API**: Pasarela de pagos de estándar industrial.
+* **Resend**: Servidor de correo.
 
 ### Frontend
+* **React**
 * **Tailwind CSS**: Estilizado basado en utilidades para un diseño responsive y elegante.
-
----
-
-## 🏗️ Arquitectura del Sistema
-El proyecto sigue un patrón **MVT (Model-View-Template)** desacoplado mediante una arquitectura **API-First**. Se prioriza la modularidad dividiendo el sistema en aplicaciones independientes:
-1. **Core:** Lógica de negocio y configuración base.
-2. **Users:** Gestión de identidades, perfiles y autenticación (JWT).
-3. **Products:** Catálogo, atributos técnicos e inventario.
-4. **Sales:** Carrito de compra, gestión de órdenes y pasarela de pagos.
-5. **AI_Services:** Integración y procesamiento de lenguaje natural con OpenAI.
 
 ---
 
