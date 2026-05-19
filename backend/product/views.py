@@ -20,7 +20,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             user.is_staff or getattr(user, "role", None) == "ADMIN"
         )
 
-        # Extraer filtros y ordenación de los parámetros de la URL
         filters = {
             "material": self.request.query_params.get("material"),
             "min_price": self.request.query_params.get("min_price"),
@@ -40,7 +39,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         ProductService.update_product(self.get_object(), serializer.validated_data)
 
     def destroy(self, request, *args, **kwargs):
-        # Sobrescribimos el borrado para que sea 'baja lógica'
         ProductService.soft_delete(self.get_object())
         return Response(
             {"message": "Producto desactivado correctamente"}, status=status.HTTP_200_OK

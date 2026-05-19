@@ -45,7 +45,6 @@ Este proyecto nace para resolver ese desafío, fusionando la robustez de un back
 
 ### 🛠️ Gestión Administrativa (Backoffice)
 * **Panel de Control Inteligente:** Gestión CRUD de inventario con alertas automáticas de stock crítico.
-* **Optimización SEO con IA:** Generación automática de descripciones persuasivas y metadatos SEO utilizando modelos de lenguaje de última generación.
 * **Analítica de Negocio:** Visualización de ingresos, tendencias de ventas y mapas de calor para identificar zonas de alta demanda.
 * **Logística Automatizada:** Gestión de estados de envío con un solo clic.
 

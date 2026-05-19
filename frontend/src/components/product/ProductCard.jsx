@@ -1,12 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { cartService } from '../../services/cartService';
+import { authService } from '../../services/authService'; // IMPORTANTE: Importamos el servicio de autenticación
 import { Eye } from 'lucide-react';
 import ShoppingBag from 'lucide-react/dist/esm/icons/shopping-bag';
 
 export default function ProductCard({ product, badge }) {
     const navigate = useNavigate();
     const API_BASE_URL = 'http://localhost:8000';
+
+    const user = authService.getCurrentUser();
+    const isAdmin = user?.role === 'ADMIN';
 
     const getPhotoUrl = (photoPath) => {
         if (!photoPath) return "/default-product.png";
@@ -55,23 +59,35 @@ export default function ProductCard({ product, badge }) {
                         src={getPhotoUrl(product.photo)}
                         loading="lazy"
                         alt={product.name}
-                        className="w-full h-full object-contain p-6 transition-transform duration-1000 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                         onError={(e) => { e.target.src = "https://placehold.co/400x400?text=Joyas+Esencia"; }}
                     />
 
                     <div className="absolute inset-0 bg-[#324339]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 px-6">
-                        <button
-                            type="button"
-                            onClick={(e) => handleAddToCart(e, product.id)}
-                            className="w-full py-3 bg-[#A86447] text-white rounded-full text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center gap-2 hover:bg-white hover:text-[#A86447] transition-all transform active:scale-95 shadow-xl"
-                        >
-                            <ShoppingBag size={14} />
-                            Añadir a la bolsa
-                        </button>
-                        <div className="flex items-center gap-2 text-white/80 text-[9px] uppercase tracking-widest font-medium">
-                            <Eye size={12} />
-                            <span>Ver detalle</span>
-                        </div>
+
+                        {!isAdmin ? (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={(e) => handleAddToCart(e, product.id)}
+                                    className="w-full py-3 bg-[#A86447] text-white rounded-full text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center gap-2 hover:bg-white hover:text-[#A86447] transition-all transform active:scale-95 shadow-xl"
+                                >
+                                    <ShoppingBag size={14} />
+                                    Añadir a la bolsa
+                                </button>
+                                <div className="flex items-center gap-2 text-white/80 text-[9px] uppercase tracking-widest font-medium">
+                                    <Eye size={12} />
+                                    <span>Ver detalle</span>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="w-full text-center">
+                                <span className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#324339] rounded-full text-[10px] uppercase tracking-[0.25em] font-bold shadow-xl">
+                                    <Eye size={14} />
+                                    Ver detalle
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

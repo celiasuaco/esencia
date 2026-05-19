@@ -48,8 +48,8 @@ const Navbar = () => {
                 </div>
 
                 <div className="flex-1 flex justify-end items-center gap-2">
-                    {isAuthenticated && (
-                        <Link to={user?.role === 'CLIENT' ? "/orders" : "/profile"} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
+                    {isAuthenticated && user?.role === 'CLIENT' && (
+                        <Link to="/orders" className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
                             <Package
                                 size={20}
                                 strokeWidth={1.5}
@@ -58,13 +58,15 @@ const Navbar = () => {
                         </Link>
                     )}
 
-                    <Link to="/cart" className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
-                        <ShoppingBag
-                            size={20}
-                            strokeWidth={1.5}
-                            className="text-[#324339] group-hover:text-[#D48A66] group-hover:scale-110 transition-all duration-300"
-                        />
-                    </Link>
+                    {user?.role !== 'ADMIN' && (
+                        <Link to="/cart" className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
+                            <ShoppingBag
+                                size={20}
+                                strokeWidth={1.5}
+                                className="text-[#324339] group-hover:text-[#D48A66] group-hover:scale-110 transition-all duration-300"
+                            />
+                        </Link>
+                    )}
 
                     <Link to={getProfilePath()} className="p-2 rounded-full hover:bg-[#FDFBF9] transition-colors group">
                         <User
